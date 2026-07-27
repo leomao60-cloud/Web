@@ -123,7 +123,10 @@
     padding:4px 7px;border-radius:6px;transition:background .16s ease, color .16s ease;
   }
   .notif-mark-read:hover{background:#eef3f9;color:var(--navy-800);}
-  .notif-mark-read:disabled{color:var(--muted);cursor:default;background:transparent;}
+  .notif-mark-read:active{transform:scale(.94);}
+  .notif-mark-read.done{color:var(--good);background:var(--good-bg);}
+  .notif-item{transition:background .28s ease;}
+  .notif-item .notif-dot{transition:background .28s ease, border-color .28s ease;}
   .notif-list{max-height:320px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--blue-pale) transparent;}
   .notif-list::-webkit-scrollbar{width:6px;}
   .notif-list::-webkit-scrollbar-thumb{background:var(--blue-pale);border-radius:3px;}
@@ -1437,7 +1440,6 @@
     const n = unreadIds.size;
     badge.textContent = n > 99 ? '99+' : n;
     badge.classList.toggle('show', n > 0);
-    markReadBtn.disabled = n === 0;
     notifFoot.textContent = n
       ? `${n} new incident${n>1?'s':''} since you last checked.`
       : `Watching ${INCIDENTS.length} incidents · you're all caught up.`;
@@ -1480,7 +1482,19 @@
     e.stopPropagation();
     setPanelOpen(!panel.classList.contains('open'));
   });
-  markReadBtn.addEventListener('click', e=>{ e.stopPropagation(); markAllRead(); });
+  let markReadResetTimer = null;
+  markReadBtn.addEventListener('click', e=>{
+    e.stopPropagation();
+    const had = unreadIds.size;
+    markAllRead();
+    markReadBtn.classList.add('done');
+    markReadBtn.textContent = had ? `✓ ${had} marked read` : '✓ All caught up';
+    window.clearTimeout(markReadResetTimer);
+    markReadResetTimer = window.setTimeout(()=>{
+      markReadBtn.classList.remove('done');
+      markReadBtn.textContent = 'Mark all read';
+    }, 1600);
+  });
   panel.addEventListener('click', e=>{
     const item = e.target.closest('.notif-item');
     if(!item) return;
