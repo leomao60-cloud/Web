@@ -171,7 +171,7 @@
   }
   .card-head{
     display:flex;align-items:center;justify-content:space-between;
-    margin-bottom:16px;
+    margin-bottom:16px;flex-wrap:wrap;gap:10px 16px;
   }
   .card-head h2{font-size:15.5px;margin:0;font-weight:700;color:var(--ink);}
   .dl-btn{
@@ -267,18 +267,48 @@
   .gauge-num{font-size:19px;font-weight:800;}
 
   /* Insights row */
-  .insights-row{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:22px;margin-bottom:22px;}
-  .trend-bars{display:flex;align-items:flex-end;gap:8px;height:130px;}
-  .trend-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;cursor:pointer;}
+  .insights-row{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-bottom:22px;}
+
+  /* Incident Trend (Month / Week / Day) */
+  .trend-subtitle{font-size:11.5px;color:var(--muted);margin-top:3px;transition:opacity .15s ease;}
+  .seg-control{display:inline-flex;background:#eef1f5;border-radius:9px;padding:3px;gap:2px;flex-shrink:0;}
+  .seg-btn{
+    border:none;background:transparent;padding:7px 16px;border-radius:7px;
+    font-size:12.5px;font-weight:700;color:var(--muted);cursor:pointer;font-family:inherit;
+    transition:background .18s ease, color .18s ease, box-shadow .18s ease;
+  }
+  .seg-btn:hover{color:var(--ink);}
+  .seg-btn.active{background:#fff;color:var(--navy-800);box-shadow:0 1px 4px rgba(20,30,50,0.16);}
+
+  .trend-bars{
+    display:flex;align-items:flex-end;gap:8px;height:160px;
+    overflow-x:auto;overflow-y:hidden;padding:4px 2px 6px;
+    transition:opacity .16s ease, transform .16s ease;
+    scrollbar-width:thin;scrollbar-color:var(--blue-pale) transparent;
+  }
+  .trend-bars::-webkit-scrollbar{height:6px;}
+  .trend-bars::-webkit-scrollbar-thumb{background:var(--blue-pale);border-radius:3px;}
+  .trend-bars::-webkit-scrollbar-track{background:transparent;}
+  .trend-bars.fading{opacity:0;transform:translateY(4px);}
+  .trend-bars:not(.dense) .trend-col{flex:1 1 0;min-width:0;}
+  .trend-bars.dense .trend-col{flex:0 0 28px;}
+  .trend-col{
+    display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;
+    cursor:pointer;
+    opacity:0;transform:translateY(6px);
+    transition:opacity .3s cubic-bezier(.22,1,.36,1), transform .3s cubic-bezier(.22,1,.36,1);
+  }
+  .trend-col.visible{opacity:1;transform:translateY(0);}
   .trend-bar{
     width:100%;max-width:26px;background:linear-gradient(180deg,var(--blue-mid),var(--navy-800));
     border-radius:5px 5px 2px 2px;transform-origin:bottom;
     transition:transform .2s cubic-bezier(.22,1,.36,1), filter .2s ease;
   }
   .trend-col:hover .trend-bar{transform:scaleX(1.15);filter:brightness(1.12);}
-  .trend-val{font-size:10px;font-weight:700;color:var(--navy-800);margin-bottom:4px;transition:transform .18s ease;}
+  .trend-val{font-size:10px;font-weight:700;color:var(--navy-800);margin-bottom:4px;transition:transform .18s ease;white-space:nowrap;}
   .trend-col:hover .trend-val{transform:translateY(-2px);}
-  .trend-lbl{font-size:10px;color:var(--muted);margin-top:6px;transition:color .18s ease;}
+  .trend-rec-dot{width:5px;height:5px;border-radius:50%;background:var(--poor);margin-bottom:3px;}
+  .trend-lbl{font-size:10px;color:var(--muted);margin-top:6px;transition:color .18s ease;white-space:nowrap;}
   .trend-col:hover .trend-lbl{color:var(--ink);}
 
   .findings-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;}
@@ -306,7 +336,7 @@
   table.sup-table tbody tr:hover .rank{background:var(--navy-800);color:#fff;transform:scale(1.1);}
 
   /* Incident Explorer */
-  .card.wide{margin-bottom:10px;}
+  .card.wide{margin-bottom:22px;}
   .badge{display:inline-block;font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:5px;transition:background .16s ease, color .16s ease;}
   .badge-fa{background:#e7f2fb;color:#2c6fb0;}
   .badge-rpo{background:var(--fair-bg);color:var(--fair);}
@@ -428,6 +458,8 @@
     header.topnav{padding:14px 18px;}
     .welcome-band{padding:16px 18px 22px;}
     main{padding:22px 16px 40px;}
+    .seg-control{width:100%;}
+    .seg-btn{flex:1;text-align:center;}
   }
   @media (prefers-reduced-motion:reduce){
     *{transition-duration:0.01ms !important;scroll-behavior:auto !important;}
@@ -633,12 +665,24 @@
     </div>
   </div>
 
+  <!-- Incident Trend -->
+  <div class="card wide">
+    <div class="card-head">
+      <div>
+        <h2>Incident Trend</h2>
+        <div class="trend-subtitle" id="trendSubtitle">January &ndash; July 2026 &middot; by month</div>
+      </div>
+      <div class="seg-control" id="trendTabs">
+        <button class="seg-btn active" data-mode="month" type="button">Month</button>
+        <button class="seg-btn" data-mode="week" type="button">Week</button>
+        <button class="seg-btn" data-mode="day" type="button">Day</button>
+      </div>
+    </div>
+    <div class="trend-bars" id="trendBars"></div>
+  </div>
+
   <!-- Insights -->
   <div class="insights-row" id="insights">
-    <div class="card">
-      <div class="card-head"><h2>Monthly Incident Trend</h2></div>
-      <div class="trend-bars" id="trendBars"></div>
-    </div>
     <div class="card">
       <div class="card-head"><h2>Key Findings</h2></div>
       <ul class="findings-list">
@@ -840,21 +884,109 @@
   poly.setAttribute('stroke-linejoin','round');
   spark.appendChild(poly);
 
-  // ---- Monthly trend bars ----
+  // ---- Incident Trend: Month / Week / Day ----
   const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul'];
+  const fullMonths = ['January','February','March','April','May','June','July'];
+
+  // Weekly incidents, Jan 1 – Jul 26, 2026 (the in-progress 7/27 week is excluded — 0 incidents so far)
+  const weekData = [
+    {label:'1/1–1/4',start:'Jan 1',v:0,r:0},{label:'1/5–1/11',start:'Jan 5',v:5,r:1},
+    {label:'1/12–1/18',start:'Jan 12',v:7,r:0},{label:'1/19–1/25',start:'Jan 19',v:10,r:0},
+    {label:'1/26–2/1',start:'Jan 26',v:6,r:0},{label:'2/2–2/8',start:'Feb 2',v:10,r:0},
+    {label:'2/9–2/15',start:'Feb 9',v:8,r:0},{label:'2/16–2/22',start:'Feb 16',v:10,r:0},
+    {label:'2/23–3/1',start:'Feb 23',v:16,r:0},{label:'3/2–3/8',start:'Mar 2',v:12,r:1},
+    {label:'3/9–3/15',start:'Mar 9',v:3,r:0},{label:'3/16–3/22',start:'Mar 16',v:9,r:0},
+    {label:'3/23–3/29',start:'Mar 23',v:4,r:0},{label:'3/30–4/5',start:'Mar 30',v:9,r:1},
+    {label:'4/6–4/12',start:'Apr 6',v:15,r:0},{label:'4/13–4/19',start:'Apr 13',v:10,r:0},
+    {label:'4/20–4/26',start:'Apr 20',v:14,r:0},{label:'4/27–5/3',start:'Apr 27',v:4,r:0},
+    {label:'5/4–5/10',start:'May 4',v:5,r:0},{label:'5/11–5/17',start:'May 11',v:7,r:1},
+    {label:'5/18–5/24',start:'May 18',v:3,r:0},{label:'5/25–5/31',start:'May 25',v:9,r:0},
+    {label:'6/1–6/7',start:'Jun 1',v:9,r:0},{label:'6/8–6/14',start:'Jun 8',v:11,r:1},
+    {label:'6/15–6/21',start:'Jun 15',v:10,r:1},{label:'6/22–6/28',start:'Jun 22',v:19,r:0},
+    {label:'6/29–7/5',start:'Jun 29',v:19,r:1},{label:'7/6–7/12',start:'Jul 6',v:16,r:0},
+    {label:'7/13–7/19',start:'Jul 13',v:7,r:0},{label:'7/20–7/26',start:'Jul 20',v:8,r:0}
+  ];
+
+  // Daily incidents, July 1–27, 2026 (through the dashboard's "as of" date)
+  const dayData = [
+    {d:1,dd:'Jul 1',v:2,r:1},{d:2,dd:'Jul 2',v:5,r:0},{d:3,dd:'Jul 3',v:5,r:0},{d:4,dd:'Jul 4',v:0,r:0},
+    {d:5,dd:'Jul 5',v:0,r:0},{d:6,dd:'Jul 6',v:0,r:0},{d:7,dd:'Jul 7',v:3,r:0},{d:8,dd:'Jul 8',v:5,r:0},
+    {d:9,dd:'Jul 9',v:5,r:0},{d:10,dd:'Jul 10',v:3,r:0},{d:11,dd:'Jul 11',v:0,r:0},{d:12,dd:'Jul 12',v:0,r:0},
+    {d:13,dd:'Jul 13',v:1,r:0},{d:14,dd:'Jul 14',v:4,r:0},{d:15,dd:'Jul 15',v:1,r:0},{d:16,dd:'Jul 16',v:0,r:0},
+    {d:17,dd:'Jul 17',v:1,r:0},{d:18,dd:'Jul 18',v:0,r:0},{d:19,dd:'Jul 19',v:0,r:0},{d:20,dd:'Jul 20',v:1,r:0},
+    {d:21,dd:'Jul 21',v:2,r:0},{d:22,dd:'Jul 22',v:3,r:0},{d:23,dd:'Jul 23',v:1,r:0},{d:24,dd:'Jul 24',v:1,r:0},
+    {d:25,dd:'Jul 25',v:0,r:0},{d:26,dd:'Jul 26',v:0,r:0},{d:27,dd:'Jul 27',v:0,r:0}
+  ];
+
+  const trendModes = {
+    month: {
+      dense:false,
+      subtitle:'January – July 2026 · by month',
+      items: months.map((m,i)=>({label:m, tt:`${fullMonths[i]} 2026`, sub:`${monthly[i]} incidents`, v:monthly[i], r:0}))
+    },
+    week: {
+      dense:true,
+      subtitle:'31 weeks · Jan 1 – Jul 26, 2026',
+      items: weekData.map((w,i)=>({
+        label: i%4===0 ? w.start : '',
+        tt: `Week of ${w.label}`,
+        sub: `${w.v} incident${w.v===1?'':'s'}${w.r? ' · '+w.r+' recordable':''}`,
+        v:w.v, r:w.r
+      }))
+    },
+    day: {
+      dense:true,
+      subtitle:'July 1 – 27, 2026 · daily',
+      items: dayData.map(d=>({
+        label:String(d.d),
+        tt:`${d.dd}, 2026`,
+        sub:`${d.v} incident${d.v===1?'':'s'}${d.r? ' · '+d.r+' recordable':''}`,
+        v:d.v, r:d.r
+      }))
+    }
+  };
+
   const trendWrap = document.getElementById('trendBars');
-  const maxT = Math.max(...monthly);
-  months.forEach((m,i)=>{
-    const v = monthly[i];
-    const col = document.createElement('div');
-    col.className='trend-col';
-    col.innerHTML = `<div class="trend-val">${v}</div><div class="trend-bar" style="height:${(v/maxT)*100}%"></div><div class="trend-lbl">${m}</div>`;
-    col.addEventListener('mousemove', e=>{
-      showTooltip(e.clientX, e.clientY, `${m} 2026`, `${v} incidents`);
-    });
-    col.addEventListener('mouseleave', hideTooltip);
-    trendWrap.appendChild(col);
+  const trendSubtitleEl = document.getElementById('trendSubtitle');
+
+  function renderTrend(mode){
+    const cfg = trendModes[mode];
+    trendWrap.classList.add('fading');
+    window.setTimeout(()=>{
+      trendWrap.classList.toggle('dense', cfg.dense);
+      const maxV = Math.max(...cfg.items.map(it=>it.v), 1);
+      trendWrap.innerHTML = cfg.items.map((it,i)=>`
+        <div class="trend-col" style="transition-delay:${Math.min(i,24)*10}ms">
+          <div class="trend-val">${it.v>0?it.v:'&nbsp;'}</div>
+          ${it.r>0?'<div class="trend-rec-dot" title="Recordable"></div>':''}
+          <div class="trend-bar" style="height:${Math.max((it.v/maxV)*100, it.v>0?4:1.5)}%"></div>
+          <div class="trend-lbl">${it.label}</div>
+        </div>
+      `).join('');
+      trendSubtitleEl.textContent = cfg.subtitle;
+      trendWrap.classList.remove('fading');
+      trendWrap.querySelectorAll('.trend-col').forEach((col,i)=>{
+        const it = cfg.items[i];
+        col.addEventListener('mousemove', e=> showTooltip(e.clientX, e.clientY, it.tt, it.sub));
+        col.addEventListener('mouseleave', hideTooltip);
+      });
+      requestAnimationFrame(()=>{
+        requestAnimationFrame(()=>{
+          trendWrap.querySelectorAll('.trend-col').forEach(el=>el.classList.add('visible'));
+        });
+      });
+    }, 140);
+  }
+
+  document.getElementById('trendTabs').addEventListener('click', e=>{
+    const btn = e.target.closest('.seg-btn');
+    if(!btn) return;
+    document.querySelectorAll('#trendTabs .seg-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    renderTrend(btn.dataset.mode);
   });
+
+  renderTrend('month');
 
   // ---- "View recent incidents" link: scroll + focus search ----
   document.querySelector('.view-more').addEventListener('click', ()=>{
