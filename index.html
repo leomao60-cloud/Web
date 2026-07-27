@@ -319,21 +319,47 @@
   .action-box{margin-top:14px;background:#f4f7fb;border-left:3px solid var(--teal);border-radius:6px;padding:10px 12px;font-size:12px;color:var(--navy-800);}
   .action-box b{color:var(--navy-900);}
 
-  table.sup-table{width:100%;border-collapse:collapse;font-size:12.5px;}
-  table.sup-table th{text-align:left;font-size:10.5px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line);padding:0 6px 8px;font-weight:700;}
-  table.sup-table td{padding:8px 6px;border-bottom:1px solid var(--line);}
-  table.sup-table tr:last-child td{border-bottom:none;}
-  table.sup-table td.num{text-align:right;font-weight:700;}
-  table.sup-table tbody tr{transition:background .16s ease;cursor:default;}
-  table.sup-table tbody tr:hover{background:#f7f9fc;}
-  table.sup-table tbody tr td:first-child{transition:transform .18s ease;}
-  table.sup-table tbody tr:hover td:first-child{transform:translateX(2px);}
   .rank{
     display:inline-flex;width:18px;height:18px;border-radius:50%;background:var(--blue-pale);
     color:var(--navy-800);font-size:10px;font-weight:800;align-items:center;justify-content:center;
-    margin-right:6px;transition:background .16s ease, color .16s ease, transform .16s ease;
+    transition:background .16s ease, color .16s ease, transform .16s ease;
   }
-  table.sup-table tbody tr:hover .rank{background:var(--navy-800);color:#fff;transform:scale(1.1);}
+
+  /* Top Supervisors: searchable, clickable list */
+  .sup-search-row{margin-bottom:10px;}
+  .sup-meta{font-size:11.5px;color:var(--muted);margin-bottom:8px;}
+  .sup-meta b{color:var(--ink);}
+  .sup-head-row,.sup-row-item{display:grid;grid-template-columns:26px 1fr 74px 46px;gap:8px;align-items:center;}
+  .sup-head-row{padding:0 8px 8px;border-bottom:1px solid var(--line);}
+  .sup-head-row span{font-size:10px;text-transform:uppercase;letter-spacing:.3px;color:var(--muted);font-weight:700;}
+  .sup-list-wrap{
+    max-height:296px;overflow-y:auto;
+    scrollbar-width:thin;scrollbar-color:var(--blue-pale) transparent;
+  }
+  .sup-list-wrap::-webkit-scrollbar{width:6px;}
+  .sup-list-wrap::-webkit-scrollbar-thumb{background:var(--blue-pale);border-radius:3px;}
+  .sup-list-wrap::-webkit-scrollbar-track{background:transparent;}
+  .sup-body{transition:opacity .16s ease, transform .16s ease;}
+  .sup-body.fading{opacity:0;transform:translateY(4px);}
+  .sup-row-item{
+    padding:8px;border-bottom:1px solid var(--line);border-radius:8px;cursor:pointer;
+    opacity:0;transform:translateY(6px);
+    transition:opacity .28s cubic-bezier(.22,1,.36,1), transform .28s cubic-bezier(.22,1,.36,1), background .15s ease;
+  }
+  .sup-row-item:last-child{border-bottom:none;}
+  .sup-row-item.visible{opacity:1;transform:translateY(0);}
+  .sup-row-item:hover{background:#f7f9fc;}
+  .sup-row-item:hover .rank{background:var(--navy-800);color:#fff;transform:scale(1.1);}
+  .sup-row-item .sup-name{font-weight:600;color:var(--ink);transition:color .15s ease;}
+  .sup-row-item:hover .sup-name{color:var(--navy-800);text-decoration:underline;text-underline-offset:2px;}
+  .sup-row-item .num{text-align:right;font-weight:700;color:var(--ink);}
+  .sup-empty{padding:34px 10px;text-align:center;color:var(--muted);font-size:12.5px;}
+
+  @keyframes searchFlash{
+    0%{box-shadow:0 0 0 0 rgba(23,162,184,0.45);}
+    100%{box-shadow:0 0 0 9px rgba(23,162,184,0);}
+  }
+  .search-row.flash{animation:searchFlash .9s ease-out;}
 
   /* Incident Explorer */
   .card.wide{margin-bottom:22px;}
@@ -695,18 +721,21 @@
       <div class="action-box"><b>Action:</b> Focus ergonomics coaching in Fabrication and target Strain-reduction exposures.</div>
     </div>
     <div class="card">
-      <div class="card-head"><h2>Top Supervisors by Incidents</h2></div>
-      <table class="sup-table">
-        <thead><tr><th>Supervisor</th><th style="text-align:right">Incidents</th><th style="text-align:right">Rec.</th></tr></thead>
-        <tbody>
-          <tr><td><span class="rank">1</span>Samuel Sierra</td><td class="num">24</td><td class="num">1</td></tr>
-          <tr><td><span class="rank">2</span>Elizabeth Neufeld</td><td class="num">23</td><td class="num">0</td></tr>
-          <tr><td><span class="rank">3</span>Juan Ramirez</td><td class="num">21</td><td class="num">0</td></tr>
-          <tr><td><span class="rank">4</span>Ovidio Sanchez</td><td class="num">21</td><td class="num">0</td></tr>
-          <tr><td><span class="rank">5</span>Alex Vargas</td><td class="num">19</td><td class="num">0</td></tr>
-          <tr><td><span class="rank">6</span>Diego Soria</td><td class="num">18</td><td class="num">2</td></tr>
-        </tbody>
-      </table>
+      <div class="card-head">
+        <h2>Top Supervisors by Incidents</h2>
+      </div>
+      <div class="search-row sup-search-row">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="supervisorSearch" placeholder="Search supervisors…" autocomplete="off">
+        <div class="search-clear-x" id="supSearchClearX" title="Clear search">&#10005;</div>
+      </div>
+      <div class="sup-meta"><b id="supCount">32</b> of 32 supervisors &middot; click a name to view their incidents</div>
+      <div class="sup-head-row">
+        <span>#</span><span>Supervisor</span><span style="text-align:right">Incidents</span><span style="text-align:right">Rec.</span>
+      </div>
+      <div class="sup-list-wrap">
+        <div class="sup-body" id="supBody"></div>
+      </div>
     </div>
   </div>
 
@@ -1134,6 +1163,86 @@
   }
 
   applyFilters();
+
+  // ==================================================================
+  // Top Supervisors: searchable list, click a name to filter incidents
+  // ==================================================================
+  const SUPERVISORS = [
+    {n:'Samuel Sierra',v:24,rec:1},{n:'Elizabeth Neufeld',v:23,rec:0},{n:'Ovidio Sanchez',v:21,rec:0},
+    {n:'Juan Ramirez',v:21,rec:0},{n:'Alex Vargas',v:19,rec:0},{n:'Diego Soria',v:18,rec:2},
+    {n:'Christian Lopez',v:15,rec:0},{n:'Chadu Moua',v:15,rec:0},{n:'Richard Xiong',v:15,rec:0},
+    {n:'Rutilio Rodriguez',v:14,rec:0},{n:'Juan Rodriguez',v:13,rec:0},{n:'Michael Orozco',v:13,rec:1},
+    {n:'Marilyn Herrera',v:12,rec:1},{n:'Maria Garcia',v:8,rec:0},{n:'Erwin Vega',v:8,rec:0},
+    {n:'Jesus Avila',v:5,rec:0},{n:'Christopher Moreno',v:4,rec:0},{n:'Francisco Tapia',v:4,rec:0},
+    {n:'Osbaldo Gutierrez',v:3,rec:0},{n:'Clara Salazar',v:3,rec:1},{n:'Jonathan Hernandez',v:2,rec:0},
+    {n:'Kamran Tavagar',v:2,rec:0},{n:'Rene Canas',v:2,rec:0},{n:'Ray Mascorro',v:2,rec:1},
+    {n:'Rayomond Corrales',v:2,rec:0},{n:'Juan Carlos Martinez',v:1,rec:0},{n:'Carlos Mata',v:1,rec:0},
+    {n:'David Zavala',v:1,rec:0},{n:'Juan Murillo',v:1,rec:0},{n:'Mary Coffee',v:1,rec:0},
+    {n:'Rosia Rosas',v:1,rec:0},{n:'Valerena Begay',v:1,rec:0}
+  ].map((s,i)=>({...s, rank:i+1}));
+
+  function supRowHTML(s,i){
+    return `<div class="sup-row-item" data-name="${escapeHtml(s.n)}" style="transition-delay:${Math.min(i,14)*18}ms" title="View incidents for ${escapeHtml(s.n)}">
+      <span class="rank">${s.rank}</span>
+      <span class="sup-name">${escapeHtml(s.n)}</span>
+      <span class="num">${s.v}</span>
+      <span class="num">${s.rec}</span>
+    </div>`;
+  }
+
+  function renderSupervisors(query){
+    const q = query.trim().toLowerCase();
+    const filtered = SUPERVISORS.filter(s=>s.n.toLowerCase().includes(q));
+    document.getElementById('supCount').textContent = filtered.length;
+    const body = document.getElementById('supBody');
+    body.classList.add('fading');
+    window.setTimeout(()=>{
+      body.innerHTML = filtered.length
+        ? filtered.map(supRowHTML).join('')
+        : `<div class="sup-empty">No supervisors match &ldquo;${escapeHtml(query)}&rdquo;</div>`;
+      body.classList.remove('fading');
+      requestAnimationFrame(()=>{
+        requestAnimationFrame(()=>{
+          body.querySelectorAll('.sup-row-item').forEach(el=>el.classList.add('visible'));
+        });
+      });
+    }, 130);
+  }
+
+  const supSearchInput = document.getElementById('supervisorSearch');
+  const supSearchClearX = document.getElementById('supSearchClearX');
+  supSearchInput.addEventListener('input', ()=>{
+    supSearchClearX.classList.toggle('show', supSearchInput.value.length>0);
+    renderSupervisors(supSearchInput.value);
+  });
+  supSearchClearX.addEventListener('click', ()=>{
+    supSearchInput.value='';
+    supSearchClearX.classList.remove('show');
+    supSearchInput.focus();
+    renderSupervisors('');
+  });
+
+  function jumpToSupervisor(name){
+    ['dept','esi','status','month'].forEach(g=>state[g].clear());
+    document.querySelectorAll('#filterChips .chip.active').forEach(c=>c.classList.remove('active'));
+    state.q = name;
+    searchInput.value = name;
+    searchClearX.classList.add('show');
+    applyFilters();
+    document.getElementById('recent').scrollIntoView({behavior:'smooth', block:'start'});
+    const row = document.querySelector('#recent .search-row');
+    row.classList.remove('flash');
+    void row.offsetWidth;
+    row.classList.add('flash');
+  }
+
+  document.getElementById('supBody').addEventListener('click', e=>{
+    const row = e.target.closest('.sup-row-item');
+    if(!row) return;
+    jumpToSupervisor(row.dataset.name);
+  });
+
+  renderSupervisors('');
 </script>
 
 </body>
