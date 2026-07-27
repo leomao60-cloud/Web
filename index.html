@@ -334,32 +334,56 @@
   .search-clear-x.show{opacity:1;transform:scale(1);pointer-events:auto;}
   .search-clear-x:hover{background:#d3dce8;color:var(--ink);}
 
-  .chip-groups{display:flex;flex-wrap:wrap;gap:8px;align-items:center;row-gap:10px;}
-  .chip-group-label{font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-right:2px;}
-  .chip-set{display:inline-flex;flex-wrap:wrap;gap:6px;}
-  .filter-divider{width:1px;height:18px;background:var(--line);margin:0 4px;}
+  .filter-groups{
+    display:flex;flex-direction:column;gap:12px;
+    background:#f8fafc;border:1px solid var(--line);border-radius:10px;
+    padding:14px 16px;
+  }
+  .filter-group{display:flex;align-items:flex-start;gap:16px;}
+  .filter-group:not(:last-child){padding-bottom:12px;border-bottom:1px dashed var(--line);}
+  .chip-group-label{
+    width:92px;flex-shrink:0;padding-top:6px;
+    font-size:10.5px;font-weight:700;color:var(--muted);
+    text-transform:uppercase;letter-spacing:.4px;
+  }
+  .chip-set{display:flex;flex-wrap:wrap;gap:7px;flex:1;}
   .chip{
     display:inline-flex;align-items:center;gap:6px;
     padding:6px 12px;border-radius:999px;
-    background:#f1f4f9;color:var(--muted);
-    font-size:12px;font-weight:600;border:1px solid transparent;
+    background:#fff;color:var(--muted);border:1px solid var(--line);
+    font-size:12px;font-weight:600;
     cursor:pointer;user-select:none;
-    transition:background .18s ease, color .18s ease, border-color .18s ease, transform .12s ease;
+    transition:background .18s ease, color .18s ease, border-color .18s ease, transform .12s ease, box-shadow .18s ease;
   }
-  .chip:hover{background:#e6ecf5;color:var(--ink);}
+  .chip:hover{background:#eef3f9;color:var(--ink);border-color:#c9d6e6;}
   .chip:active{transform:scale(.95);}
-  .chip.active{background:var(--navy-800);color:#fff;border-color:var(--navy-800);}
+  .chip.active{background:var(--navy-800);color:#fff;border-color:var(--navy-800);box-shadow:0 3px 8px rgba(18,35,63,0.22);}
   .chip.active:hover{background:var(--navy-700);}
-  .chip .chip-count{opacity:.65;font-weight:700;font-size:10.5px;transition:opacity .18s ease;}
+  .chip .chip-count{opacity:.6;font-weight:700;font-size:10.5px;transition:opacity .18s ease;}
   .chip.active .chip-count{opacity:.85;}
+
+  .filter-footer{display:flex;justify-content:flex-end;align-items:center;gap:12px;min-height:26px;margin-top:2px;}
+  .active-summary{
+    font-size:12px;color:var(--muted);margin-right:auto;
+    opacity:0;transform:translateY(-2px);
+    transition:opacity .18s ease, transform .18s ease;
+  }
+  .active-summary.show{opacity:1;transform:translateY(0);}
+  .active-summary b{color:var(--navy-800);}
   .clear-all-btn{
+    display:inline-flex;align-items:center;gap:5px;
     font-size:12px;font-weight:700;color:var(--poor);cursor:pointer;
-    opacity:0;transform:translateX(-4px);pointer-events:none;
+    opacity:0;transform:translateX(4px);pointer-events:none;
     transition:opacity .18s ease, transform .18s ease, background .16s ease;
     padding:6px 10px;border-radius:8px;
   }
   .clear-all-btn.show{opacity:1;transform:translateX(0);pointer-events:auto;}
   .clear-all-btn:hover{background:var(--poor-bg);}
+
+  @media (max-width:600px){
+    .filter-group{flex-direction:column;gap:6px;}
+    .chip-group-label{width:auto;padding-top:0;}
+  }
 
   .results-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:12px;color:var(--muted);}
   .results-meta b{color:var(--ink);transition:color .15s ease;}
@@ -655,19 +679,27 @@
         <input type="text" id="incidentSearch" placeholder="Search by employee, department, injury type, or supervisor…" autocomplete="off">
         <div class="search-clear-x" id="searchClearX" title="Clear search">&#10005;</div>
       </div>
-      <div class="chip-groups" id="filterChips">
-        <span class="chip-group-label">Dept</span>
-        <span class="chip-set" id="chipsDept"></span>
-        <span class="filter-divider"></span>
-        <span class="chip-group-label">ESI</span>
-        <span class="chip-set" id="chipsEsi"></span>
-        <span class="filter-divider"></span>
-        <span class="chip-group-label">Status</span>
-        <span class="chip-set" id="chipsStatus"></span>
-        <span class="filter-divider"></span>
-        <span class="chip-group-label">Month</span>
-        <span class="chip-set" id="chipsMonth"></span>
-        <span class="clear-all-btn" id="clearAllBtn">Clear all</span>
+      <div class="filter-groups" id="filterChips">
+        <div class="filter-group">
+          <span class="chip-group-label">Department</span>
+          <div class="chip-set" id="chipsDept"></div>
+        </div>
+        <div class="filter-group">
+          <span class="chip-group-label">ESI Status</span>
+          <div class="chip-set" id="chipsEsi"></div>
+        </div>
+        <div class="filter-group">
+          <span class="chip-group-label">Case Status</span>
+          <div class="chip-set" id="chipsStatus"></div>
+        </div>
+        <div class="filter-group">
+          <span class="chip-group-label">Month</span>
+          <div class="chip-set" id="chipsMonth"></div>
+        </div>
+      </div>
+      <div class="filter-footer">
+        <span class="active-summary" id="activeSummary"></span>
+        <span class="clear-all-btn" id="clearAllBtn">&#10005; Clear all filters</span>
       </div>
     </div>
 
@@ -912,8 +944,16 @@
   });
 
   function updateClearBtn(){
-    const active = state.q || state.dept.size || state.esi.size || state.status.size || state.month.size;
+    const filterCount = state.dept.size + state.esi.size + state.status.size + state.month.size;
+    const active = state.q || filterCount;
     document.getElementById('clearAllBtn').classList.toggle('show', !!active);
+    const summary = document.getElementById('activeSummary');
+    if(filterCount){
+      summary.innerHTML = `<b>${filterCount}</b> filter${filterCount>1?'s':''} active`;
+      summary.classList.add('show');
+    } else {
+      summary.classList.remove('show');
+    }
   }
 
   function rowHTML(r,i){
