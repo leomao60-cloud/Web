@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Safety &amp; Injury Dashboard</title>
+<style>
+  :root{
+    --navy-900:#12233f;
+    --navy-800:#1b3f6e;
+    --navy-700:#234c85;
+    --teal:#17a2b8;
+    --teal-light:#8fd7e2;
+    --blue-mid:#2c6fb0;
+    --blue-soft:#5aa9d6;
+    --blue-pale:#cfe1f2;
+    --bg:#eef1f5;
+    --card:#ffffff;
+    --ink:#1a2433;
+    --muted:#68758a;
+    --line:#e4e9f0;
+    --good:#1f9d55;
+    --good-bg:#e5f7ec;
+    --fair:#e08a1e;
+    --fair-bg:#fdf1e0;
+    --poor:#d1483f;
+    --poor-bg:#fbe7e5;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:"Segoe UI", -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+  }
+  a{color:inherit;}
+
+  /* Header */
+  header.topnav{
+    background:var(--navy-800);
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:14px 32px;
+  }
+  .logo{
+    font-weight:700;
+    font-size:20px;
+    letter-spacing:0.5px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .logo .mark{
+    width:26px;height:26px;border-radius:6px;
+    background:var(--teal);
+    display:inline-flex;align-items:center;justify-content:center;
+    font-size:14px;font-weight:800;color:var(--navy-900);
+  }
+  nav.links{display:flex;gap:28px;font-size:14px;}
+  nav.links a{text-decoration:none;color:#cfe0f2;padding-bottom:4px;}
+  nav.links a.active{color:#fff;font-weight:600;border-bottom:2px solid var(--teal);}
+  .header-right{display:flex;align-items:center;gap:16px;}
+  .icon-btn{
+    width:34px;height:34px;border-radius:50%;
+    background:rgba(255,255,255,0.12);
+    display:flex;align-items:center;justify-content:center;
+    font-size:15px;cursor:default;
+  }
+  .avatar{
+    width:30px;height:30px;border-radius:50%;
+    background:var(--teal-light);color:var(--navy-900);
+    display:flex;align-items:center;justify-content:center;
+    font-weight:700;font-size:13px;
+  }
+
+  /* Welcome / KPI band */
+  .welcome-band{
+    background:var(--navy-800);
+    background:linear-gradient(180deg,var(--navy-800),var(--navy-900));
+    color:#fff;
+    padding:18px 32px 26px;
+  }
+  .welcome-row{
+    display:flex;align-items:center;justify-content:space-between;
+    margin-bottom:18px;flex-wrap:wrap;gap:12px;
+  }
+  .welcome-row h1{font-size:19px;margin:0;font-weight:700;}
+  .welcome-row .sub{font-size:12.5px;color:#a9c0da;margin-top:3px;font-weight:400;}
+  .pill-group{display:flex;gap:10px;flex-wrap:wrap;}
+  .pill{
+    border:1px solid rgba(255,255,255,0.25);
+    background:rgba(255,255,255,0.06);
+    color:#e6eef8;
+    border-radius:8px;
+    padding:7px 14px;
+    font-size:12.5px;
+    white-space:nowrap;
+  }
+
+  .kpi-row{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:18px;
+  }
+  .kpi-card{
+    background:rgba(255,255,255,0.07);
+    border:1px solid rgba(255,255,255,0.12);
+    border-radius:10px;
+    padding:14px 16px;
+    display:flex;
+    gap:12px;
+    align-items:flex-start;
+  }
+  .kpi-icon{
+    width:40px;height:40px;border-radius:9px;
+    background:rgba(255,255,255,0.1);
+    display:flex;align-items:center;justify-content:center;
+    font-size:19px;flex-shrink:0;
+  }
+  .kpi-body .kpi-label{font-size:11.5px;color:#aac1dc;text-transform:uppercase;letter-spacing:0.4px;}
+  .kpi-body .kpi-value{font-size:24px;font-weight:700;margin-top:2px;}
+  .kpi-body .kpi-delta{font-size:11.5px;margin-top:4px;color:#bcd3e9;}
+  .kpi-delta.up{color:#ffb199;}
+  .kpi-delta.flat{color:#9fe3c8;}
+  .kpi-delta.share{color:#9fd6e8;}
+
+  /* Main content */
+  main{max-width:1280px;margin:0 auto;padding:26px 32px 50px;}
+  .panels{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:22px;
+    margin-bottom:22px;
+  }
+  .card{
+    background:var(--card);
+    border-radius:12px;
+    box-shadow:0 1px 3px rgba(20,30,50,0.08), 0 1px 1px rgba(20,30,50,0.04);
+    padding:20px 22px 22px;
+  }
+  .card-head{
+    display:flex;align-items:center;justify-content:space-between;
+    margin-bottom:16px;
+  }
+  .card-head h2{font-size:15.5px;margin:0;font-weight:700;color:var(--ink);}
+  .dl-btn{
+    width:28px;height:28px;border-radius:7px;background:var(--blue-pale);
+    display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--navy-800);
+  }
+
+  .panel-split{display:grid;grid-template-columns:1.05fr 1fr;gap:18px;align-items:start;}
+  .stat-block{background:#f4f7fb;border-radius:10px;padding:16px;}
+  .stat-block .big-label{font-size:12px;color:var(--muted);font-weight:600;}
+  .stat-block .big-num{font-size:28px;font-weight:800;margin:4px 0 2px;color:var(--navy-800);}
+  .stat-block .big-sub{font-size:11.5px;color:var(--muted);margin-bottom:10px;}
+  .spark-wrap{display:flex;align-items:center;gap:10px;margin:8px 0 14px;}
+  .spark-badge{
+    background:var(--good-bg);color:var(--good);font-size:11px;font-weight:700;
+    border-radius:12px;padding:3px 9px;white-space:nowrap;
+  }
+  .mini-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:6px;}
+  .mini-stats div{text-align:left;}
+  .mini-stats .n{font-size:16px;font-weight:800;color:var(--ink);}
+  .mini-stats .l{font-size:10.5px;color:var(--muted);margin-top:1px;}
+
+  .legend-top{display:flex;flex-direction:column;gap:8px;margin-bottom:14px;width:100%;}
+  .legend-row{display:flex;align-items:center;justify-content:space-between;font-size:12.5px;}
+  .legend-row .lbl{display:flex;align-items:center;gap:8px;color:var(--muted);}
+  .legend-row .dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+  .legend-row .pct{font-weight:700;color:var(--ink);}
+
+  .donut-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .donut-center-label{font-size:12px;color:var(--muted);margin-top:10px;letter-spacing:1px;text-transform:uppercase;}
+
+  .protocol-row{display:flex;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line);}
+  .protocol-row:last-of-type{border-bottom:none;}
+  .protocol-row .pname{font-size:12.5px;color:var(--muted);font-weight:600;}
+  .protocol-row .ppct{font-size:19px;font-weight:800;color:var(--ink);margin-top:2px;}
+  .protocol-sub{text-align:right;}
+  .protocol-sub div{font-size:11px;color:var(--muted);display:flex;gap:10px;justify-content:flex-end;}
+  .protocol-sub span.num{color:var(--ink);font-weight:700;min-width:26px;text-align:right;display:inline-block;}
+  .view-more{display:inline-block;margin-top:12px;font-size:12.5px;color:var(--blue-mid);font-weight:700;text-decoration:none;}
+
+  .bar-chart{display:flex;align-items:flex-end;gap:14px;height:190px;padding-top:20px;}
+  .bar-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;}
+  .bar-pct{font-size:11px;font-weight:700;color:#fff;margin-bottom:6px;}
+  .bar{width:100%;max-width:34px;border-radius:6px 6px 3px 3px;}
+  .bar-label{font-size:10.5px;color:var(--muted);margin-top:8px;text-align:center;line-height:1.2;}
+  .chart-caption{text-align:center;font-size:11px;color:var(--muted);margin-top:6px;}
+
+  /* Gauge row */
+  .gauge-row{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-bottom:22px;}
+  .gauge-card{background:var(--card);border-radius:12px;box-shadow:0 1px 3px rgba(20,30,50,0.08);padding:20px 22px;display:flex;justify-content:space-between;align-items:center;gap:14px;}
+  .gauge-left h3{font-size:14.5px;margin:0 0 8px;font-weight:700;}
+  .status-pill{display:inline-block;font-size:11px;font-weight:700;border-radius:5px;padding:3px 9px;margin-bottom:12px;}
+  .status-good{background:var(--good-bg);color:var(--good);}
+  .status-fair{background:var(--fair-bg);color:var(--fair);}
+  .status-poor{background:var(--poor-bg);color:var(--poor);}
+  .gauge-meta{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:5px;margin-top:5px;}
+  .gauge-num{font-size:19px;font-weight:800;}
+
+  /* Insights row */
+  .insights-row{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:22px;margin-bottom:22px;}
+  .trend-bars{display:flex;align-items:flex-end;gap:8px;height:130px;}
+  .trend-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;}
+  .trend-bar{width:100%;max-width:26px;background:linear-gradient(180deg,var(--blue-mid),var(--navy-800));border-radius:5px 5px 2px 2px;}
+  .trend-val{font-size:10px;font-weight:700;color:var(--navy-800);margin-bottom:4px;}
+  .trend-lbl{font-size:10px;color:var(--muted);margin-top:6px;}
+
+  .findings-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;}
+  .findings-list li{font-size:12.5px;color:var(--ink);padding-left:16px;position:relative;line-height:1.4;}
+  .findings-list li::before{content:"";position:absolute;left:0;top:6px;width:6px;height:6px;border-radius:50%;background:var(--teal);}
+  .action-box{margin-top:14px;background:#f4f7fb;border-left:3px solid var(--teal);border-radius:6px;padding:10px 12px;font-size:12px;color:var(--navy-800);}
+  .action-box b{color:var(--navy-900);}
+
+  table.sup-table{width:100%;border-collapse:collapse;font-size:12.5px;}
+  table.sup-table th{text-align:left;font-size:10.5px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line);padding:0 6px 8px;font-weight:700;}
+  table.sup-table td{padding:8px 6px;border-bottom:1px solid var(--line);}
+  table.sup-table tr:last-child td{border-bottom:none;}
+  table.sup-table td.num{text-align:right;font-weight:700;}
+  .rank{display:inline-flex;width:18px;height:18px;border-radius:50%;background:var(--blue-pale);color:var(--navy-800);font-size:10px;font-weight:800;align-items:center;justify-content:center;margin-right:6px;}
+
+  /* Recent incidents table */
+  .card.wide{margin-bottom:10px;}
+  table.recent{width:100%;border-collapse:collapse;font-size:12.5px;}
+  table.recent th{text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:0.3px;color:var(--muted);border-bottom:1px solid var(--line);padding:0 10px 10px;font-weight:700;}
+  table.recent td{padding:10px;border-bottom:1px solid var(--line);color:var(--ink);}
+  table.recent tr:last-child td{border-bottom:none;}
+  table.recent tr:hover td{background:#f7f9fc;}
+  .badge{display:inline-block;font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:5px;}
+  .badge-fa{background:#e7f2fb;color:#2c6fb0;}
+  .badge-rpo{background:var(--fair-bg);color:var(--fair);}
+  .badge-rec{background:var(--poor-bg);color:var(--poor);}
+  .badge-close{background:var(--good-bg);color:var(--good);}
+  .badge-open{background:#eef1f5;color:var(--muted);}
+
+  footer{text-align:center;font-size:11.5px;color:var(--muted);padding:20px 0 36px;}
+
+  @media (max-width:980px){
+    .kpi-row{grid-template-columns:repeat(2,1fr);}
+    .panels,.panel-split,.gauge-row,.insights-row{grid-template-columns:1fr;}
+  }
+  @media (max-width:700px){
+    nav.links{display:none;}
+    header.topnav{padding:14px 18px;}
+    .welcome-band{padding:16px 18px 22px;}
+    main{padding:22px 16px 40px;}
+  }
+</style>
+</head>
+<body>
+
+<header class="topnav">
+  <div class="logo"><span class="mark">SI</span>SafeIndex</div>
+  <nav class="links">
+    <a class="active" href="#">Dashboard</a>
+    <a href="#panels">Injuries</a>
+    <a href="#panels">Departments</a>
+    <a href="#insights">Trends</a>
+    <a href="#recent">Reports</a>
+  </nav>
+  <div class="header-right">
+    <div class="icon-btn">&#128276;</div>
+    <div class="avatar">ST</div>
+  </div>
+</header>
+
+<section class="welcome-band">
+  <div class="welcome-row">
+    <div>
+      <h1>Welcome, Safety Team</h1>
+      <div class="sub">Master List of Injuries &middot; Focus Year 2026 &middot; Updated Jul 27, 2026</div>
+    </div>
+    <div class="pill-group">
+      <div class="pill">&#128197; YTD 2026 (Jan 1 &ndash; Jul 27)</div>
+      <div class="pill">&#9889; Medium Risk &middot; Sev 43</div>
+      <div class="pill">&#8635; Live data</div>
+    </div>
+  </div>
+
+  <div class="kpi-row">
+    <div class="kpi-card">
+      <div class="kpi-icon">&#128203;</div>
+      <div class="kpi-body">
+        <div class="kpi-label">Total Incidents YTD</div>
+        <div class="kpi-value">275</div>
+        <div class="kpi-delta up">&#9650; +95% vs 2025 (141)</div>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon">&#9888;&#65039;</div>
+      <div class="kpi-body">
+        <div class="kpi-label">Recordable</div>
+        <div class="kpi-value">7</div>
+        <div class="kpi-delta flat">&#9679; +0 vs 2025 (7)</div>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon">&#128138;</div>
+      <div class="kpi-body">
+        <div class="kpi-label">First Aid (FA)</div>
+        <div class="kpi-value">228</div>
+        <div class="kpi-delta share">83% of YTD incidents</div>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon">&#127974;</div>
+      <div class="kpi-body">
+        <div class="kpi-label">RPO / Modified Duty</div>
+        <div class="kpi-value">40</div>
+        <div class="kpi-delta share">15% of YTD incidents</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<main>
+
+  <div class="panels" id="panels">
+    <!-- Injury Type Distribution -->
+    <div class="card">
+      <div class="card-head">
+        <h2>Injury Type Distribution</h2>
+        <div class="dl-btn">&#8595;</div>
+      </div>
+      <div class="panel-split">
+        <div>
+          <div class="stat-block">
+            <div class="big-label">Total Incidents (YTD)</div>
+            <div class="big-num">275</div>
+            <div class="big-sub">From Jan 1, 2026 to Jul 27, 2026</div>
+            <div class="spark-wrap">
+              <svg id="sparkline" width="140" height="34" viewBox="0 0 140 34"></svg>
+              <span class="spark-badge">&#9650; 95%</span>
+            </div>
+            <div class="mini-stats">
+              <div><div class="n">99</div><div class="l">Strain</div></div>
+              <div><div class="n">26</div><div class="l">Slip/Trip/Fall</div></div>
+              <div><div class="n">25</div><div class="l">Puncture</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="donut-wrap">
+          <div class="legend-top" id="donutLegend"></div>
+          <svg id="donutChart" width="190" height="190" viewBox="0 0 190 190"></svg>
+          <div class="donut-center-label">Injury Types</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Department Distribution -->
+    <div class="card">
+      <div class="card-head">
+        <h2>Department Distribution</h2>
+        <div class="dl-btn">&#8595;</div>
+      </div>
+      <div class="panel-split">
+        <div>
+          <div class="protocol-row">
+            <div>
+              <div class="pname">FA (FIRST AID)</div>
+              <div class="ppct">82.9%</div>
+            </div>
+            <div class="protocol-sub">
+              <div><span>Fabrication</span><span class="num">115</span></div>
+              <div><span>Harvest</span><span class="num">90</span></div>
+            </div>
+          </div>
+          <div class="protocol-row">
+            <div>
+              <div class="pname">RPO / MOD DUTY</div>
+              <div class="ppct">14.5%</div>
+            </div>
+            <div class="protocol-sub">
+              <div><span>Fabrication</span><span class="num">15</span></div>
+              <div><span>Harvest</span><span class="num">13</span></div>
+            </div>
+          </div>
+          <div class="protocol-row">
+            <div>
+              <div class="pname">RECORDABLE</div>
+              <div class="ppct">2.5%</div>
+            </div>
+            <div class="protocol-sub">
+              <div><span>Fabrication</span><span class="num">2</span></div>
+              <div><span>Harvest</span><span class="num">3</span></div>
+            </div>
+          </div>
+          <a class="view-more" href="#recent">View recent incidents &rsaquo;</a>
+        </div>
+        <div>
+          <div class="bar-chart" id="deptBars"></div>
+          <div class="chart-caption">Department Incident Details</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gauges -->
+  <div class="gauge-row">
+    <div class="gauge-card">
+      <div class="gauge-left">
+        <h3>Non-Recordable Rate</h3>
+        <span class="status-pill status-good">Good</span>
+        <div class="gauge-meta">&#9728;&#65039; From Jan 1, 2026 &middot; 12:00 AM</div>
+        <div class="gauge-meta">&#128337; To Jul 27, 2026 &middot; 24:00 PM</div>
+      </div>
+      <svg width="88" height="88" viewBox="0 0 88 88">
+        <circle cx="44" cy="44" r="37" fill="none" stroke="#e9edf3" stroke-width="10"/>
+        <circle cx="44" cy="44" r="37" fill="none" stroke="#1f9d55" stroke-width="10"
+          stroke-linecap="round" transform="rotate(-90 44 44)"
+          stroke-dasharray="232.5" stroke-dashoffset="5.8"/>
+        <text x="44" y="49" text-anchor="middle" font-size="17" font-weight="800" fill="#1a2433">97.5%</text>
+      </svg>
+    </div>
+
+    <div class="gauge-card">
+      <div class="gauge-left">
+        <h3>Days W/O Recordable</h3>
+        <span class="status-pill status-fair">On Pace</span>
+        <div class="gauge-meta">&#127919; Goal: 30 consecutive days</div>
+        <div class="gauge-meta">&#128337; Currently at 26 / 30 days</div>
+      </div>
+      <svg width="88" height="88" viewBox="0 0 88 88">
+        <circle cx="44" cy="44" r="37" fill="none" stroke="#e9edf3" stroke-width="10"/>
+        <circle cx="44" cy="44" r="37" fill="none" stroke="#e08a1e" stroke-width="10"
+          stroke-linecap="round" transform="rotate(-90 44 44)"
+          stroke-dasharray="232.5" stroke-dashoffset="30.2"/>
+        <text x="44" y="49" text-anchor="middle" font-size="17" font-weight="800" fill="#1a2433">87%</text>
+      </svg>
+    </div>
+
+    <div class="gauge-card">
+      <div class="gauge-left">
+        <h3>Severity Index</h3>
+        <span class="status-pill status-poor">Medium Risk</span>
+        <div class="gauge-meta">&#128202; Composite score: 43 / 100</div>
+        <div class="gauge-meta">&#128204; Fabrication &amp; Strain drive volume</div>
+      </div>
+      <svg width="88" height="88" viewBox="0 0 88 88">
+        <circle cx="44" cy="44" r="37" fill="none" stroke="#e9edf3" stroke-width="10"/>
+        <circle cx="44" cy="44" r="37" fill="none" stroke="#d1483f" stroke-width="10"
+          stroke-linecap="round" transform="rotate(-90 44 44)"
+          stroke-dasharray="232.5" stroke-dashoffset="132.5"/>
+        <text x="44" y="49" text-anchor="middle" font-size="17" font-weight="800" fill="#1a2433">43</text>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Insights -->
+  <div class="insights-row" id="insights">
+    <div class="card">
+      <div class="card-head"><h2>Monthly Incident Trend</h2></div>
+      <div class="trend-bars" id="trendBars"></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h2>Key Findings</h2></div>
+      <ul class="findings-list">
+        <li>July closed with 43 incidents, down 13 month-over-month.</li>
+        <li>Fabrication leads all departments with a 48% share of YTD incidents.</li>
+        <li>Strain is the #1 injury type YTD with 99 recorded cases.</li>
+        <li>Recordable cases hold flat at 7 vs. 7 last year &mdash; rate down to 2.5%.</li>
+        <li>YTD volume is up 95% vs. 2025 (275 vs. 141).</li>
+      </ul>
+      <div class="action-box"><b>Action:</b> Focus ergonomics coaching in Fabrication and target Strain-reduction exposures.</div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h2>Top Supervisors by Incidents</h2></div>
+      <table class="sup-table">
+        <thead><tr><th>Supervisor</th><th style="text-align:right">Incidents</th><th style="text-align:right">Rec.</th></tr></thead>
+        <tbody>
+          <tr><td><span class="rank">1</span>Samuel Sierra</td><td class="num">24</td><td class="num">1</td></tr>
+          <tr><td><span class="rank">2</span>Elizabeth Neufeld</td><td class="num">23</td><td class="num">0</td></tr>
+          <tr><td><span class="rank">3</span>Juan Ramirez</td><td class="num">21</td><td class="num">0</td></tr>
+          <tr><td><span class="rank">4</span>Ovidio Sanchez</td><td class="num">21</td><td class="num">0</td></tr>
+          <tr><td><span class="rank">5</span>Alex Vargas</td><td class="num">19</td><td class="num">0</td></tr>
+          <tr><td><span class="rank">6</span>Diego Soria</td><td class="num">18</td><td class="num">2</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Recent Incidents -->
+  <div class="card wide" id="recent">
+    <div class="card-head"><h2>Recent Incidents</h2></div>
+    <table class="recent">
+      <thead>
+        <tr><th>Employee</th><th>Date</th><th>Department</th><th>Injury Type</th><th>ESI Status</th><th>Case Status</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Joseph Gomez</td><td>Jul 24, 2026</td><td>Harvest</td><td>Foreign Object</td><td><span class="badge badge-fa">FA</span></td><td><span class="badge badge-open">Open</span></td></tr>
+        <tr><td>Ceasar Saldana</td><td>Jul 23, 2026</td><td>Maintenance</td><td>Electric Shock</td><td><span class="badge badge-rpo">RPO</span></td><td><span class="badge badge-open">Open</span></td></tr>
+        <tr><td>Irma Ortega</td><td>Jul 22, 2026</td><td>Fabrication</td><td>Strain</td><td><span class="badge badge-fa">FA</span></td><td><span class="badge badge-close">Close</span></td></tr>
+        <tr><td>Ramon Garcia</td><td>Jul 22, 2026</td><td>Harvest</td><td>Slip, Trip, &amp; Fall</td><td><span class="badge badge-rpo">RPO</span></td><td><span class="badge badge-close">Close</span></td></tr>
+        <tr><td>Noe Frage Ruiz</td><td>Jul 22, 2026</td><td>Fabrication</td><td>Struck By/Against Object</td><td><span class="badge badge-rpo">RPO</span></td><td><span class="badge badge-close">Close</span></td></tr>
+        <tr><td>Jesus Bernal</td><td>Jul 21, 2026</td><td>Corrals</td><td>Struck By Cattle</td><td><span class="badge badge-fa">FA</span></td><td><span class="badge badge-close">Close</span></td></tr>
+        <tr><td>Rudy Ramos</td><td>Jul 21, 2026</td><td>Harvest</td><td>Abrasion</td><td><span class="badge badge-fa">FA</span></td><td><span class="badge badge-close">Close</span></td></tr>
+        <tr><td>Rosalba Oseguera Mendez</td><td>Jul 20, 2026</td><td>Harvest</td><td>Strain</td><td><span class="badge badge-fa">FA</span></td><td><span class="badge badge-close">Close</span></td></tr>
+        <tr><td>Christopher Diaz</td><td>Jul 17, 2026</td><td>Loading Dock</td><td>Strain</td><td><span class="badge badge-fa">FA</span></td><td><span class="badge badge-close">Close</span></td></tr>
+        <tr><td>Eduardo Contreras</td><td>Jul 15, 2026</td><td>Harvest</td><td>Rash</td><td><span class="badge badge-fa">FA</span></td><td><span class="badge badge-close">Close</span></td></tr>
+        <tr><td>Carlos Roman</td><td>Jul 14, 2026</td><td>Buildings &amp; Grounds</td><td>Struck By/Against Object</td><td><span class="badge badge-fa">FA</span></td><td><span class="badge badge-close">Close</span></td></tr>
+        <tr><td>Maria Figueroa</td><td>Jul 14, 2026</td><td>Harvest</td><td>Burn</td><td><span class="badge badge-rpo">RPO</span></td><td><span class="badge badge-close">Close</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <footer>Source: Master_List_Of_Injuries_2025_2026 &middot; 275 YTD incident records (2026) &middot; Generated Jul 27, 2026</footer>
+</main>
+
+<script>
+  // ---- Injury Type donut ----
+  const injuryTypes = [
+    {label:'Strain', value:99, color:'#12233f'},
+    {label:'Slip, Trip & Fall', value:26, color:'#17a2b8'},
+    {label:'Puncture', value:25, color:'#2c6fb0'},
+    {label:'Foreign Object', value:18, color:'#5aa9d6'},
+    {label:'Rash', value:14, color:'#8fc4e3'},
+    {label:'Other', value:93, color:'#cfe1f2'}
+  ];
+  const totalInjury = injuryTypes.reduce((s,d)=>s+d.value,0);
+
+  const donutSvg = document.getElementById('donutChart');
+  const cx=95, cy=95, r=70, sw=26;
+  const circumference = 2*Math.PI*r;
+  let offset = 0;
+  injuryTypes.forEach(seg=>{
+    const frac = seg.value/totalInjury;
+    const len = frac*circumference;
+    const circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    circle.setAttribute('cx',cx); circle.setAttribute('cy',cy); circle.setAttribute('r',r);
+    circle.setAttribute('fill','none');
+    circle.setAttribute('stroke',seg.color);
+    circle.setAttribute('stroke-width',sw);
+    circle.setAttribute('stroke-dasharray', `${len} ${circumference-len}`);
+    circle.setAttribute('stroke-dashoffset', -offset);
+    circle.setAttribute('transform', `rotate(-90 ${cx} ${cy})`);
+    donutSvg.appendChild(circle);
+    offset += len;
+  });
+
+  const legendWrap = document.getElementById('donutLegend');
+  injuryTypes.slice(0,4).forEach(seg=>{
+    const pct = ((seg.value/totalInjury)*100).toFixed(0);
+    const row = document.createElement('div');
+    row.className='legend-row';
+    row.innerHTML = `<span class="lbl"><span class="dot" style="background:${seg.color}"></span>${seg.label}</span><span class="pct">${pct}%</span>`;
+    legendWrap.appendChild(row);
+  });
+
+  // ---- Department bar chart ----
+  const departments = [
+    {label:'Fabrication', value:132, color:'#12233f'},
+    {label:'Harvest', value:106, color:'#17a2b8'},
+    {label:'Maintenance', value:10, color:'#2c6fb0'},
+    {label:'Corrals', value:8, color:'#5aa9d6'},
+    {label:'Warehouse', value:6, color:'#8fc4e3'},
+    {label:'Other', value:13, color:'#cfe1f2'}
+  ];
+  const totalDept = departments.reduce((s,d)=>s+d.value,0);
+  const maxDept = Math.max(...departments.map(d=>d.value));
+  const barWrap = document.getElementById('deptBars');
+  departments.forEach(d=>{
+    const pct = ((d.value/totalDept)*100).toFixed(0);
+    const heightPct = (d.value/maxDept)*100;
+    const col = document.createElement('div');
+    col.className='bar-col';
+    col.innerHTML = `<div class="bar-pct" style="color:${d.color==='#cfe1f2'?'#68758a':'#1a2433'}">${pct}%</div>
+      <div class="bar" style="height:${heightPct}%;background:${d.color}"></div>
+      <div class="bar-label">${d.label}</div>`;
+    barWrap.appendChild(col);
+  });
+
+  // ---- Sparkline (monthly incidents Jan-Jul) ----
+  const monthly = [28,44,31,48,25,56,43];
+  const spark = document.getElementById('sparkline');
+  const sw2=140, sh2=34, pad=3;
+  const maxM = Math.max(...monthly), minM = Math.min(...monthly);
+  const stepX = (sw2-2*pad)/(monthly.length-1);
+  const pts = monthly.map((v,i)=>{
+    const x = pad + i*stepX;
+    const y = sh2-pad - ((v-minM)/(maxM-minM||1))*(sh2-2*pad);
+    return `${x},${y}`;
+  }).join(' ');
+  const poly = document.createElementNS('http://www.w3.org/2000/svg','polyline');
+  poly.setAttribute('points',pts);
+  poly.setAttribute('fill','none');
+  poly.setAttribute('stroke','#17a2b8');
+  poly.setAttribute('stroke-width','2');
+  poly.setAttribute('stroke-linecap','round');
+  poly.setAttribute('stroke-linejoin','round');
+  spark.appendChild(poly);
+
+  // ---- Monthly trend bars ----
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul'];
+  const trendWrap = document.getElementById('trendBars');
+  const maxT = Math.max(...monthly);
+  months.forEach((m,i)=>{
+    const v = monthly[i];
+    const col = document.createElement('div');
+    col.className='trend-col';
+    col.innerHTML = `<div class="trend-val">${v}</div><div class="trend-bar" style="height:${(v/maxT)*100}%"></div><div class="trend-lbl">${m}</div>`;
+    trendWrap.appendChild(col);
+  });
+</script>
+
+</body>
+</html>
