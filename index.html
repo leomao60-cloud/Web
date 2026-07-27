@@ -82,6 +82,71 @@
     transition:background .2s ease, transform .2s ease;
   }
   .icon-btn:hover{background:rgba(255,255,255,0.24);transform:translateY(-1px);}
+  .icon-btn{border:none;color:inherit;position:relative;}
+
+  /* Notification bell */
+  .notif-wrap{position:relative;}
+  @keyframes bellRing{
+    0%,100%{transform:rotate(0);}
+    15%{transform:rotate(14deg);} 30%{transform:rotate(-12deg);}
+    45%{transform:rotate(9deg);}  60%{transform:rotate(-7deg);}
+    75%{transform:rotate(4deg);}
+  }
+  .icon-btn.ringing{animation:bellRing .8s ease-in-out;}
+  .notif-badge{
+    position:absolute;top:-3px;right:-3px;min-width:17px;height:17px;padding:0 4px;
+    border-radius:9px;background:var(--poor);color:#fff;
+    font-size:10px;font-weight:800;line-height:17px;text-align:center;
+    border:2px solid var(--navy-800);
+    opacity:0;transform:scale(.4);pointer-events:none;
+    transition:opacity .2s ease, transform .25s cubic-bezier(.34,1.56,.64,1);
+  }
+  .notif-badge.show{opacity:1;transform:scale(1);}
+
+  .notif-panel{
+    position:absolute;top:44px;right:0;width:330px;z-index:90;
+    background:var(--card);border-radius:12px;
+    box-shadow:0 14px 38px rgba(10,20,40,0.26);
+    color:var(--ink);overflow:hidden;
+    opacity:0;transform:translateY(-8px) scale(.97);pointer-events:none;
+    transition:opacity .18s ease, transform .18s cubic-bezier(.22,1,.36,1);
+  }
+  .notif-panel.open{opacity:1;transform:translateY(0) scale(1);pointer-events:auto;}
+  .notif-head{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:12px 14px;border-bottom:1px solid var(--line);
+    font-size:13px;font-weight:700;
+  }
+  .notif-mark-read{
+    border:none;background:transparent;font-family:inherit;
+    font-size:11.5px;font-weight:700;color:var(--blue-mid);cursor:pointer;
+    padding:4px 7px;border-radius:6px;transition:background .16s ease, color .16s ease;
+  }
+  .notif-mark-read:hover{background:#eef3f9;color:var(--navy-800);}
+  .notif-mark-read:disabled{color:var(--muted);cursor:default;background:transparent;}
+  .notif-list{max-height:320px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--blue-pale) transparent;}
+  .notif-list::-webkit-scrollbar{width:6px;}
+  .notif-list::-webkit-scrollbar-thumb{background:var(--blue-pale);border-radius:3px;}
+  .notif-item{
+    display:flex;gap:10px;padding:11px 14px;border-bottom:1px solid var(--line);
+    cursor:pointer;transition:background .15s ease;
+  }
+  .notif-item:last-child{border-bottom:none;}
+  .notif-item:hover{background:#f7f9fc;}
+  .notif-item.unread{background:#f2f9fb;}
+  .notif-item.unread:hover{background:#e9f4f8;}
+  .notif-dot{width:7px;height:7px;border-radius:50%;background:var(--teal);margin-top:5px;flex-shrink:0;}
+  .notif-item:not(.unread) .notif-dot{background:transparent;border:1.5px solid var(--line);}
+  .notif-body{flex:1;min-width:0;}
+  .notif-title{font-size:12.5px;font-weight:600;line-height:1.35;}
+  .notif-sub{font-size:11px;color:var(--muted);margin-top:2px;}
+  .notif-empty{padding:30px 16px;text-align:center;color:var(--muted);font-size:12.5px;}
+  .notif-empty .big{font-size:22px;display:block;margin-bottom:6px;}
+  .notif-foot{padding:9px 14px;border-top:1px solid var(--line);font-size:10.5px;color:var(--muted);background:#f8fafc;}
+
+  @media (max-width:480px){
+    .notif-panel{width:calc(100vw - 32px);right:-8px;}
+  }
   .avatar{
     width:30px;height:30px;border-radius:50%;
     background:var(--teal-light);color:var(--navy-900);
@@ -521,7 +586,20 @@
     <a href="#recent">Reports</a>
   </nav>
   <div class="header-right">
-    <div class="icon-btn">&#128276;</div>
+    <div class="notif-wrap">
+      <button type="button" class="icon-btn" id="notifBell" title="Notifications" aria-haspopup="true" aria-expanded="false">
+        &#128276;
+        <span class="notif-badge" id="notifBadge">0</span>
+      </button>
+      <div class="notif-panel" id="notifPanel" role="dialog" aria-label="Notifications">
+        <div class="notif-head">
+          <span>Notifications</span>
+          <button type="button" class="notif-mark-read" id="notifMarkRead">Mark all read</button>
+        </div>
+        <div class="notif-list" id="notifList"></div>
+        <div class="notif-foot" id="notifFoot"></div>
+      </div>
+    </div>
     <div class="avatar">ST</div>
   </div>
 </header>
@@ -1241,7 +1319,7 @@
     renderSupervisors('');
   });
 
-  function jumpToSupervisor(name){
+  function jumpToIncidentSearch(name){
     ['dept','esi','status','month'].forEach(g=>state[g].clear());
     document.querySelectorAll('#filterChips .chip.active').forEach(c=>c.classList.remove('active'));
     state.q = name;
@@ -1258,7 +1336,7 @@
   document.getElementById('supBody').addEventListener('click', e=>{
     const row = e.target.closest('.sup-row-item');
     if(!row) return;
-    jumpToSupervisor(row.dataset.name);
+    jumpToIncidentSearch(row.dataset.name);
   });
 
   renderSupervisors('');
@@ -1299,11 +1377,125 @@
         lastUpdatedEl.classList.remove('fade');
       }, 180);
 
+      checkForNewIncidents();
+
       refreshBtn.classList.remove('spinning');
       refreshBtn.disabled = false;
       refreshLabel.textContent = 'Live data';
     }, 850);
   });
+
+  // ==================================================================
+  // Notification bell: flags incidents that appeared in the data since
+  // this browser last acknowledged them (baseline kept in localStorage).
+  // ==================================================================
+  const SEEN_KEY = 'incidentReport.seenIncidentIds';
+  const NOTIF_LIMIT = 25;
+
+  const incidentId = r => `${r.d}|${r.e}|${r.t}`;
+
+  function loadSeen(){
+    try{
+      const raw = window.localStorage.getItem(SEEN_KEY);
+      return raw ? new Set(JSON.parse(raw)) : null;
+    }catch(err){ return null; }
+  }
+  function saveSeen(ids){
+    try{ window.localStorage.setItem(SEEN_KEY, JSON.stringify([...ids])); }
+    catch(err){ /* private mode or storage full: badge simply won't persist */ }
+  }
+
+  const bell = document.getElementById('notifBell');
+  const badge = document.getElementById('notifBadge');
+  const panel = document.getElementById('notifPanel');
+  const notifList = document.getElementById('notifList');
+  const notifFoot = document.getElementById('notifFoot');
+  const markReadBtn = document.getElementById('notifMarkRead');
+
+  let unreadIds = new Set();
+
+  function renderNotifications(){
+    const recent = INCIDENTS.slice(0, NOTIF_LIMIT);
+    if(!recent.length){
+      notifList.innerHTML = `<div class="notif-empty"><span class="big">&#128276;</span>No incidents on record.</div>`;
+      return;
+    }
+    notifList.innerHTML = recent.map(r=>{
+      const id = incidentId(r);
+      const isNew = unreadIds.has(id);
+      return `<div class="notif-item ${isNew?'unread':''}" data-name="${escapeHtml(r.e)}">
+        <span class="notif-dot"></span>
+        <div class="notif-body">
+          <div class="notif-title">${isNew?'<b>New incident</b> &middot; ':''}${escapeHtml(r.e)} &mdash; ${escapeHtml(r.t)}</div>
+          <div class="notif-sub">${escapeHtml(r.dd)} &middot; ${escapeHtml(r.dept)} &middot; ${escapeHtml(r.esi)}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function updateBadge(){
+    const n = unreadIds.size;
+    badge.textContent = n > 99 ? '99+' : n;
+    badge.classList.toggle('show', n > 0);
+    markReadBtn.disabled = n === 0;
+    notifFoot.textContent = n
+      ? `${n} new incident${n>1?'s':''} since you last checked.`
+      : `Watching ${INCIDENTS.length} incidents · you're all caught up.`;
+  }
+
+  function checkForNewIncidents(){
+    const allIds = INCIDENTS.map(incidentId);
+    const seen = loadSeen();
+    if(seen === null){
+      // First visit on this browser: establish a baseline so the bell only
+      // ever reports incidents added after this point.
+      saveSeen(new Set(allIds));
+      unreadIds = new Set();
+    } else {
+      const fresh = allIds.filter(id => !seen.has(id));
+      if(fresh.length){
+        fresh.forEach(id => unreadIds.add(id));
+        bell.classList.remove('ringing');
+        void bell.offsetWidth;
+        bell.classList.add('ringing');
+      }
+    }
+    updateBadge();
+    renderNotifications();
+  }
+
+  function markAllRead(){
+    saveSeen(new Set(INCIDENTS.map(incidentId)));
+    unreadIds.clear();
+    updateBadge();
+    renderNotifications();
+  }
+
+  function setPanelOpen(open){
+    panel.classList.toggle('open', open);
+    bell.setAttribute('aria-expanded', String(open));
+  }
+
+  bell.addEventListener('click', e=>{
+    e.stopPropagation();
+    setPanelOpen(!panel.classList.contains('open'));
+  });
+  markReadBtn.addEventListener('click', e=>{ e.stopPropagation(); markAllRead(); });
+  panel.addEventListener('click', e=>{
+    const item = e.target.closest('.notif-item');
+    if(!item) return;
+    setPanelOpen(false);
+    markAllRead();
+    jumpToIncidentSearch(item.dataset.name);
+  });
+  document.addEventListener('click', e=>{
+    if(!e.target.closest('.notif-wrap')) setPanelOpen(false);
+  });
+  document.addEventListener('keydown', e=>{
+    if(e.key === 'Escape') setPanelOpen(false);
+  });
+
+  checkForNewIncidents();
 </script>
 
 </body>
