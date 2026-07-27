@@ -27,6 +27,7 @@
     --poor-bg:#fbe7e5;
   }
   *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
   body{
     margin:0;
     font-family:"Segoe UI", -apple-system, BlinkMacSystemFont, Arial, sans-serif;
@@ -34,6 +35,10 @@
     color:var(--ink);
   }
   a{color:inherit;}
+  button{font-family:inherit;}
+  .chip:focus-visible,.icon-btn:focus-visible,.dl-btn:focus-visible,
+  .clear-all-btn:focus-visible,.search-clear-x:focus-visible,nav.links a:focus-visible,
+  .view-more:focus-visible{outline:2px solid var(--teal);outline-offset:2px;}
 
   /* Header */
   header.topnav{
@@ -59,21 +64,33 @@
     font-size:14px;font-weight:800;color:var(--navy-900);
   }
   nav.links{display:flex;gap:28px;font-size:14px;}
-  nav.links a{text-decoration:none;color:#cfe0f2;padding-bottom:4px;}
-  nav.links a.active{color:#fff;font-weight:600;border-bottom:2px solid var(--teal);}
+  nav.links a{position:relative;text-decoration:none;color:#cfe0f2;padding-bottom:4px;transition:color .2s ease;}
+  nav.links a::after{
+    content:"";position:absolute;left:0;bottom:-1px;width:100%;height:2px;
+    background:var(--teal);transform:scaleX(0);transform-origin:left;
+    transition:transform .28s cubic-bezier(.4,0,.2,1);
+  }
+  nav.links a:hover{color:#fff;}
+  nav.links a:hover::after,nav.links a.active::after{transform:scaleX(1);}
+  nav.links a.active{color:#fff;font-weight:600;}
   .header-right{display:flex;align-items:center;gap:16px;}
   .icon-btn{
     width:34px;height:34px;border-radius:50%;
     background:rgba(255,255,255,0.12);
     display:flex;align-items:center;justify-content:center;
-    font-size:15px;cursor:default;
+    font-size:15px;cursor:pointer;
+    transition:background .2s ease, transform .2s ease;
   }
+  .icon-btn:hover{background:rgba(255,255,255,0.24);transform:translateY(-1px);}
   .avatar{
     width:30px;height:30px;border-radius:50%;
     background:var(--teal-light);color:var(--navy-900);
     display:flex;align-items:center;justify-content:center;
     font-weight:700;font-size:13px;
+    transition:transform .2s ease, box-shadow .2s ease;
+    cursor:pointer;
   }
+  .avatar:hover{transform:scale(1.07);box-shadow:0 0 0 3px rgba(255,255,255,0.16);}
 
   /* Welcome / KPI band */
   .welcome-band{
@@ -97,7 +114,9 @@
     padding:7px 14px;
     font-size:12.5px;
     white-space:nowrap;
+    transition:background .2s ease, border-color .2s ease, transform .2s ease;
   }
+  .pill:hover{background:rgba(255,255,255,0.13);border-color:rgba(255,255,255,0.45);transform:translateY(-1px);}
 
   .kpi-row{
     display:grid;
@@ -112,16 +131,26 @@
     display:flex;
     gap:12px;
     align-items:flex-start;
+    transition:transform .22s cubic-bezier(.22,1,.36,1), background .22s ease, border-color .22s ease, box-shadow .22s ease;
+    cursor:default;
+  }
+  .kpi-card:hover{
+    transform:translateY(-3px);
+    background:rgba(255,255,255,0.12);
+    border-color:rgba(255,255,255,0.24);
+    box-shadow:0 10px 22px rgba(6,14,28,0.22);
   }
   .kpi-icon{
     width:40px;height:40px;border-radius:9px;
     background:rgba(255,255,255,0.1);
     display:flex;align-items:center;justify-content:center;
     font-size:19px;flex-shrink:0;
+    transition:background .22s ease, transform .22s ease;
   }
+  .kpi-card:hover .kpi-icon{background:rgba(255,255,255,0.22);transform:scale(1.08);}
   .kpi-body .kpi-label{font-size:11.5px;color:#aac1dc;text-transform:uppercase;letter-spacing:0.4px;}
-  .kpi-body .kpi-value{font-size:24px;font-weight:700;margin-top:2px;}
-  .kpi-body .kpi-delta{font-size:11.5px;margin-top:4px;color:#bcd3e9;}
+  .kpi-body .kpi-value{font-size:24px;font-weight:700;margin-top:2px;transition:color .2s ease;}
+  .kpi-body .kpi-delta{font-size:11.5px;margin-top:4px;color:#bcd3e9;transition:color .2s ease;}
   .kpi-delta.up{color:#ffb199;}
   .kpi-delta.flat{color:#9fe3c8;}
   .kpi-delta.share{color:#9fd6e8;}
@@ -148,7 +177,9 @@
   .dl-btn{
     width:28px;height:28px;border-radius:7px;background:var(--blue-pale);
     display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--navy-800);
+    cursor:pointer;transition:background .18s ease, transform .18s ease;
   }
+  .dl-btn:hover{background:#b9d5ef;transform:translateY(-1px);}
 
   .panel-split{display:grid;grid-template-columns:1.05fr 1fr;gap:18px;align-items:start;}
   .stat-block{background:#f4f7fb;border-radius:10px;padding:16px;}
@@ -166,12 +197,21 @@
   .mini-stats .l{font-size:10.5px;color:var(--muted);margin-top:1px;}
 
   .legend-top{display:flex;flex-direction:column;gap:8px;margin-bottom:14px;width:100%;}
-  .legend-row{display:flex;align-items:center;justify-content:space-between;font-size:12.5px;}
-  .legend-row .lbl{display:flex;align-items:center;gap:8px;color:var(--muted);}
-  .legend-row .dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
-  .legend-row .pct{font-weight:700;color:var(--ink);}
+  .legend-row{
+    display:flex;align-items:center;justify-content:space-between;font-size:12.5px;
+    cursor:pointer;padding:4px 6px;margin:0 -6px;border-radius:6px;
+    transition:background .18s ease, transform .18s ease;
+  }
+  .legend-row:hover{background:#f4f7fb;transform:translateX(2px);}
+  .legend-row .lbl{display:flex;align-items:center;gap:8px;color:var(--muted);transition:color .18s ease;}
+  .legend-row:hover .lbl{color:var(--ink);}
+  .legend-row .dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;transition:transform .18s ease;}
+  .legend-row:hover .dot{transform:scale(1.25);}
+  .legend-row .pct{font-weight:700;color:var(--ink);transition:transform .18s ease;}
+  .legend-row:hover .pct{transform:scale(1.08);}
 
   .donut-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  #donutChart circle{transition:opacity .2s ease, stroke-width .2s ease;cursor:pointer;}
   .donut-center-label{font-size:12px;color:var(--muted);margin-top:10px;letter-spacing:1px;text-transform:uppercase;}
 
   .protocol-row{display:flex;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line);}
@@ -181,18 +221,43 @@
   .protocol-sub{text-align:right;}
   .protocol-sub div{font-size:11px;color:var(--muted);display:flex;gap:10px;justify-content:flex-end;}
   .protocol-sub span.num{color:var(--ink);font-weight:700;min-width:26px;text-align:right;display:inline-block;}
-  .view-more{display:inline-block;margin-top:12px;font-size:12.5px;color:var(--blue-mid);font-weight:700;text-decoration:none;}
+  .view-more{position:relative;display:inline-block;margin-top:12px;font-size:12.5px;color:var(--blue-mid);font-weight:700;text-decoration:none;transition:color .18s ease;cursor:pointer;}
+  .view-more::after{
+    content:"";position:absolute;left:0;bottom:-2px;width:0;height:1.5px;
+    background:var(--navy-800);transition:width .24s cubic-bezier(.4,0,.2,1);
+  }
+  .view-more:hover{color:var(--navy-800);}
+  .view-more:hover::after{width:100%;}
 
   .bar-chart{display:flex;align-items:flex-end;gap:14px;height:190px;padding-top:20px;}
-  .bar-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;}
-  .bar-pct{font-size:11px;font-weight:700;color:#fff;margin-bottom:6px;}
-  .bar{width:100%;max-width:34px;border-radius:6px 6px 3px 3px;}
-  .bar-label{font-size:10.5px;color:var(--muted);margin-top:8px;text-align:center;line-height:1.2;}
+  .bar-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;cursor:pointer;}
+  .bar-pct{font-size:11px;font-weight:700;color:#fff;margin-bottom:6px;transition:transform .2s ease;}
+  .bar{width:100%;max-width:34px;border-radius:6px 6px 3px 3px;transform-origin:bottom;transition:transform .2s cubic-bezier(.22,1,.36,1), filter .2s ease;}
+  .bar-col:hover .bar{transform:scaleX(1.12);filter:brightness(1.1);}
+  .bar-col:hover .bar-pct{transform:translateY(-2px);}
+  .bar-label{font-size:10.5px;color:var(--muted);margin-top:8px;text-align:center;line-height:1.2;transition:color .18s ease;}
+  .bar-col:hover .bar-label{color:var(--ink);}
   .chart-caption{text-align:center;font-size:11px;color:var(--muted);margin-top:6px;}
+
+  .chart-tooltip{
+    position:fixed;z-index:80;pointer-events:none;
+    background:var(--navy-900);color:#fff;font-size:11.5px;font-weight:600;line-height:1.4;
+    padding:7px 11px;border-radius:7px;
+    opacity:0;transform:translate(-50%,-100%) translateY(-4px) scale(.96);
+    transition:opacity .16s ease, transform .16s ease;
+    white-space:nowrap;box-shadow:0 6px 18px rgba(8,16,32,0.3);
+  }
+  .chart-tooltip.show{opacity:1;transform:translate(-50%,-100%) translateY(-10px) scale(1);}
+  .chart-tooltip .tt-sub{opacity:.72;font-weight:500;}
 
   /* Gauge row */
   .gauge-row{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-bottom:22px;}
-  .gauge-card{background:var(--card);border-radius:12px;box-shadow:0 1px 3px rgba(20,30,50,0.08);padding:20px 22px;display:flex;justify-content:space-between;align-items:center;gap:14px;}
+  .gauge-card{
+    background:var(--card);border-radius:12px;box-shadow:0 1px 3px rgba(20,30,50,0.08);
+    padding:20px 22px;display:flex;justify-content:space-between;align-items:center;gap:14px;
+    transition:transform .22s cubic-bezier(.22,1,.36,1), box-shadow .22s ease;
+  }
+  .gauge-card:hover{transform:translateY(-3px);box-shadow:0 12px 26px rgba(20,30,50,0.13);}
   .gauge-left h3{font-size:14.5px;margin:0 0 8px;font-weight:700;}
   .status-pill{display:inline-block;font-size:11px;font-weight:700;border-radius:5px;padding:3px 9px;margin-bottom:12px;}
   .status-good{background:var(--good-bg);color:var(--good);}
@@ -204,14 +269,23 @@
   /* Insights row */
   .insights-row{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:22px;margin-bottom:22px;}
   .trend-bars{display:flex;align-items:flex-end;gap:8px;height:130px;}
-  .trend-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;}
-  .trend-bar{width:100%;max-width:26px;background:linear-gradient(180deg,var(--blue-mid),var(--navy-800));border-radius:5px 5px 2px 2px;}
-  .trend-val{font-size:10px;font-weight:700;color:var(--navy-800);margin-bottom:4px;}
-  .trend-lbl{font-size:10px;color:var(--muted);margin-top:6px;}
+  .trend-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;cursor:pointer;}
+  .trend-bar{
+    width:100%;max-width:26px;background:linear-gradient(180deg,var(--blue-mid),var(--navy-800));
+    border-radius:5px 5px 2px 2px;transform-origin:bottom;
+    transition:transform .2s cubic-bezier(.22,1,.36,1), filter .2s ease;
+  }
+  .trend-col:hover .trend-bar{transform:scaleX(1.15);filter:brightness(1.12);}
+  .trend-val{font-size:10px;font-weight:700;color:var(--navy-800);margin-bottom:4px;transition:transform .18s ease;}
+  .trend-col:hover .trend-val{transform:translateY(-2px);}
+  .trend-lbl{font-size:10px;color:var(--muted);margin-top:6px;transition:color .18s ease;}
+  .trend-col:hover .trend-lbl{color:var(--ink);}
 
   .findings-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;}
-  .findings-list li{font-size:12.5px;color:var(--ink);padding-left:16px;position:relative;line-height:1.4;}
-  .findings-list li::before{content:"";position:absolute;left:0;top:6px;width:6px;height:6px;border-radius:50%;background:var(--teal);}
+  .findings-list li{font-size:12.5px;color:var(--ink);padding-left:16px;position:relative;line-height:1.4;transition:transform .18s ease, color .18s ease;cursor:default;}
+  .findings-list li:hover{transform:translateX(3px);color:var(--navy-800);}
+  .findings-list li::before{content:"";position:absolute;left:0;top:6px;width:6px;height:6px;border-radius:50%;background:var(--teal);transition:transform .18s ease;}
+  .findings-list li:hover::before{transform:scale(1.4);}
   .action-box{margin-top:14px;background:#f4f7fb;border-left:3px solid var(--teal);border-radius:6px;padding:10px 12px;font-size:12px;color:var(--navy-800);}
   .action-box b{color:var(--navy-900);}
 
@@ -220,21 +294,104 @@
   table.sup-table td{padding:8px 6px;border-bottom:1px solid var(--line);}
   table.sup-table tr:last-child td{border-bottom:none;}
   table.sup-table td.num{text-align:right;font-weight:700;}
-  .rank{display:inline-flex;width:18px;height:18px;border-radius:50%;background:var(--blue-pale);color:var(--navy-800);font-size:10px;font-weight:800;align-items:center;justify-content:center;margin-right:6px;}
+  table.sup-table tbody tr{transition:background .16s ease;cursor:default;}
+  table.sup-table tbody tr:hover{background:#f7f9fc;}
+  table.sup-table tbody tr td:first-child{transition:transform .18s ease;}
+  table.sup-table tbody tr:hover td:first-child{transform:translateX(2px);}
+  .rank{
+    display:inline-flex;width:18px;height:18px;border-radius:50%;background:var(--blue-pale);
+    color:var(--navy-800);font-size:10px;font-weight:800;align-items:center;justify-content:center;
+    margin-right:6px;transition:background .16s ease, color .16s ease, transform .16s ease;
+  }
+  table.sup-table tbody tr:hover .rank{background:var(--navy-800);color:#fff;transform:scale(1.1);}
 
-  /* Recent incidents table */
+  /* Incident Explorer */
   .card.wide{margin-bottom:10px;}
-  table.recent{width:100%;border-collapse:collapse;font-size:12.5px;}
-  table.recent th{text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:0.3px;color:var(--muted);border-bottom:1px solid var(--line);padding:0 10px 10px;font-weight:700;}
-  table.recent td{padding:10px;border-bottom:1px solid var(--line);color:var(--ink);}
-  table.recent tr:last-child td{border-bottom:none;}
-  table.recent tr:hover td{background:#f7f9fc;}
-  .badge{display:inline-block;font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:5px;}
+  .badge{display:inline-block;font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:5px;transition:background .16s ease, color .16s ease;}
   .badge-fa{background:#e7f2fb;color:#2c6fb0;}
   .badge-rpo{background:var(--fair-bg);color:var(--fair);}
   .badge-rec{background:var(--poor-bg);color:var(--poor);}
   .badge-close{background:var(--good-bg);color:var(--good);}
   .badge-open{background:#eef1f5;color:var(--muted);}
+
+  .filter-bar{display:flex;flex-direction:column;gap:14px;margin-bottom:18px;}
+  .search-row{
+    display:flex;align-items:center;gap:10px;background:#f4f7fb;
+    border:1.5px solid var(--line);border-radius:10px;padding:10px 14px;
+    transition:border-color .18s ease, box-shadow .18s ease, background .18s ease;
+  }
+  .search-row:focus-within{border-color:var(--teal);box-shadow:0 0 0 3px rgba(23,162,184,0.14);background:#fff;}
+  .search-row svg{flex-shrink:0;color:var(--muted);transition:color .18s ease;}
+  .search-row:focus-within svg{color:var(--teal);}
+  .search-row input{border:none;background:transparent;outline:none;font-size:13.5px;flex:1;color:var(--ink);font-family:inherit;}
+  .search-row input::placeholder{color:#9aa7ba;}
+  .search-clear-x{
+    display:flex;width:20px;height:20px;border-radius:50%;background:#e4e9f0;color:var(--muted);
+    align-items:center;justify-content:center;font-size:11px;cursor:pointer;flex-shrink:0;
+    opacity:0;transform:scale(.7);pointer-events:none;
+    transition:opacity .16s ease, transform .16s ease, background .16s ease, color .16s ease;
+  }
+  .search-clear-x.show{opacity:1;transform:scale(1);pointer-events:auto;}
+  .search-clear-x:hover{background:#d3dce8;color:var(--ink);}
+
+  .chip-groups{display:flex;flex-wrap:wrap;gap:8px;align-items:center;row-gap:10px;}
+  .chip-group-label{font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-right:2px;}
+  .chip-set{display:inline-flex;flex-wrap:wrap;gap:6px;}
+  .filter-divider{width:1px;height:18px;background:var(--line);margin:0 4px;}
+  .chip{
+    display:inline-flex;align-items:center;gap:6px;
+    padding:6px 12px;border-radius:999px;
+    background:#f1f4f9;color:var(--muted);
+    font-size:12px;font-weight:600;border:1px solid transparent;
+    cursor:pointer;user-select:none;
+    transition:background .18s ease, color .18s ease, border-color .18s ease, transform .12s ease;
+  }
+  .chip:hover{background:#e6ecf5;color:var(--ink);}
+  .chip:active{transform:scale(.95);}
+  .chip.active{background:var(--navy-800);color:#fff;border-color:var(--navy-800);}
+  .chip.active:hover{background:var(--navy-700);}
+  .chip .chip-count{opacity:.65;font-weight:700;font-size:10.5px;transition:opacity .18s ease;}
+  .chip.active .chip-count{opacity:.85;}
+  .clear-all-btn{
+    font-size:12px;font-weight:700;color:var(--poor);cursor:pointer;
+    opacity:0;transform:translateX(-4px);pointer-events:none;
+    transition:opacity .18s ease, transform .18s ease, background .16s ease;
+    padding:6px 10px;border-radius:8px;
+  }
+  .clear-all-btn.show{opacity:1;transform:translateX(0);pointer-events:auto;}
+  .clear-all-btn:hover{background:var(--poor-bg);}
+
+  .results-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:12px;color:var(--muted);}
+  .results-meta b{color:var(--ink);transition:color .15s ease;}
+
+  .results-head-row,.result-row{display:grid;grid-template-columns:1.6fr 1fr 1.2fr 1.4fr .8fr .8fr;gap:8px;align-items:center;}
+  .results-head-row{padding:0 10px 10px;border-bottom:1px solid var(--line);}
+  .results-head-row span{font-size:10.5px;text-transform:uppercase;letter-spacing:.3px;color:var(--muted);font-weight:700;}
+  .results-body{transition:opacity .16s ease, transform .16s ease;min-height:60px;}
+  .results-body.fading{opacity:0;transform:translateY(4px);}
+  .result-row{
+    padding:11px 10px;border-bottom:1px solid var(--line);border-radius:8px;
+    opacity:0;transform:translateY(6px);
+    transition:opacity .32s cubic-bezier(.22,1,.36,1), transform .32s cubic-bezier(.22,1,.36,1), background .15s ease;
+  }
+  .result-row.visible{opacity:1;transform:translateY(0);}
+  .result-row:hover{background:#f7f9fc;}
+  .result-row .emp{font-weight:600;color:var(--ink);}
+  .result-row .muted-cell{color:var(--muted);}
+  .empty-state{text-align:center;padding:44px 20px;color:var(--muted);}
+  .empty-state .icon{font-size:28px;margin-bottom:10px;}
+  .empty-state b{color:var(--ink);}
+  .empty-state .hint{font-size:12px;margin-top:5px;}
+
+  @media (max-width:760px){
+    .results-head-row{display:none;}
+    .result-row{
+      grid-template-columns:1fr;background:#fff;border:1px solid var(--line);
+      border-radius:10px;margin-bottom:8px;padding:12px;
+    }
+    .result-row>div{display:flex;justify-content:space-between;padding:3px 0;font-size:12.5px;gap:10px;}
+    .result-row>div::before{content:attr(data-label);color:var(--muted);font-weight:600;font-size:10.5px;text-transform:uppercase;flex-shrink:0;}
+  }
 
   footer{text-align:center;font-size:11.5px;color:var(--muted);padding:20px 0 36px;}
 
@@ -247,6 +404,9 @@
     header.topnav{padding:14px 18px;}
     .welcome-band{padding:16px 18px 22px;}
     main{padding:22px 16px 40px;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{transition-duration:0.01ms !important;scroll-behavior:auto !important;}
   }
 </style>
 </head>
@@ -482,34 +642,67 @@
     </div>
   </div>
 
-  <!-- Recent Incidents -->
+  <!-- Incident Explorer -->
   <div class="card wide" id="recent">
-    <div class="card-head"><h2>Recent Incidents</h2></div>
-    <table class="recent">
-      <thead>
-        <tr><th>Employee</th><th>Date</th><th>Department</th><th>Injury Type</th><th>ESI Status</th><th>Case Status</th></tr>
-      </thead>
-      <tbody>
-        <tr><td>Joseph Gomez</td><td>Jul 24, 2026</td><td>Harvest</td><td>Foreign Object</td><td><span class="badge badge-fa">FA</span></td><td><span class="badge badge-open">Open</span></td></tr>
-        <tr><td>Ceasar Saldana</td><td>Jul 23, 2026</td><td>Maintenance</td><td>Electric Shock</td><td><span class="badge badge-rpo">RPO</span></td><td><span class="badge badge-open">Open</span></td></tr>
-        <tr><td>Irma Ortega</td><td>Jul 22, 2026</td><td>Fabrication</td><td>Strain</td><td><span class="badge badge-fa">FA</span></td><td><span class="badge badge-close">Close</span></td></tr>
-        <tr><td>Ramon Garcia</td><td>Jul 22, 2026</td><td>Harvest</td><td>Slip, Trip, &amp; Fall</td><td><span class="badge badge-rpo">RPO</span></td><td><span class="badge badge-close">Close</span></td></tr>
-        <tr><td>Noe Frage Ruiz</td><td>Jul 22, 2026</td><td>Fabrication</td><td>Struck By/Against Object</td><td><span class="badge badge-rpo">RPO</span></td><td><span class="badge badge-close">Close</span></td></tr>
-        <tr><td>Jesus Bernal</td><td>Jul 21, 2026</td><td>Corrals</td><td>Struck By Cattle</td><td><span class="badge badge-fa">FA</span></td><td><span class="badge badge-close">Close</span></td></tr>
-        <tr><td>Rudy Ramos</td><td>Jul 21, 2026</td><td>Harvest</td><td>Abrasion</td><td><span class="badge badge-fa">FA</span></td><td><span class="badge badge-close">Close</span></td></tr>
-        <tr><td>Rosalba Oseguera Mendez</td><td>Jul 20, 2026</td><td>Harvest</td><td>Strain</td><td><span class="badge badge-fa">FA</span></td><td><span class="badge badge-close">Close</span></td></tr>
-        <tr><td>Christopher Diaz</td><td>Jul 17, 2026</td><td>Loading Dock</td><td>Strain</td><td><span class="badge badge-fa">FA</span></td><td><span class="badge badge-close">Close</span></td></tr>
-        <tr><td>Eduardo Contreras</td><td>Jul 15, 2026</td><td>Harvest</td><td>Rash</td><td><span class="badge badge-fa">FA</span></td><td><span class="badge badge-close">Close</span></td></tr>
-        <tr><td>Carlos Roman</td><td>Jul 14, 2026</td><td>Buildings &amp; Grounds</td><td>Struck By/Against Object</td><td><span class="badge badge-fa">FA</span></td><td><span class="badge badge-close">Close</span></td></tr>
-        <tr><td>Maria Figueroa</td><td>Jul 14, 2026</td><td>Harvest</td><td>Burn</td><td><span class="badge badge-rpo">RPO</span></td><td><span class="badge badge-close">Close</span></td></tr>
-      </tbody>
-    </table>
+    <div class="card-head">
+      <h2>Incident Explorer</h2>
+      <div class="dl-btn">&#8595;</div>
+    </div>
+
+    <div class="filter-bar">
+      <div class="search-row">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="incidentSearch" placeholder="Search by employee, department, injury type, or supervisor…" autocomplete="off">
+        <div class="search-clear-x" id="searchClearX" title="Clear search">&#10005;</div>
+      </div>
+      <div class="chip-groups" id="filterChips">
+        <span class="chip-group-label">Dept</span>
+        <span class="chip-set" id="chipsDept"></span>
+        <span class="filter-divider"></span>
+        <span class="chip-group-label">ESI</span>
+        <span class="chip-set" id="chipsEsi"></span>
+        <span class="filter-divider"></span>
+        <span class="chip-group-label">Status</span>
+        <span class="chip-set" id="chipsStatus"></span>
+        <span class="filter-divider"></span>
+        <span class="chip-group-label">Month</span>
+        <span class="chip-set" id="chipsMonth"></span>
+        <span class="clear-all-btn" id="clearAllBtn">Clear all</span>
+      </div>
+    </div>
+
+    <div class="results-meta">
+      <div><b id="resultsCount">275</b> of 275 incidents</div>
+      <div>Sorted by most recent</div>
+    </div>
+
+    <div class="results-table">
+      <div class="results-head-row">
+        <span>Employee</span><span>Date</span><span>Department</span><span>Injury Type</span><span>ESI</span><span>Status</span>
+      </div>
+      <div class="results-body" id="resultsBody"></div>
+    </div>
   </div>
+
+  <div class="chart-tooltip" id="chartTooltip"></div>
 
   <footer>Source: Master_List_Of_Injuries_2025_2026 &middot; 275 YTD incident records (2026) &middot; Generated Jul 27, 2026</footer>
 </main>
 
+<script type="application/json" id="incidentData">[{"e":"Joseph Gomez","d":"2026-07-24","dd":"Jul 24, 2026","dept":"Harvest","t":"Foreign Object","esi":"FA","s":"Open","sup":"Richard Xiong","m":"July"},{"e":"Ceasar Saldana","d":"2026-07-23","dd":"Jul 23, 2026","dept":"Maintenance","t":"Electric Shock","esi":"RPO","s":"Open","sup":"Jonathan Hernandez","m":"July"},{"e":"Irma Ortega","d":"2026-07-22","dd":"Jul 22, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Diego Soria","m":"July"},{"e":"Ramon Garcia","d":"2026-07-22","dd":"Jul 22, 2026","dept":"Harvest","t":"Slip, Trip, & Fall","esi":"RPO","s":"Close","sup":"Richard Xiong","m":"July"},{"e":"Noe Frage Ruiz","d":"2026-07-22","dd":"Jul 22, 2026","dept":"Fabrication","t":"Struck By/Against Object","esi":"RPO","s":"Close","sup":"Juan Ramirez","m":"July"},{"e":"Jesus Bernal","d":"2026-07-21","dd":"Jul 21, 2026","dept":"Corrals","t":"Struck By Cattle","esi":"FA","s":"Close","sup":"Marilyn Herrera","m":"July"},{"e":"Rudy Ramos","d":"2026-07-21","dd":"Jul 21, 2026","dept":"Harvest","t":"Abrasion","esi":"FA","s":"Close","sup":"Richard Xiong","m":"July"},{"e":"Rosalba Oseguera Mendez","d":"2026-07-20","dd":"Jul 20, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Alex Vargas","m":"July"},{"e":"Christopher Diaz","d":"2026-07-17","dd":"Jul 17, 2026","dept":"Loading Dock","t":"Strain","esi":"FA","s":"Close","sup":"Francisco Tapia","m":"July"},{"e":"Eduardo Contreras","d":"2026-07-15","dd":"Jul 15, 2026","dept":"Harvest","t":"Rash","esi":"FA","s":"Close","sup":"Alex Vargas","m":"July"},{"e":"Carlos Roman","d":"2026-07-14","dd":"Jul 14, 2026","dept":"Buildings & Grounds","t":"Struck By/Against Object","esi":"FA","s":"Close","sup":"Christopher Moreno","m":"July"},{"e":"Maria Figueroa","d":"2026-07-14","dd":"Jul 14, 2026","dept":"Harvest","t":"Burn","esi":"RPO","s":"Close","sup":"Samuel Sierra","m":"July"},{"e":"Ezequiel Ambriz","d":"2026-07-14","dd":"Jul 14, 2026","dept":"Utilities","t":"Burn","esi":"FA","s":"Close","sup":"Juan Murillo","m":"July"},{"e":"Jonny Garcia","d":"2026-07-14","dd":"Jul 14, 2026","dept":"Corrals","t":"Struck By Cattle","esi":"RPO","s":"Close","sup":"Marilyn Herrera","m":"July"},{"e":"Richie Glass","d":"2026-07-13","dd":"Jul 13, 2026","dept":"FSQA","t":"Slip, Trip, & Fall","esi":"RPO","s":"Close","sup":"Rene Canas","m":"July"},{"e":"Michael Montelongo","d":"2026-07-10","dd":"Jul 10, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Elizabeth Neufeld","m":"July"},{"e":"Rudy Gallegos","d":"2026-07-10","dd":"Jul 10, 2026","dept":"Harvest","t":"Struck By/Against Object","esi":"FA","s":"Close","sup":"Samuel Sierra","m":"July"},{"e":"Osbaldo Santiago","d":"2026-07-10","dd":"Jul 10, 2026","dept":"Harvest","t":"Strain","esi":"RPO","s":"Close","sup":"Alex Vargas","m":"July"},{"e":"Mason Ojeda","d":"2026-07-09","dd":"Jul 9, 2026","dept":"Corrals","t":"Foreign Object","esi":"RPO","s":"Close","sup":"Marilyn Herrera","m":"July"},{"e":"Pisperema Amaya","d":"2026-07-09","dd":"Jul 9, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Samuel Sierra","m":"July"},{"e":"Jonathan Campas","d":"2026-07-09","dd":"Jul 9, 2026","dept":"Harvest","t":"Foreign Object","esi":"FA","s":"Close","sup":"Samuel Sierra","m":"July"},{"e":"Daisy Sotelo","d":"2026-07-09","dd":"Jul 9, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Samuel Sierra","m":"July"},{"e":"Claudia Estrada Cruz","d":"2026-07-09","dd":"Jul 9, 2026","dept":"Fabrication","t":"Puncture","esi":"FA","s":"Close","sup":"Elizabeth Neufeld","m":"July"},{"e":"Hector Razo","d":"2026-07-08","dd":"Jul 8, 2026","dept":"Buildings & Grounds","t":"Insect Bite/ Sting","esi":"RPO","s":"Close","sup":"Christopher Moreno","m":"July"},{"e":"Apolinar Basilio","d":"2026-07-08","dd":"Jul 8, 2026","dept":"Fabrication","t":"Struck By Equipment","esi":"FA","s":"Close","sup":"Maria Garcia","m":"July"},{"e":"Mayra Solarte","d":"2026-07-08","dd":"Jul 8, 2026","dept":"Harvest","t":"Strain","esi":"RPO","s":"Close","sup":"Alex Vargas","m":"July"},{"e":"Vilma De Jesus Gomez","d":"2026-07-08","dd":"Jul 8, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Maria Garcia","m":"July"},{"e":"Victor Garcia","d":"2026-07-08","dd":"Jul 8, 2026","dept":"Fabrication","t":"No Injury","esi":"RPO","s":"Close","sup":"Chadu Moua","m":"July"},{"e":"Rosalba Osguera","d":"2026-07-07","dd":"Jul 7, 2026","dept":"Harvest","t":"Burn","esi":"FA","s":"Close","sup":"Alex Vargas","m":"July"},{"e":"Roman Morales","d":"2026-07-07","dd":"Jul 7, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Michael Orozco","m":"July"},{"e":"Angel Estrada","d":"2026-07-07","dd":"Jul 7, 2026","dept":"Maintenance","t":"Slip, Trip, & Fall","esi":"RPO","s":"Close","sup":"Kamran Tavagar","m":"July"},{"e":"Adolfo Aguilera","d":"2026-07-03","dd":"Jul 3, 2026","dept":"Harvest","t":"Crush Injury","esi":"FA","s":"Close","sup":"Marilyn Herrera","m":"July"},{"e":"Jasmine Gonzalez","d":"2026-07-03","dd":"Jul 3, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Alex Vargas","m":"July"},{"e":"Victoria Vazquez","d":"2026-07-03","dd":"Jul 3, 2026","dept":"Harvest","t":"Inhalation / Reaction","esi":"RPO","s":"Close","sup":"Michael Orozco","m":"July"},{"e":"China Bonner","d":"2026-07-03","dd":"Jul 3, 2026","dept":"Fabrication","t":"Foreign Object","esi":"FA","s":"Close","sup":"Elizabeth Neufeld","m":"July"},{"e":"Sopheap Pos","d":"2026-07-03","dd":"Jul 3, 2026","dept":"Fabrication","t":"Slip, Trip, & Fall","esi":"RPO","s":"Close","sup":"Juan Ramirez","m":"July"},{"e":"Lebrado Avila","d":"2026-07-02","dd":"Jul 2, 2026","dept":"Fabrication","t":"Crush Injury","esi":"RPO","s":"Close","sup":"Chadu Moua","m":"July"},{"e":"Bernardo Gonzalez","d":"2026-07-02","dd":"Jul 2, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Juan Ramirez","m":"July"},{"e":"Raymundo Vargas Jr","d":"2026-07-02","dd":"Jul 2, 2026","dept":"Fabrication","t":"Slip, Trip, & Fall","esi":"RPO","s":"Close","sup":"Erwin Vega","m":"July"},{"e":"Jose Nunez","d":"2026-07-02","dd":"Jul 2, 2026","dept":"Fabrication","t":"Falling Objects","esi":"FA","s":"Close","sup":"Erwin Vega","m":"July"},{"e":"Edgar Hernandez","d":"2026-07-02","dd":"Jul 2, 2026","dept":"Harvest","t":"Burn","esi":"FA","s":"Close","sup":"Alex Vargas","m":"July"},{"e":"Juan Ceballos","d":"2026-07-01","dd":"Jul 1, 2026","dept":"Harvest","t":"Laceration","esi":"RECORDABLE","s":"Close","sup":"Michael Orozco","m":"July"},{"e":"Claudia Estrada Cruz","d":"2026-07-01","dd":"Jul 1, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Elizabeth Neufeld","m":"July"},{"e":"Vilma de Jesus","d":"2026-06-30","dd":"Jun 30, 2026","dept":"Fabrication","t":"Contact Stress","esi":"FA","s":"Close","sup":"Maria Garcia","m":"June"},{"e":"Edgar Guttierez","d":"2026-06-29","dd":"Jun 29, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Juan Carlos Martinez","m":"June"},{"e":"Eduardo Contreras","d":"2026-06-29","dd":"Jun 29, 2026","dept":"Harvest","t":"Slip, Trip, & Fall","esi":"RPO","s":"Close","sup":"Alex Vargas","m":"June"},{"e":"Aaron Ching","d":"2026-06-29","dd":"Jun 29, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Alex Vargas","m":"June"},{"e":"Kristy Davila","d":"2026-06-29","dd":"Jun 29, 2026","dept":"Fabrication","t":"Foreign Object","esi":"FA","s":"Close","sup":"Elizabeth Neufeld","m":"June"},{"e":"Steven Aceves","d":"2026-06-29","dd":"Jun 29, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Ovidio Sanchez","m":"June"},{"e":"Frederick Garcia","d":"2026-06-29","dd":"Jun 29, 2026","dept":"Harvest","t":"Foreign Object","esi":"FA","s":"Close","sup":"Alex Vargas","m":"June"},{"e":"Esmeralda Avalos Vazquez","d":"2026-06-26","dd":"Jun 26, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Rutilio Rodriguez","m":"June"},{"e":"Osbaldo Santiago","d":"2026-06-26","dd":"Jun 26, 2026","dept":"Harvest","t":"Burn","esi":"FA","s":"Close","sup":"Alex Vargas","m":"June"},{"e":"Juan Rivera","d":"2026-06-26","dd":"Jun 26, 2026","dept":"Buildings & Grounds","t":"Insect Bite/ Sting","esi":"RPO","s":"Close","sup":"Christopher Moreno","m":"June"},{"e":"Pablo de la Cruz","d":"2026-06-25","dd":"Jun 25, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Erwin Vega","m":"June"},{"e":"Douglas Cline","d":"2026-06-25","dd":"Jun 25, 2026","dept":"Fabrication","t":"Foreign Object","esi":"FA","s":"Close","sup":"Juan Ramirez","m":"June"},{"e":"Daniel Hernandez","d":"2026-06-25","dd":"Jun 25, 2026","dept":"Maintenance","t":"Struck By/Against Object","esi":"FA","s":"Close","sup":"Osbaldo Gutierrez","m":"June"},{"e":"Edgar Hernandez","d":"2026-06-25","dd":"Jun 25, 2026","dept":"Harvest","t":"Burn","esi":"FA","s":"Close","sup":"Alex Vargas","m":"June"},{"e":"Jayden Acosta","d":"2026-06-24","dd":"Jun 24, 2026","dept":"Fabrication","t":"Slip, Trip, & Fall","esi":"FA","s":"Close","sup":"Erwin Vega","m":"June"},{"e":"Albert Ramos","d":"2026-06-24","dd":"Jun 24, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Juan Ramirez","m":"June"},{"e":"Maricela Ruiz","d":"2026-06-24","dd":"Jun 24, 2026","dept":"Fabrication","t":"Puncture","esi":"FA","s":"Close","sup":"Elizabeth Neufeld","m":"June"},{"e":"Nicole Machuca","d":"2026-06-23","dd":"Jun 23, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Chadu Moua","m":"June"},{"e":"Jose Vazquez","d":"2026-06-23","dd":"Jun 23, 2026","dept":"Fabrication","t":"Foreign Object","esi":"FA","s":"Close","sup":"Ovidio Sanchez","m":"June"},{"e":"Jose Madrigal","d":"2026-06-23","dd":"Jun 23, 2026","dept":"Harvest","t":"Slip, Trip, & Fall","esi":"FA","s":"Close","sup":"Alex Vargas","m":"June"},{"e":"Juan Rivera","d":"2026-06-23","dd":"Jun 23, 2026","dept":"Buildings & Grounds","t":"Strain","esi":"FA","s":"Close","sup":"Christopher Moreno","m":"June"},{"e":"Rocio Bernal","d":"2026-06-23","dd":"Jun 23, 2026","dept":"Harvest","t":"Rash","esi":"FA","s":"Close","sup":"Samuel Sierra","m":"June"},{"e":"Luis Llamas","d":"2026-06-22","dd":"Jun 22, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Erwin Vega","m":"June"},{"e":"Rocio Bernal","d":"2026-06-22","dd":"Jun 22, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Samuel Sierra","m":"June"},{"e":"Angel Campas","d":"2026-06-22","dd":"Jun 22, 2026","dept":"Harvest","t":"Contact Stress","esi":"FA","s":"Close","sup":"Michael Orozco","m":"June"},{"e":"Celso Avendano","d":"2026-06-22","dd":"Jun 22, 2026","dept":"Fabrication","t":"Struck By/Against Object","esi":"FA","s":"Close","sup":"Ovidio Sanchez","m":"June"},{"e":"Juan Rodriguez","d":"2026-06-19","dd":"Jun 19, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Juan Rodriguez","m":"June"},{"e":"Esmeralda Avalos Vazquez","d":"2026-06-19","dd":"Jun 19, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Rutilio Rodriguez","m":"June"},{"e":"Justin Briggs","d":"2026-06-19","dd":"Jun 19, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Richard Xiong","m":"June"},{"e":"Jose Rivas","d":"2026-06-19","dd":"Jun 19, 2026","dept":"Maintenance","t":"Strain","esi":"FA","s":"Close","sup":"Osbaldo Gutierrez","m":"June"},{"e":"Jorge Maldonado","d":"2026-06-18","dd":"Jun 18, 2026","dept":"Fabrication","t":"Sprain","esi":"RECORDABLE","s":"Close","sup":"Diego Soria","m":"June"},{"e":"Tomasa Quinonez","d":"2026-06-16","dd":"Jun 16, 2026","dept":"Fabrication","t":"Pinch Point - Caught In","esi":"FA","s":"Close","sup":"Elizabeth Neufeld","m":"June"},{"e":"Miguel Sandoval","d":"2026-06-16","dd":"Jun 16, 2026","dept":"Harvest","t":"Puncture","esi":"FA","s":"Close","sup":"Rutilio Rodriguez","m":"June"},{"e":"Balwinder Kaur","d":"2026-06-16","dd":"Jun 16, 2026","dept":"Harvest","t":"Slip, Trip, & Fall","esi":"RPO","s":"Close","sup":"Samuel Sierra","m":"June"},{"e":"Frank Padilla","d":"2026-06-15","dd":"Jun 15, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Ovidio Sanchez","m":"June"},{"e":"Armando Gonzalez","d":"2026-06-15","dd":"Jun 15, 2026","dept":"Fabrication","t":"Puncture","esi":"FA","s":"Close","sup":"Mary Coffee","m":"June"},{"e":"Marly Delgado","d":"2026-06-12","dd":"Jun 12, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Ovidio Sanchez","m":"June"},{"e":"Abraham Gonzales","d":"2026-06-12","dd":"Jun 12, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Richard Xiong","m":"June"},{"e":"Jose Lopez","d":"2026-06-12","dd":"Jun 12, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Richard Xiong","m":"June"},{"e":"Ricardo Lopez","d":"2026-06-11","dd":"Jun 11, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Alex Vargas","m":"June"},{"e":"Eduardo Contreras","d":"2026-06-10","dd":"Jun 10, 2026","dept":"Harvest","t":"Rash","esi":"FA","s":"Close","sup":"Alex Vargas","m":"June"},{"e":"Jesus Bustos","d":"2026-06-10","dd":"Jun 10, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Juan Ramirez","m":"June"},{"e":"Justin Briggs","d":"2026-06-10","dd":"Jun 10, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Richard Xiong","m":"June"},{"e":"Rosalba Aseguero","d":"2026-06-09","dd":"Jun 9, 2026","dept":"Harvest","t":"Burn","esi":"FA","s":"Close","sup":"Alex Vargas","m":"June"},{"e":"Luis Perez","d":"2026-06-09","dd":"Jun 9, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Richard Xiong","m":"June"},{"e":"Brian Camacho","d":"2026-06-08","dd":"Jun 8, 2026","dept":"Outside Clean Up","t":"Slip, Trip, & Fall","esi":"RECORDABLE","s":"Close","sup":"Clara Salazar","m":"June"},{"e":"Jesse De La Torre","d":"2026-06-08","dd":"Jun 8, 2026","dept":"Fabrication","t":"Contact Stress","esi":"FA","s":"Close","sup":"Diego Soria","m":"June"},{"e":"Luis Flores","d":"2026-06-05","dd":"Jun 5, 2026","dept":"Fabrication","t":"Puncture","esi":"FA","s":"Close","sup":"Juan Ramirez","m":"June"},{"e":"Manpreet Singh","d":"2026-06-04","dd":"Jun 4, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Ovidio Sanchez","m":"June"},{"e":"Ismael Martinez","d":"2026-06-04","dd":"Jun 4, 2026","dept":"Fabrication","t":"Crush Injury","esi":"FA","s":"Close","sup":"Chadu Moua","m":"June"},{"e":"Juan Espinoza","d":"2026-06-03","dd":"Jun 3, 2026","dept":"Harvest","t":"Burn","esi":"FA","s":"Close","sup":"Richard Xiong","m":"June"},{"e":"Sandra Arrendondo","d":"2026-06-03","dd":"Jun 3, 2026","dept":"Fabrication","t":"Slip, Trip, & Fall","esi":"FA","s":"Close","sup":"Ovidio Sanchez","m":"June"},{"e":"Salvador Gutierez","d":"2026-06-02","dd":"Jun 2, 2026","dept":"Loading Dock","t":"Slip, Trip, & Fall","esi":"FA","s":"Close","sup":"Francisco Tapia","m":"June"},{"e":"Alejandro Pantoja","d":"2026-06-02","dd":"Jun 2, 2026","dept":"Harvest","t":"Puncture","esi":"FA","s":"Close","sup":"Michael Orozco","m":"June"},{"e":"Oshmar Hernandez","d":"2026-06-02","dd":"Jun 2, 2026","dept":"Harvest","t":"Rash","esi":"RPO","s":"Close","sup":"Michael Orozco","m":"June"},{"e":"Eduardo Contreras","d":"2026-06-01","dd":"Jun 1, 2026","dept":"Harvest","t":"Slip, Trip, & Fall","esi":"RPO","s":"Close","sup":"Alex Vargas","m":"June"},{"e":"Baljit Kaur","d":"2026-05-29","dd":"May 29, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Elizabeth Neufeld","m":"May"},{"e":"Ricardo Lopez","d":"2026-05-29","dd":"May 29, 2026","dept":"Harvest","t":"Contact Stress","esi":"FA","s":"Close","sup":"Alex Vargas","m":"May"},{"e":"Ricardo Lopez","d":"2026-05-29","dd":"May 29, 2026","dept":"Harvest","t":"Contact Stress","esi":"FA","s":"Close","sup":"Alex Vargas","m":"May"},{"e":"Diego Prciado","d":"2026-05-29","dd":"May 29, 2026","dept":"Harvest","t":"Rash","esi":"FA","s":"Close","sup":"Michael Orozco","m":"May"},{"e":"Paul Estrada","d":"2026-05-29","dd":"May 29, 2026","dept":"Corrals","t":"Slip, Trip, & Fall","esi":"FA","s":"Close","sup":"Marilyn Herrera","m":"May"},{"e":"Baljit Kaur","d":"2026-05-29","dd":"May 29, 2026","dept":"Fabrication","t":"Slip, Trip, & Fall","esi":"FA","s":"Close","sup":"Elizabeth Neufeld","m":"May"},{"e":"Daniel Verduzco","d":"2026-05-28","dd":"May 28, 2026","dept":"Harvest","t":"Abrasion","esi":"FA","s":"Close","sup":"Samuel Sierra","m":"May"},{"e":"Ralph Gonzalez","d":"2026-05-27","dd":"May 27, 2026","dept":"Harvest","t":"Strain","esi":"RPO","s":"Close","sup":"Samuel Sierra","m":"May"},{"e":"Gerardo Ibarra","d":"2026-05-26","dd":"May 26, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Ovidio Sanchez","m":"May"},{"e":"Michael Rocha","d":"2026-05-22","dd":"May 22, 2026","dept":"Fabrication","t":"Foreign Object","esi":"FA","s":"Close","sup":"Ovidio Sanchez","m":"May"},{"e":"Eduardo Peres","d":"2026-05-21","dd":"May 21, 2026","dept":"Fabrication","t":"Slip, Trip, & Fall","esi":"RPO","s":"Close","sup":"Ovidio Sanchez","m":"May"},{"e":"Saul Flores","d":"2026-05-19","dd":"May 19, 2026","dept":"Fabrication","t":"Slip, Trip, & Fall","esi":"RPO","s":"Close","sup":"Juan Rodriguez","m":"May"},{"e":"Adrian Chaidez","d":"2026-05-14","dd":"May 14, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Juan Ramirez","m":"May"},{"e":"Daniel Verduzco","d":"2026-05-13","dd":"May 13, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Samuel Sierra","m":"May"},{"e":"Joseph Gomez","d":"2026-05-13","dd":"May 13, 2026","dept":"Harvest","t":"Struck By/Against Object","esi":"FA","s":"Close","sup":"Richard Xiong","m":"May"},{"e":"Eden Segoviano","d":"2026-05-13","dd":"May 13, 2026","dept":"Fabrication","t":"Puncture","esi":"FA","s":"Close","sup":"Diego Soria","m":"May"},{"e":"Karina Torres","d":"2026-05-13","dd":"May 13, 2026","dept":"Harvest","t":"Crush Injury","esi":"RECORDABLE","s":"Open","sup":"Samuel Sierra","m":"May"},{"e":"Bernardo Gonzalez","d":"2026-05-12","dd":"May 12, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Juan Ramirez","m":"May"},{"e":"Manpreet Singh","d":"2026-05-12","dd":"May 12, 2026","dept":"Fabrication","t":"Contact Stress","esi":"FA","s":"Close","sup":"Ovidio Sanchez","m":"May"},{"e":"Angel Garcia","d":"2026-05-08","dd":"May 8, 2026","dept":"Harvest","t":"Burn","esi":"FA","s":"Close","sup":"Christian Lopez","m":"May"},{"e":"Manpreet Singh","d":"2026-05-08","dd":"May 8, 2026","dept":"Fabrication","t":"Puncture","esi":"FA","s":"Close","sup":"Ovidio Sanchez","m":"May"},{"e":"Jose R. Medina","d":"2026-05-07","dd":"May 7, 2026","dept":"Maintenance","t":"Electric Shock","esi":"FA","s":"Close","sup":"Kamran Tavagar","m":"May"},{"e":"Gabriela Martinez","d":"2026-05-06","dd":"May 6, 2026","dept":"Harvest","t":"Slip, Trip, & Fall","esi":"FA","s":"Close","sup":"Samuel Sierra","m":"May"},{"e":"Angel Garcia","d":"2026-05-05","dd":"May 5, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Christian Lopez","m":"May"},{"e":"Juan Maravilla","d":"2026-05-01","dd":"May 1, 2026","dept":"Fabrication","t":"Slip, Trip, & Fall","esi":"RPO","s":"Close","sup":"Valerena Begay","m":"May"},{"e":"Mapreet Singn","d":"2026-04-29","dd":"Apr 29, 2026","dept":"Fabrication","t":"Contact Stress","esi":"FA","s":"Close","sup":"Ovidio Sanchez","m":"April"},{"e":"Moises Flores","d":"2026-04-29","dd":"Apr 29, 2026","dept":"Fabrication","t":"Puncture","esi":"RPO","s":"Close","sup":"Juan Ramirez","m":"April"},{"e":"Maury Gillian","d":"2026-04-28","dd":"Apr 28, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Elizabeth Neufeld","m":"April"},{"e":"Cesar Mendoza","d":"2026-04-24","dd":"Apr 24, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Ovidio Sanchez","m":"April"},{"e":"Jesus Bustos","d":"2026-04-24","dd":"Apr 24, 2026","dept":"Fabrication","t":"Puncture","esi":"FA","s":"Close","sup":"Juan Ramirez","m":"April"},{"e":"Adrian Chaidez","d":"2026-04-24","dd":"Apr 24, 2026","dept":"Fabrication","t":"Abrasion","esi":"FA","s":"Close","sup":"Juan Ramirez","m":"April"},{"e":"James Entrocaso","d":"2026-04-23","dd":"Apr 23, 2026","dept":"Fabrication","t":"Puncture","esi":"FA","s":"Close","sup":"Ovidio Sanchez","m":"April"},{"e":"Brando Gonzalez","d":"2026-04-23","dd":"Apr 23, 2026","dept":"Fabrication","t":"Slip, Trip, & Fall","esi":"FA","s":"Close","sup":"Diego Soria","m":"April"},{"e":"Jhondri Madariaga","d":"2026-04-23","dd":"Apr 23, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Chadu Moua","m":"April"},{"e":"Francisco Lopez","d":"2026-04-22","dd":"Apr 22, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Chadu Moua","m":"April"},{"e":"Jonathan Ramirez","d":"2026-04-22","dd":"Apr 22, 2026","dept":"Fabrication","t":"Puncture","esi":"FA","s":"Close","sup":"Ovidio Sanchez","m":"April"},{"e":"Rosalba Oseguera Mendez","d":"2026-04-22","dd":"Apr 22, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Samuel Sierra","m":"April"},{"e":"Natividad Galicia","d":"2026-04-22","dd":"Apr 22, 2026","dept":"Harvest","t":"Puncture","esi":"FA","s":"Close","sup":"Ray Mascorro","m":"April"},{"e":"Sergio De Jesus","d":"2026-04-22","dd":"Apr 22, 2026","dept":"Fabrication","t":"Crush Injury","esi":"FA","s":"Close","sup":"Chadu Moua","m":"April"},{"e":"Gabriel Garcia","d":"2026-04-22","dd":"Apr 22, 2026","dept":"Fabrication","t":"Reaction","esi":"FA","s":"Close","sup":"Chadu Moua","m":"April"},{"e":"Honorina Lopez","d":"2026-04-21","dd":"Apr 21, 2026","dept":"Harvest","t":"Puncture","esi":"FA","s":"Close","sup":"Christian Lopez","m":"April"},{"e":"Jose Miranda","d":"2026-04-21","dd":"Apr 21, 2026","dept":"Fabrication","t":"Puncture","esi":"FA","s":"Close","sup":"Juan Rodriguez","m":"April"},{"e":"Juan Rodriguez","d":"2026-04-17","dd":"Apr 17, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Juan Rodriguez","m":"April"},{"e":"Jose Barajas","d":"2026-04-17","dd":"Apr 17, 2026","dept":"Fabrication","t":"Foreign Object","esi":"FA","s":"Close","sup":"Juan Ramirez","m":"April"},{"e":"Guilbert Beltran","d":"2026-04-17","dd":"Apr 17, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Samuel Sierra","m":"April"},{"e":"Ismael Martinez","d":"2026-04-16","dd":"Apr 16, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Chadu Moua","m":"April"},{"e":"Michael Rocha","d":"2026-04-15","dd":"Apr 15, 2026","dept":"Fabrication","t":"Foreign Object","esi":"FA","s":"Close","sup":"Ovidio Sanchez","m":"April"},{"e":"Rosangela Rodriguez","d":"2026-04-14","dd":"Apr 14, 2026","dept":"Fabrication","t":"Abrasion","esi":"RPO","s":"Close","sup":"Chadu Moua","m":"April"},{"e":"Frank Padilla","d":"2026-04-14","dd":"Apr 14, 2026","dept":"Fabrication","t":"Puncture","esi":"FA","s":"Close","sup":"Ovidio Sanchez","m":"April"},{"e":"Jesus Valadez","d":"2026-04-14","dd":"Apr 14, 2026","dept":"Fabrication","t":"Puncture","esi":"FA","s":"Close","sup":"Diego Soria","m":"April"},{"e":"Edalia Lopez","d":"2026-04-14","dd":"Apr 14, 2026","dept":"Harvest","t":"Burn","esi":"FA","s":"Close","sup":"Christian Lopez","m":"April"},{"e":"Noe Frage Ruiz","d":"2026-04-14","dd":"Apr 14, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Juan Ramirez","m":"April"},{"e":"Rafael Piceno","d":"2026-04-10","dd":"Apr 10, 2026","dept":"Fabrication","t":"Slip, Trip, & Fall","esi":"FA","s":"Close","sup":"Chadu Moua","m":"April"},{"e":"Omar Chavez","d":"2026-04-10","dd":"Apr 10, 2026","dept":"Harvest","t":"Struck By Cattle","esi":"FA","s":"Close","sup":"Richard Xiong","m":"April"},{"e":"Morgan Branning","d":"2026-04-10","dd":"Apr 10, 2026","dept":"Harvest","t":"Awkward Posture","esi":"FA","s":"Close","sup":"Michael Orozco","m":"April"},{"e":"Hector Raya","d":"2026-04-09","dd":"Apr 9, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Juan Rodriguez","m":"April"},{"e":"Jesus Bustos","d":"2026-04-09","dd":"Apr 9, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Juan Rodriguez","m":"April"},{"e":"Jesus Bustos","d":"2026-04-09","dd":"Apr 9, 2026","dept":"Fabrication","t":"Sprain","esi":"FA","s":"Close","sup":"Juan Ramirez","m":"April"},{"e":"Angel Garcia","d":"2026-04-09","dd":"Apr 9, 2026","dept":"Harvest","t":"Rash","esi":"FA","s":"Close","sup":"Christian Lopez","m":"April"},{"e":"Joseph Gomez","d":"2026-04-09","dd":"Apr 9, 2026","dept":"Harvest","t":"Foreign Object","esi":"FA","s":"Close","sup":"Richard Xiong","m":"April"},{"e":"Gladys Lugan","d":"2026-04-08","dd":"Apr 8, 2026","dept":"Harvest","t":"Struck By/Against Object","esi":"FA","s":"Close","sup":"Rutilio Rodriguez","m":"April"},{"e":"Jesus Olazava","d":"2026-04-08","dd":"Apr 8, 2026","dept":"FSQA","t":"Laceration","esi":"FA","s":"Close","sup":"Rene Canas","m":"April"},{"e":"Enrique Ramos","d":"2026-04-08","dd":"Apr 8, 2026","dept":"Fabrication","t":"Puncture","esi":"FA","s":"Close","sup":"Diego Soria","m":"April"},{"e":"Ana Mendoza","d":"2026-04-08","dd":"Apr 8, 2026","dept":"Fabrication","t":"Contact Stress","esi":"FA","s":"Close","sup":"Elizabeth Neufeld","m":"April"},{"e":"Jesse De La Torre","d":"2026-04-08","dd":"Apr 8, 2026","dept":"Fabrication","t":"Rash","esi":"FA","s":"Close","sup":"Diego Soria","m":"April"},{"e":"Samantha Guzman","d":"2026-04-07","dd":"Apr 7, 2026","dept":"Warehouse","t":"Struck By/Against Object","esi":"RPO","s":"Close","sup":"Jesus Avila","m":"April"},{"e":"Juan Vazquez","d":"2026-04-07","dd":"Apr 7, 2026","dept":"Fabrication","t":"Struck By/Against Object","esi":"RPO","s":"Close","sup":"Elizabeth Neufeld","m":"April"},{"e":"Juan Lugardo","d":"2026-04-03","dd":"Apr 3, 2026","dept":"Harvest","t":"Puncture","esi":"RECORDABLE","s":"Close","sup":"Ray Mascorro","m":"April"},{"e":"Guadalupe Barajas","d":"2026-04-03","dd":"Apr 3, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Juan Ramirez","m":"April"},{"e":"Samuel Cruz","d":"2026-04-03","dd":"Apr 3, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Juan Rodriguez","m":"April"},{"e":"Samuel Cruz","d":"2026-04-02","dd":"Apr 2, 2026","dept":"Fabrication","t":"Abrasion","esi":"FA","s":"Close","sup":"Juan Rodriguez","m":"April"},{"e":"Saul Flores","d":"2026-04-01","dd":"Apr 1, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Juan Rodriguez","m":"April"},{"e":"Yvonne Matinez","d":"2026-04-01","dd":"Apr 1, 2026","dept":"Fabrication","t":"NA - Stress","esi":"RPO","s":"Close","sup":"Elizabeth Neufeld","m":"April"},{"e":"Jorge Maldonado","d":"2026-03-31","dd":"Mar 31, 2026","dept":"Fabrication","t":"Puncture","esi":"FA","s":"Close","sup":"Diego Soria","m":"March"},{"e":"Rogelio Mendoza","d":"2026-03-31","dd":"Mar 31, 2026","dept":"Maintenance","t":"Strain","esi":"FA","s":"Close","sup":"Osbaldo Gutierrez","m":"March"},{"e":"Edgar Hernandez","d":"2026-03-30","dd":"Mar 30, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Samuel Sierra","m":"March"},{"e":"Isreal Cruz Hernandez","d":"2026-03-27","dd":"Mar 27, 2026","dept":"Harvest","t":"Laceration","esi":"FA","s":"Close","sup":"Christian Lopez","m":"March"},{"e":"RA Thach","d":"2026-03-27","dd":"Mar 27, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Juan Ramirez","m":"March"},{"e":"Mayra Solarte","d":"2026-03-24","dd":"Mar 24, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Samuel Sierra","m":"March"},{"e":"Jesus Topete","d":"2026-03-23","dd":"Mar 23, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Ovidio Sanchez","m":"March"},{"e":"Saul Flores","d":"2026-03-20","dd":"Mar 20, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Juan Rodriguez","m":"March"},{"e":"Alan Aranda","d":"2026-03-20","dd":"Mar 20, 2026","dept":"Fabrication","t":"Slip, Trip, & Fall","esi":"FA","s":"Close","sup":"Elizabeth Neufeld","m":"March"},{"e":"Xeng Vuew","d":"2026-03-20","dd":"Mar 20, 2026","dept":"Harvest","t":"Rash","esi":"FA","s":"Close","sup":"Samuel Sierra","m":"March"},{"e":"China Bonner","d":"2026-03-19","dd":"Mar 19, 2026","dept":"Fabrication","t":"Foreign Object","esi":"FA","s":"Close","sup":"Elizabeth Neufeld","m":"March"},{"e":"Edgar Guttierez","d":"2026-03-19","dd":"Mar 19, 2026","dept":"Fabrication","t":"Puncture","esi":"FA","s":"Close","sup":"Diego Soria","m":"March"},{"e":"Jesus Bernal","d":"2026-03-19","dd":"Mar 19, 2026","dept":"Harvest","t":"Foreign Object","esi":"FA","s":"Close","sup":"Marilyn Herrera","m":"March"},{"e":"Cesar Castellanos","d":"2026-03-19","dd":"Mar 19, 2026","dept":"Harvest","t":"Struck By Cattle","esi":"FA","s":"Close","sup":"Marilyn Herrera","m":"March"},{"e":"Griselda Floran","d":"2026-03-19","dd":"Mar 19, 2026","dept":"Harvest","t":"Rash","esi":"FA","s":"Close","sup":"Samuel Sierra","m":"March"},{"e":"Jhondri Madariaga","d":"2026-03-17","dd":"Mar 17, 2026","dept":"Fabrication","t":"Struck By Equipment","esi":"FA","s":"Close","sup":"Chadu Moua","m":"March"},{"e":"Kristy Davila","d":"2026-03-13","dd":"Mar 13, 2026","dept":"Fabrication","t":"Contact Stress","esi":"RPO","s":"Close","sup":"Elizabeth Neufeld","m":"March"},{"e":"Karen Vance","d":"2026-03-11","dd":"Mar 11, 2026","dept":"Maintenance","t":"Slip, Trip, & Fall","esi":"FA","s":"Close","sup":"Jonathan Hernandez","m":"March"},{"e":"Samuel Cruz","d":"2026-03-10","dd":"Mar 10, 2026","dept":"Fabrication","t":"Struck By/Against Object","esi":"FA","s":"Close","sup":"Juan Rodriguez","m":"March"},{"e":"Kathrine Montez","d":"2026-03-06","dd":"Mar 6, 2026","dept":"Harvest","t":"Crush Injury","esi":"FA","s":"Close","sup":"Samuel Sierra","m":"March"},{"e":"Armando Gonzalez","d":"2026-03-06","dd":"Mar 6, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Juan Ramirez","m":"March"},{"e":"Braulio Torres","d":"2026-03-06","dd":"Mar 6, 2026","dept":"Corrals","t":"Foreign Object","esi":"FA","s":"Close","sup":"Marilyn Herrera","m":"March"},{"e":"Israel Cruz Hernandez","d":"2026-03-06","dd":"Mar 6, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Samuel Sierra","m":"March"},{"e":"German Cerda","d":"2026-03-05","dd":"Mar 5, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Diego Soria","m":"March"},{"e":"Chadu Moua","d":"2026-03-05","dd":"Mar 5, 2026","dept":"Fabrication","t":"Struck By/Against Object","esi":"FA","s":"Close","sup":"David Zavala","m":"March"},{"e":"Juan Herrera","d":"2026-03-04","dd":"Mar 4, 2026","dept":"Fabrication","t":"Contact Stress","esi":"FA","s":"Close","sup":"Elizabeth Neufeld","m":"March"},{"e":"Juan Dominguez","d":"2026-03-04","dd":"Mar 4, 2026","dept":"Harvest","t":"Laceration","esi":"FA","s":"Close","sup":"Christian Lopez","m":"March"},{"e":"Jesus Morales","d":"2026-03-04","dd":"Mar 4, 2026","dept":"Corrals","t":"Crush Injury","esi":"RECORDABLE","s":"Close","sup":"Marilyn Herrera","m":"March"},{"e":"Karson Lowe","d":"2026-03-04","dd":"Mar 4, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Michael Orozco","m":"March"},{"e":"Maria Sanchez","d":"2026-03-03","dd":"Mar 3, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Ovidio Sanchez","m":"March"},{"e":"Guadalupe Fuentes","d":"2026-03-02","dd":"Mar 2, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Rutilio Rodriguez","m":"March"},{"e":"Devron Gassaway","d":"2026-02-27","dd":"Feb 27, 2026","dept":"Fabrication","t":"Slip, Trip, & Fall","esi":"FA","s":"Close","sup":"Chadu Moua","m":"February"},{"e":"Jesus Bustos","d":"2026-02-27","dd":"Feb 27, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Juan Ramirez","m":"February"},{"e":"Kristy Davila","d":"2026-02-27","dd":"Feb 27, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Elizabeth Neufeld","m":"February"},{"e":"Quiroz Sanchez","d":"2026-02-26","dd":"Feb 26, 2026","dept":"Harvest","t":"Inhalation / Reaction","esi":"RPO","s":"Close","sup":"Christian Lopez","m":"February"},{"e":"Valeria Vasquez","d":"2026-02-26","dd":"Feb 26, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Rutilio Rodriguez","m":"February"},{"e":"Jose Ramirez","d":"2026-02-25","dd":"Feb 25, 2026","dept":"Harvest","t":"Abrasion","esi":"FA","s":"Close","sup":"Christian Lopez","m":"February"},{"e":"Marquiz Gassaway","d":"2026-02-25","dd":"Feb 25, 2026","dept":"Harvest","t":"Rash","esi":"FA","s":"Close","sup":"Christian Lopez","m":"February"},{"e":"Oscar Torres","d":"2026-02-25","dd":"Feb 25, 2026","dept":"Fabrication","t":"Strain","esi":"RPO","s":"Close","sup":"Elizabeth Neufeld","m":"February"},{"e":"Joaquin Diaz","d":"2026-02-24","dd":"Feb 24, 2026","dept":"Harvest","t":"Burn","esi":"FA","s":"Close","sup":"Christian Lopez","m":"February"},{"e":"Martel Sanchez","d":"2026-02-23","dd":"Feb 23, 2026","dept":"Fabrication","t":"Puncture","esi":"FA","s":"Close","sup":"Diego Soria","m":"February"},{"e":"Fermin Martinez","d":"2026-02-23","dd":"Feb 23, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Elizabeth Neufeld","m":"February"},{"e":"Jesus Avila","d":"2026-02-23","dd":"Feb 23, 2026","dept":"Warehouse","t":"Inhalation / Reaction","esi":"FA","s":"Close","sup":"Rosia Rosas","m":"February"},{"e":"Imelda Ranger","d":"2026-02-23","dd":"Feb 23, 2026","dept":"Warehouse","t":"Inhalation / Reaction","esi":"FA","s":"Close","sup":"Jesus Avila","m":"February"},{"e":"Hilary Coberly","d":"2026-02-23","dd":"Feb 23, 2026","dept":"Warehouse","t":"Inhalation / Reaction","esi":"FA","s":"Close","sup":"Jesus Avila","m":"February"},{"e":"Adam Valdiva","d":"2026-02-23","dd":"Feb 23, 2026","dept":"Warehouse","t":"Inhalation / Reaction","esi":"RPO","s":"Close","sup":"Jesus Avila","m":"February"},{"e":"Moises Bahera","d":"2026-02-23","dd":"Feb 23, 2026","dept":"Warehouse","t":"Inhalation / Reaction","esi":"RPO","s":"Close","sup":"Jesus Avila","m":"February"},{"e":"Edalia Lopez","d":"2026-02-20","dd":"Feb 20, 2026","dept":"Harvest","t":"Abrasion","esi":"FA","s":"Close","sup":"Samuel Sierra","m":"February"},{"e":"Honorina Lopez","d":"2026-02-19","dd":"Feb 19, 2026","dept":"Harvest","t":"Struck By/Against Object","esi":"FA","s":"Close","sup":"Samuel Sierra","m":"February"},{"e":"Magalie Cadet","d":"2026-02-19","dd":"Feb 19, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Rutilio Rodriguez","m":"February"},{"e":"Cesar Castellanos","d":"2026-02-18","dd":"Feb 18, 2026","dept":"Corrals","t":"Struck By Cattle","esi":"FA","s":"Close","sup":"Marilyn Herrera","m":"February"},{"e":"Aaron Slorio","d":"2026-02-18","dd":"Feb 18, 2026","dept":"Harvest","t":"Rash","esi":"FA","s":"Close","sup":"Michael Orozco","m":"February"},{"e":"Joseph Gomez","d":"2026-02-18","dd":"Feb 18, 2026","dept":"Harvest","t":"Struck By Cattle","esi":"FA","s":"Close","sup":"Richard Xiong","m":"February"},{"e":"Adrian Chaidez","d":"2026-02-18","dd":"Feb 18, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Juan Ramirez","m":"February"},{"e":"Jose Lopez","d":"2026-02-17","dd":"Feb 17, 2026","dept":"Corrals","t":"Struck By Cattle","esi":"FA","s":"Close","sup":"Marilyn Herrera","m":"February"},{"e":"Raul Trejo","d":"2026-02-17","dd":"Feb 17, 2026","dept":"Fabrication","t":"Rash","esi":"FA","s":"Close","sup":"Erwin Vega","m":"February"},{"e":"Daniel Ortega","d":"2026-02-16","dd":"Feb 16, 2026","dept":"Harvest","t":"Struck By Equipment","esi":"RPO","s":"Close","sup":"Rutilio Rodriguez","m":"February"},{"e":"Esmeralda Avalos Vazquez","d":"2026-02-13","dd":"Feb 13, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Christian Lopez","m":"February"},{"e":"China Bonner","d":"2026-02-13","dd":"Feb 13, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Elizabeth Neufeld","m":"February"},{"e":"Po Thao","d":"2026-02-13","dd":"Feb 13, 2026","dept":"Harvest","t":"Laceration","esi":"FA","s":"Close","sup":"Samuel Sierra","m":"February"},{"e":"Daniel Vega","d":"2026-02-12","dd":"Feb 12, 2026","dept":"Fabrication","t":"Foreign Object","esi":"FA","s":"Close","sup":"Maria Garcia","m":"February"},{"e":"Chrisofer Diaz","d":"2026-02-12","dd":"Feb 12, 2026","dept":"Loading Dock","t":"Strain","esi":"FA","s":"Close","sup":"Francisco Tapia","m":"February"},{"e":"Servando Valencia","d":"2026-02-10","dd":"Feb 10, 2026","dept":"Maintenance","t":"Laceration","esi":"FA","s":"Close","sup":"Rayomond Corrales","m":"February"},{"e":"Joseph Munt","d":"2026-02-10","dd":"Feb 10, 2026","dept":"Fabrication","t":"Puncture","esi":"FA","s":"Close","sup":"Erwin Vega","m":"February"},{"e":"Arsenio Leyva","d":"2026-02-10","dd":"Feb 10, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Rutilio Rodriguez","m":"February"},{"e":"Sonia Orozco","d":"2026-02-06","dd":"Feb 6, 2026","dept":"Fabrication","t":"Sprain","esi":"FA","s":"Close","sup":"Chadu Moua","m":"February"},{"e":"Edgar Hernandez","d":"2026-02-06","dd":"Feb 6, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Rutilio Rodriguez","m":"February"},{"e":"Gabriel Garcia","d":"2026-02-06","dd":"Feb 6, 2026","dept":"Fabrication","t":"Contusion","esi":"FA","s":"Close","sup":"Chadu Moua","m":"February"},{"e":"Deshovana Wells","d":"2026-02-06","dd":"Feb 6, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Michael Orozco","m":"February"},{"e":"David Rodriguez","d":"2026-02-05","dd":"Feb 5, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Richard Xiong","m":"February"},{"e":"Mathew Lee","d":"2026-02-04","dd":"Feb 4, 2026","dept":"Maintenance","t":"Abrasion","esi":"FA","s":"Close","sup":"Carlos Mata","m":"February"},{"e":"Deshovana Wells","d":"2026-02-04","dd":"Feb 4, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Michael Orozco","m":"February"},{"e":"Ronald Barboza","d":"2026-02-04","dd":"Feb 4, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Juan Rodriguez","m":"February"},{"e":"Martin Escalera","d":"2026-02-02","dd":"Feb 2, 2026","dept":"Outside Clean Up","t":"Inhalation","esi":"RPO","s":"Close","sup":"Clara Salazar","m":"February"},{"e":"Esperanza Alvarez","d":"2026-02-02","dd":"Feb 2, 2026","dept":"Outside Clean Up","t":"Inhalation","esi":"RPO","s":"Close","sup":"Clara Salazar","m":"February"},{"e":"Frank Aguero","d":"2026-01-28","dd":"Jan 28, 2026","dept":"Fabrication","t":"Foreign Object","esi":"FA","s":"Close","sup":"Maria Garcia","m":"January"},{"e":"Esmeralda Avalos Vazquez","d":"2026-01-28","dd":"Jan 28, 2026","dept":"Harvest","t":"Slip, Trip, & Fall","esi":"FA","s":"Close","sup":"Christian Lopez","m":"January"},{"e":"Joseph Munt","d":"2026-01-27","dd":"Jan 27, 2026","dept":"Fabrication","t":"Slip, Trip, & Fall","esi":"RPO","s":"Close","sup":"Erwin Vega","m":"January"},{"e":"Gabriel Sandhu","d":"2026-01-27","dd":"Jan 27, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Elizabeth Neufeld","m":"January"},{"e":"Edgar Guttierez","d":"2026-01-26","dd":"Jan 26, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Diego Soria","m":"January"},{"e":"Michael Valdez","d":"2026-01-26","dd":"Jan 26, 2026","dept":"Fabrication","t":"Sprain","esi":"FA","s":"Close","sup":"Ovidio Sanchez","m":"January"},{"e":"Rayna Perez","d":"2026-01-23","dd":"Jan 23, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Rutilio Rodriguez","m":"January"},{"e":"Jesus Garcia","d":"2026-01-23","dd":"Jan 23, 2026","dept":"Harvest","t":"Rash","esi":"FA","s":"Close","sup":"Rutilio Rodriguez","m":"January"},{"e":"Edwin Parada","d":"2026-01-22","dd":"Jan 22, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Elizabeth Neufeld","m":"January"},{"e":"Aliyah Gonzalez","d":"2026-01-22","dd":"Jan 22, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Christian Lopez","m":"January"},{"e":"Braulio Torres","d":"2026-01-22","dd":"Jan 22, 2026","dept":"Harvest","t":"Abrasion","esi":"FA","s":"Close","sup":"Marilyn Herrera","m":"January"},{"e":"Israel Douglas","d":"2026-01-22","dd":"Jan 22, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Diego Soria","m":"January"},{"e":"Artemio Monje","d":"2026-01-21","dd":"Jan 21, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Diego Soria","m":"January"},{"e":"Diego Prciado","d":"2026-01-21","dd":"Jan 21, 2026","dept":"Harvest","t":"Foreign Object","esi":"FA","s":"Close","sup":"Michael Orozco","m":"January"},{"e":"Valeria Vasquez","d":"2026-01-21","dd":"Jan 21, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Rutilio Rodriguez","m":"January"},{"e":"Jonathan Golaviz","d":"2026-01-20","dd":"Jan 20, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Diego Soria","m":"January"},{"e":"Mayra Solarte","d":"2026-01-16","dd":"Jan 16, 2026","dept":"Harvest","t":"Rash","esi":"RPO","s":"Close","sup":"Rutilio Rodriguez","m":"January"},{"e":"Esmeralda Avalos Vazquez","d":"2026-01-16","dd":"Jan 16, 2026","dept":"Harvest","t":"Burn","esi":"FA","s":"Close","sup":"Christian Lopez","m":"January"},{"e":"Antonio Soto","d":"2026-01-16","dd":"Jan 16, 2026","dept":"Fabrication","t":"Puncture","esi":"FA","s":"Close","sup":"Maria Garcia","m":"January"},{"e":"Moises Flores","d":"2026-01-14","dd":"Jan 14, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Juan Ramirez","m":"January"},{"e":"Jose Aguilar","d":"2026-01-12","dd":"Jan 12, 2026","dept":"Maintenance","t":"Pinch-Point","esi":"FA","s":"Close","sup":"Rayomond Corrales","m":"January"},{"e":"Selfia Revuelta","d":"2026-01-12","dd":"Jan 12, 2026","dept":"Fabrication","t":"Puncture","esi":"FA","s":"Close","sup":"Juan Rodriguez","m":"January"},{"e":"Touthao Yang","d":"2026-01-12","dd":"Jan 12, 2026","dept":"Fabrication","t":"Laceration","esi":"FA","s":"Close","sup":"Francisco Tapia","m":"January"},{"e":"Kao Vang","d":"2026-01-09","dd":"Jan 9, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Maria Garcia","m":"January"},{"e":"Douglas Cline","d":"2026-01-08","dd":"Jan 8, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Diego Soria","m":"January"},{"e":"Patricia Castillo","d":"2026-01-08","dd":"Jan 8, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Maria Garcia","m":"January"},{"e":"Luis Perez Baldez","d":"2026-01-08","dd":"Jan 8, 2026","dept":"Fabrication","t":"Laceration","esi":"RECORDABLE","s":"Close","sup":"Diego Soria","m":"January"},{"e":"Sarah Gonzalez","d":"2026-01-07","dd":"Jan 7, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Richard Xiong","m":"January"}]</script>
+
 <script>
+  // ---- Shared tooltip ----
+  const tooltip = document.getElementById('chartTooltip');
+  function showTooltip(x,y,title,sub){
+    tooltip.innerHTML = `<div>${title}</div>${sub?`<div class="tt-sub">${sub}</div>`:''}`;
+    tooltip.style.left = x+'px';
+    tooltip.style.top = y+'px';
+    tooltip.classList.add('show');
+  }
+  function moveTooltip(x,y){ tooltip.style.left = x+'px'; tooltip.style.top = y+'px'; }
+  function hideTooltip(){ tooltip.classList.remove('show'); }
+
   // ---- Injury Type donut ----
   const injuryTypes = [
     {label:'Strain', value:99, color:'#12233f'},
@@ -524,10 +717,12 @@
   const donutSvg = document.getElementById('donutChart');
   const cx=95, cy=95, r=70, sw=26;
   const circumference = 2*Math.PI*r;
+  const donutSegEls = [];
   let offset = 0;
-  injuryTypes.forEach(seg=>{
+  injuryTypes.forEach((seg,idx)=>{
     const frac = seg.value/totalInjury;
     const len = frac*circumference;
+    const pct = (frac*100).toFixed(1);
     const circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
     circle.setAttribute('cx',cx); circle.setAttribute('cy',cy); circle.setAttribute('r',r);
     circle.setAttribute('fill','none');
@@ -536,16 +731,33 @@
     circle.setAttribute('stroke-dasharray', `${len} ${circumference-len}`);
     circle.setAttribute('stroke-dashoffset', -offset);
     circle.setAttribute('transform', `rotate(-90 ${cx} ${cy})`);
+    circle.addEventListener('mousemove', e=>{
+      showTooltip(e.clientX, e.clientY, seg.label, `${seg.value} incidents &middot; ${pct}%`);
+      highlightDonutSeg(idx);
+    });
+    circle.addEventListener('mouseleave', ()=>{ hideTooltip(); clearDonutHighlight(); });
     donutSvg.appendChild(circle);
+    donutSegEls.push(circle);
     offset += len;
   });
+  function highlightDonutSeg(idx){
+    donutSegEls.forEach((c,i)=>{
+      c.style.opacity = i===idx ? '1' : '0.32';
+      c.style.strokeWidth = i===idx ? (sw+4) : sw;
+    });
+  }
+  function clearDonutHighlight(){
+    donutSegEls.forEach(c=>{ c.style.opacity='1'; c.style.strokeWidth=sw; });
+  }
 
   const legendWrap = document.getElementById('donutLegend');
-  injuryTypes.slice(0,4).forEach(seg=>{
+  injuryTypes.slice(0,4).forEach((seg,idx)=>{
     const pct = ((seg.value/totalInjury)*100).toFixed(0);
     const row = document.createElement('div');
     row.className='legend-row';
     row.innerHTML = `<span class="lbl"><span class="dot" style="background:${seg.color}"></span>${seg.label}</span><span class="pct">${pct}%</span>`;
+    row.addEventListener('mouseenter', ()=>highlightDonutSeg(idx));
+    row.addEventListener('mouseleave', clearDonutHighlight);
     legendWrap.appendChild(row);
   });
 
@@ -569,6 +781,10 @@
     col.innerHTML = `<div class="bar-pct" style="color:${d.color==='#cfe1f2'?'#68758a':'#1a2433'}">${pct}%</div>
       <div class="bar" style="height:${heightPct}%;background:${d.color}"></div>
       <div class="bar-label">${d.label}</div>`;
+    col.addEventListener('mousemove', e=>{
+      showTooltip(e.clientX, e.clientY, d.label, `${d.value} incidents &middot; ${pct}% of YTD`);
+    });
+    col.addEventListener('mouseleave', hideTooltip);
     barWrap.appendChild(col);
   });
 
@@ -601,8 +817,151 @@
     const col = document.createElement('div');
     col.className='trend-col';
     col.innerHTML = `<div class="trend-val">${v}</div><div class="trend-bar" style="height:${(v/maxT)*100}%"></div><div class="trend-lbl">${m}</div>`;
+    col.addEventListener('mousemove', e=>{
+      showTooltip(e.clientX, e.clientY, `${m} 2026`, `${v} incidents`);
+    });
+    col.addEventListener('mouseleave', hideTooltip);
     trendWrap.appendChild(col);
   });
+
+  // ---- "View recent incidents" link: scroll + focus search ----
+  document.querySelector('.view-more').addEventListener('click', ()=>{
+    window.setTimeout(()=>{
+      const el = document.getElementById('incidentSearch');
+      if(el) el.focus();
+    }, 420);
+  });
+
+  // ==================================================================
+  // Incident Explorer: fully searchable, multi-filter incident browser
+  // ==================================================================
+  const INCIDENTS = JSON.parse(document.getElementById('incidentData').textContent);
+  const TOTAL_INCIDENTS = INCIDENTS.length;
+
+  const state = { q:'', dept:new Set(), esi:new Set(), status:new Set(), month:new Set() };
+
+  function escapeHtml(str){
+    return String(str).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  }
+  function esiClass(esi){
+    if(esi==='FA') return 'badge-fa';
+    if(esi==='RPO') return 'badge-rpo';
+    if(esi==='RECORDABLE') return 'badge-rec';
+    return 'badge-open';
+  }
+  function statusClass(s){
+    return s==='Close' ? 'badge-close' : 'badge-open';
+  }
+  function countBy(key){
+    const m = new Map();
+    INCIDENTS.forEach(r=>{ m.set(r[key], (m.get(r[key])||0)+1); });
+    return m;
+  }
+
+  function renderChipGroup(containerId, group, order, counts, labelMap){
+    const wrap = document.getElementById(containerId);
+    wrap.innerHTML = order.map(v=>{
+      const label = (labelMap && labelMap[v]) || v;
+      const count = counts.get(v) || 0;
+      return `<button type="button" class="chip" data-group="${group}" data-value="${escapeHtml(v)}">${escapeHtml(label)}<span class="chip-count">${count}</span></button>`;
+    }).join('');
+  }
+
+  const deptCounts = countBy('dept');
+  const deptOrder = [...deptCounts.entries()].sort((a,b)=>b[1]-a[1]).map(e=>e[0]);
+  renderChipGroup('chipsDept','dept',deptOrder,deptCounts);
+
+  const esiCounts = countBy('esi');
+  renderChipGroup('chipsEsi','esi',['FA','RPO','RECORDABLE'],esiCounts,{FA:'First Aid',RPO:'RPO / Mod Duty',RECORDABLE:'Recordable'});
+
+  const statusCounts = countBy('s');
+  renderChipGroup('chipsStatus','status',['Close','Open'],statusCounts,{Close:'Closed',Open:'Open'});
+
+  const monthCounts = countBy('m');
+  const monthOrder = ['January','February','March','April','May','June','July'].filter(m=>monthCounts.has(m));
+  renderChipGroup('chipsMonth','month',monthOrder,monthCounts);
+
+  document.getElementById('filterChips').addEventListener('click', e=>{
+    const chip = e.target.closest('.chip');
+    if(!chip) return;
+    const group = chip.dataset.group, value = chip.dataset.value;
+    if(state[group].has(value)) state[group].delete(value); else state[group].add(value);
+    chip.classList.toggle('active');
+    applyFilters();
+  });
+
+  const searchInput = document.getElementById('incidentSearch');
+  const searchClearX = document.getElementById('searchClearX');
+  searchInput.addEventListener('input', ()=>{
+    state.q = searchInput.value;
+    searchClearX.classList.toggle('show', state.q.length>0);
+    applyFilters();
+  });
+  searchClearX.addEventListener('click', ()=>{
+    searchInput.value=''; state.q='';
+    searchClearX.classList.remove('show');
+    searchInput.focus();
+    applyFilters();
+  });
+
+  document.getElementById('clearAllBtn').addEventListener('click', ()=>{
+    state.q=''; searchInput.value=''; searchClearX.classList.remove('show');
+    ['dept','esi','status','month'].forEach(g=>state[g].clear());
+    document.querySelectorAll('#filterChips .chip.active').forEach(c=>c.classList.remove('active'));
+    applyFilters();
+  });
+
+  function updateClearBtn(){
+    const active = state.q || state.dept.size || state.esi.size || state.status.size || state.month.size;
+    document.getElementById('clearAllBtn').classList.toggle('show', !!active);
+  }
+
+  function rowHTML(r,i){
+    return `<div class="result-row" style="transition-delay:${Math.min(i,16)*20}ms">
+      <div class="emp" data-label="Employee">${escapeHtml(r.e)}</div>
+      <div class="muted-cell" data-label="Date">${escapeHtml(r.dd)}</div>
+      <div data-label="Department">${escapeHtml(r.dept)}</div>
+      <div data-label="Injury Type">${escapeHtml(r.t)}</div>
+      <div data-label="ESI"><span class="badge ${esiClass(r.esi)}">${escapeHtml(r.esi)}</span></div>
+      <div data-label="Status"><span class="badge ${statusClass(r.s)}">${escapeHtml(r.s)}</span></div>
+    </div>`;
+  }
+
+  function renderResults(list){
+    const body = document.getElementById('resultsBody');
+    body.classList.add('fading');
+    window.setTimeout(()=>{
+      body.innerHTML = list.length
+        ? list.map(rowHTML).join('')
+        : `<div class="empty-state"><div class="icon">&#128269;</div><div><b>No incidents match your filters</b></div><div class="hint">Try a different search term or clear a filter.</div></div>`;
+      body.classList.remove('fading');
+      requestAnimationFrame(()=>{
+        requestAnimationFrame(()=>{
+          body.querySelectorAll('.result-row').forEach(el=>el.classList.add('visible'));
+        });
+      });
+    }, 150);
+  }
+
+  function applyFilters(){
+    const q = state.q.trim().toLowerCase();
+    const filtered = INCIDENTS.filter(r=>{
+      if(state.dept.size && !state.dept.has(r.dept)) return false;
+      if(state.esi.size && !state.esi.has(r.esi)) return false;
+      if(state.status.size && !state.status.has(r.s)) return false;
+      if(state.month.size && !state.month.has(r.m)) return false;
+      if(q){
+        const hay = `${r.e} ${r.dept} ${r.t} ${r.sup} ${r.esi} ${r.s} ${r.m}`.toLowerCase();
+        if(!hay.includes(q)) return false;
+      }
+      return true;
+    });
+    renderResults(filtered);
+    document.getElementById('resultsCount').textContent = filtered.length;
+    updateClearBtn();
+  }
+
+  applyFilters();
 </script>
 
 </body>
