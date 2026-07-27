@@ -614,7 +614,7 @@
       <div class="sub">Master List of Injuries &middot; Focus Year 2026 &middot; <span id="lastUpdated">Updated Jul 27, 2026</span></div>
     </div>
     <div class="pill-group">
-      <div class="pill">&#128197; YTD 2026 (Jan 1 &ndash; Jul 27)</div>
+      <div class="pill" id="periodPill">&#128197; YTD 2026 (Jan 1 &ndash; Jul 27)</div>
       <div class="pill">&#9889; Medium Risk &middot; Sev 43</div>
       <button type="button" class="pill pill-refresh" id="refreshBtn" title="Refresh dashboard data">
         <span class="refresh-icon">&#8635;</span> <span class="refresh-label">Live data</span>
@@ -627,32 +627,32 @@
       <div class="kpi-icon">&#128203;</div>
       <div class="kpi-body">
         <div class="kpi-label">Total Incidents YTD</div>
-        <div class="kpi-value">275</div>
-        <div class="kpi-delta up">&#9650; +95% vs 2025 (141)</div>
+        <div class="kpi-value" id="kpiTotal">275</div>
+        <div class="kpi-delta up" id="kpiTotalDelta">&#9650; +95% vs 2025 (141)</div>
       </div>
     </div>
     <div class="kpi-card">
       <div class="kpi-icon">&#9888;&#65039;</div>
       <div class="kpi-body">
         <div class="kpi-label">Recordable</div>
-        <div class="kpi-value">7</div>
-        <div class="kpi-delta flat">&#9679; +0 vs 2025 (7)</div>
+        <div class="kpi-value" id="kpiRec">7</div>
+        <div class="kpi-delta flat" id="kpiRecDelta">&#9679; +0 vs 2025 (7)</div>
       </div>
     </div>
     <div class="kpi-card">
       <div class="kpi-icon">&#128138;</div>
       <div class="kpi-body">
         <div class="kpi-label">First Aid (FA)</div>
-        <div class="kpi-value">228</div>
-        <div class="kpi-delta share">83% of YTD incidents</div>
+        <div class="kpi-value" id="kpiFa">228</div>
+        <div class="kpi-delta share" id="kpiFaDelta">83% of YTD incidents</div>
       </div>
     </div>
     <div class="kpi-card">
       <div class="kpi-icon">&#127974;</div>
       <div class="kpi-body">
         <div class="kpi-label">RPO / Modified Duty</div>
-        <div class="kpi-value">40</div>
-        <div class="kpi-delta share">15% of YTD incidents</div>
+        <div class="kpi-value" id="kpiRpo">40</div>
+        <div class="kpi-delta share" id="kpiRpoDelta">15% of YTD incidents</div>
       </div>
     </div>
   </div>
@@ -671,17 +671,13 @@
         <div>
           <div class="stat-block">
             <div class="big-label">Total Incidents (YTD)</div>
-            <div class="big-num">275</div>
-            <div class="big-sub">From Jan 1, 2026 to Jul 27, 2026</div>
+            <div class="big-num" id="statTotal">275</div>
+            <div class="big-sub" id="statRange">From Jan 1, 2026 to Jul 27, 2026</div>
             <div class="spark-wrap">
               <svg id="sparkline" width="140" height="34" viewBox="0 0 140 34"></svg>
-              <span class="spark-badge">&#9650; 95%</span>
+              <span class="spark-badge" id="sparkBadge">&#9650; 95%</span>
             </div>
-            <div class="mini-stats">
-              <div><div class="n">99</div><div class="l">Strain</div></div>
-              <div><div class="n">26</div><div class="l">Slip/Trip/Fall</div></div>
-              <div><div class="n">25</div><div class="l">Puncture</div></div>
-            </div>
+            <div class="mini-stats" id="miniStats"></div>
           </div>
         </div>
         <div class="donut-wrap">
@@ -700,36 +696,7 @@
       </div>
       <div class="panel-split">
         <div>
-          <div class="protocol-row">
-            <div>
-              <div class="pname">FA (FIRST AID)</div>
-              <div class="ppct">82.9%</div>
-            </div>
-            <div class="protocol-sub">
-              <div><span>Fabrication</span><span class="num">115</span></div>
-              <div><span>Harvest</span><span class="num">90</span></div>
-            </div>
-          </div>
-          <div class="protocol-row">
-            <div>
-              <div class="pname">RPO / MOD DUTY</div>
-              <div class="ppct">14.5%</div>
-            </div>
-            <div class="protocol-sub">
-              <div><span>Fabrication</span><span class="num">15</span></div>
-              <div><span>Harvest</span><span class="num">13</span></div>
-            </div>
-          </div>
-          <div class="protocol-row">
-            <div>
-              <div class="pname">RECORDABLE</div>
-              <div class="ppct">2.5%</div>
-            </div>
-            <div class="protocol-sub">
-              <div><span>Fabrication</span><span class="num">2</span></div>
-              <div><span>Harvest</span><span class="num">3</span></div>
-            </div>
-          </div>
+          <div id="protocolRows"></div>
           <a class="view-more" href="#recent">View recent incidents &rsaquo;</a>
         </div>
         <div>
@@ -746,31 +713,31 @@
       <div class="gauge-left">
         <h3>Non-Recordable Rate</h3>
         <span class="status-pill status-good">Good</span>
-        <div class="gauge-meta">&#9728;&#65039; From Jan 1, 2026 &middot; 12:00 AM</div>
-        <div class="gauge-meta">&#128337; To Jul 27, 2026 &middot; 24:00 PM</div>
+        <div class="gauge-meta" id="nrrFrom">&#9728;&#65039; From Jan 1, 2026 &middot; 12:00 AM</div>
+        <div class="gauge-meta" id="nrrTo">&#128337; To Jul 27, 2026 &middot; 24:00 PM</div>
       </div>
       <svg width="88" height="88" viewBox="0 0 88 88">
         <circle cx="44" cy="44" r="37" fill="none" stroke="#e9edf3" stroke-width="10"/>
         <circle cx="44" cy="44" r="37" fill="none" stroke="#1f9d55" stroke-width="10"
           stroke-linecap="round" transform="rotate(-90 44 44)"
-          stroke-dasharray="232.5" stroke-dashoffset="5.8"/>
-        <text x="44" y="49" text-anchor="middle" font-size="17" font-weight="800" fill="#1a2433">97.5%</text>
+          stroke-dasharray="232.5" stroke-dashoffset="5.8" id="nrrArc"/>
+        <text x="44" y="49" text-anchor="middle" font-size="17" font-weight="800" fill="#1a2433" id="nrrText">97.5%</text>
       </svg>
     </div>
 
     <div class="gauge-card">
       <div class="gauge-left">
         <h3>Days W/O Recordable</h3>
-        <span class="status-pill status-fair">On Pace</span>
+        <span class="status-pill status-fair" id="dwrPill">On Pace</span>
         <div class="gauge-meta">&#127919; Goal: 30 consecutive days</div>
-        <div class="gauge-meta">&#128337; Currently at 26 / 30 days</div>
+        <div class="gauge-meta" id="dwrMeta">&#128337; Currently at 26 / 30 days</div>
       </div>
       <svg width="88" height="88" viewBox="0 0 88 88">
         <circle cx="44" cy="44" r="37" fill="none" stroke="#e9edf3" stroke-width="10"/>
         <circle cx="44" cy="44" r="37" fill="none" stroke="#e08a1e" stroke-width="10"
           stroke-linecap="round" transform="rotate(-90 44 44)"
-          stroke-dasharray="232.5" stroke-dashoffset="30.2"/>
-        <text x="44" y="49" text-anchor="middle" font-size="17" font-weight="800" fill="#1a2433">87%</text>
+          stroke-dasharray="232.5" stroke-dashoffset="30.2" id="dwrArc"/>
+        <text x="44" y="49" text-anchor="middle" font-size="17" font-weight="800" fill="#1a2433" id="dwrText">87%</text>
       </svg>
     </div>
 
@@ -779,7 +746,7 @@
         <h3>Severity Index</h3>
         <span class="status-pill status-poor">Medium Risk</span>
         <div class="gauge-meta">&#128202; Composite score: 43 / 100</div>
-        <div class="gauge-meta">&#128204; Fabrication &amp; Strain drive volume</div>
+        <div class="gauge-meta" id="sevMeta">&#128204; Fabrication &amp; Strain drive volume</div>
       </div>
       <svg width="88" height="88" viewBox="0 0 88 88">
         <circle cx="44" cy="44" r="37" fill="none" stroke="#e9edf3" stroke-width="10"/>
@@ -811,14 +778,8 @@
   <div class="insights-row" id="insights">
     <div class="card">
       <div class="card-head"><h2>Key Findings</h2></div>
-      <ul class="findings-list">
-        <li>July closed with 43 incidents, down 13 month-over-month.</li>
-        <li>Fabrication leads all departments with a 48% share of YTD incidents.</li>
-        <li>Strain is the #1 injury type YTD with 99 recorded cases.</li>
-        <li>Recordable cases hold flat at 7 vs. 7 last year &mdash; rate down to 2.5%.</li>
-        <li>YTD volume is up 95% vs. 2025 (275 vs. 141).</li>
-      </ul>
-      <div class="action-box"><b>Action:</b> Focus ergonomics coaching in Fabrication and target Strain-reduction exposures.</div>
+      <ul class="findings-list" id="findingsList"></ul>
+      <div class="action-box" id="actionBox"><b>Action:</b> Focus ergonomics coaching in Fabrication and target Strain-reduction exposures.</div>
     </div>
     <div class="card">
       <div class="card-head">
@@ -829,7 +790,7 @@
         <input type="text" id="supervisorSearch" placeholder="Search supervisors…" autocomplete="off">
         <div class="search-clear-x" id="supSearchClearX" title="Clear search">&#10005;</div>
       </div>
-      <div class="sup-meta"><b id="supCount">32</b> of 32 supervisors &middot; click a name to view their incidents</div>
+      <div class="sup-meta"><b id="supCount">32</b> of <span id="supTotal">32</span> supervisors &middot; click a name to view their incidents</div>
       <div class="sup-head-row">
         <span>#</span><span>Supervisor</span><span style="text-align:right">Incidents</span><span style="text-align:right">Rec.</span>
       </div>
@@ -877,7 +838,7 @@
     </div>
 
     <div class="results-meta">
-      <div><b id="resultsCount">275</b> of 275 incidents</div>
+      <div><b id="resultsCount">275</b> of <span id="resultsTotal">275</span> incidents</div>
       <div>Sorted by most recent</div>
     </div>
 
@@ -891,195 +852,405 @@
 
   <div class="chart-tooltip" id="chartTooltip"></div>
 
-  <footer>Source: Master_List_Of_Injuries_2025_2026 &middot; 275 YTD incident records (2026) &middot; Generated Jul 27, 2026</footer>
+  <footer id="pageFooter">Source: Master_List_Of_Injuries_2025_2026 &middot; 275 YTD incident records (2026) &middot; Generated Jul 27, 2026</footer>
 </main>
 
 <script type="application/json" id="incidentData">[{"e":"Joseph Gomez","d":"2026-07-24","dd":"Jul 24, 2026","dept":"Harvest","t":"Foreign Object","esi":"FA","s":"Open","sup":"Richard Xiong","m":"July"},{"e":"Ceasar Saldana","d":"2026-07-23","dd":"Jul 23, 2026","dept":"Maintenance","t":"Electric Shock","esi":"RPO","s":"Open","sup":"Jonathan Hernandez","m":"July"},{"e":"Irma Ortega","d":"2026-07-22","dd":"Jul 22, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Diego Soria","m":"July"},{"e":"Ramon Garcia","d":"2026-07-22","dd":"Jul 22, 2026","dept":"Harvest","t":"Slip, Trip, & Fall","esi":"RPO","s":"Close","sup":"Richard Xiong","m":"July"},{"e":"Noe Frage Ruiz","d":"2026-07-22","dd":"Jul 22, 2026","dept":"Fabrication","t":"Struck By/Against Object","esi":"RPO","s":"Close","sup":"Juan Ramirez","m":"July"},{"e":"Jesus Bernal","d":"2026-07-21","dd":"Jul 21, 2026","dept":"Corrals","t":"Struck By Cattle","esi":"FA","s":"Close","sup":"Marilyn Herrera","m":"July"},{"e":"Rudy Ramos","d":"2026-07-21","dd":"Jul 21, 2026","dept":"Harvest","t":"Abrasion","esi":"FA","s":"Close","sup":"Richard Xiong","m":"July"},{"e":"Rosalba Oseguera Mendez","d":"2026-07-20","dd":"Jul 20, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Alex Vargas","m":"July"},{"e":"Christopher Diaz","d":"2026-07-17","dd":"Jul 17, 2026","dept":"Loading Dock","t":"Strain","esi":"FA","s":"Close","sup":"Francisco Tapia","m":"July"},{"e":"Eduardo Contreras","d":"2026-07-15","dd":"Jul 15, 2026","dept":"Harvest","t":"Rash","esi":"FA","s":"Close","sup":"Alex Vargas","m":"July"},{"e":"Carlos Roman","d":"2026-07-14","dd":"Jul 14, 2026","dept":"Buildings & Grounds","t":"Struck By/Against Object","esi":"FA","s":"Close","sup":"Christopher Moreno","m":"July"},{"e":"Maria Figueroa","d":"2026-07-14","dd":"Jul 14, 2026","dept":"Harvest","t":"Burn","esi":"RPO","s":"Close","sup":"Samuel Sierra","m":"July"},{"e":"Ezequiel Ambriz","d":"2026-07-14","dd":"Jul 14, 2026","dept":"Utilities","t":"Burn","esi":"FA","s":"Close","sup":"Juan Murillo","m":"July"},{"e":"Jonny Garcia","d":"2026-07-14","dd":"Jul 14, 2026","dept":"Corrals","t":"Struck By Cattle","esi":"RPO","s":"Close","sup":"Marilyn Herrera","m":"July"},{"e":"Richie Glass","d":"2026-07-13","dd":"Jul 13, 2026","dept":"FSQA","t":"Slip, Trip, & Fall","esi":"RPO","s":"Close","sup":"Rene Canas","m":"July"},{"e":"Michael Montelongo","d":"2026-07-10","dd":"Jul 10, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Elizabeth Neufeld","m":"July"},{"e":"Rudy Gallegos","d":"2026-07-10","dd":"Jul 10, 2026","dept":"Harvest","t":"Struck By/Against Object","esi":"FA","s":"Close","sup":"Samuel Sierra","m":"July"},{"e":"Osbaldo Santiago","d":"2026-07-10","dd":"Jul 10, 2026","dept":"Harvest","t":"Strain","esi":"RPO","s":"Close","sup":"Alex Vargas","m":"July"},{"e":"Mason Ojeda","d":"2026-07-09","dd":"Jul 9, 2026","dept":"Corrals","t":"Foreign Object","esi":"RPO","s":"Close","sup":"Marilyn Herrera","m":"July"},{"e":"Pisperema Amaya","d":"2026-07-09","dd":"Jul 9, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Samuel Sierra","m":"July"},{"e":"Jonathan Campas","d":"2026-07-09","dd":"Jul 9, 2026","dept":"Harvest","t":"Foreign Object","esi":"FA","s":"Close","sup":"Samuel Sierra","m":"July"},{"e":"Daisy Sotelo","d":"2026-07-09","dd":"Jul 9, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Samuel Sierra","m":"July"},{"e":"Claudia Estrada Cruz","d":"2026-07-09","dd":"Jul 9, 2026","dept":"Fabrication","t":"Puncture","esi":"FA","s":"Close","sup":"Elizabeth Neufeld","m":"July"},{"e":"Hector Razo","d":"2026-07-08","dd":"Jul 8, 2026","dept":"Buildings & Grounds","t":"Insect Bite/ Sting","esi":"RPO","s":"Close","sup":"Christopher Moreno","m":"July"},{"e":"Apolinar Basilio","d":"2026-07-08","dd":"Jul 8, 2026","dept":"Fabrication","t":"Struck By Equipment","esi":"FA","s":"Close","sup":"Maria Garcia","m":"July"},{"e":"Mayra Solarte","d":"2026-07-08","dd":"Jul 8, 2026","dept":"Harvest","t":"Strain","esi":"RPO","s":"Close","sup":"Alex Vargas","m":"July"},{"e":"Vilma De Jesus Gomez","d":"2026-07-08","dd":"Jul 8, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Maria Garcia","m":"July"},{"e":"Victor Garcia","d":"2026-07-08","dd":"Jul 8, 2026","dept":"Fabrication","t":"No Injury","esi":"RPO","s":"Close","sup":"Chadu Moua","m":"July"},{"e":"Rosalba Osguera","d":"2026-07-07","dd":"Jul 7, 2026","dept":"Harvest","t":"Burn","esi":"FA","s":"Close","sup":"Alex Vargas","m":"July"},{"e":"Roman Morales","d":"2026-07-07","dd":"Jul 7, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Michael Orozco","m":"July"},{"e":"Angel Estrada","d":"2026-07-07","dd":"Jul 7, 2026","dept":"Maintenance","t":"Slip, Trip, & Fall","esi":"RPO","s":"Close","sup":"Kamran Tavagar","m":"July"},{"e":"Adolfo Aguilera","d":"2026-07-03","dd":"Jul 3, 2026","dept":"Harvest","t":"Crush Injury","esi":"FA","s":"Close","sup":"Marilyn Herrera","m":"July"},{"e":"Jasmine Gonzalez","d":"2026-07-03","dd":"Jul 3, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Alex Vargas","m":"July"},{"e":"Victoria Vazquez","d":"2026-07-03","dd":"Jul 3, 2026","dept":"Harvest","t":"Inhalation / Reaction","esi":"RPO","s":"Close","sup":"Michael Orozco","m":"July"},{"e":"China Bonner","d":"2026-07-03","dd":"Jul 3, 2026","dept":"Fabrication","t":"Foreign Object","esi":"FA","s":"Close","sup":"Elizabeth Neufeld","m":"July"},{"e":"Sopheap Pos","d":"2026-07-03","dd":"Jul 3, 2026","dept":"Fabrication","t":"Slip, Trip, & Fall","esi":"RPO","s":"Close","sup":"Juan Ramirez","m":"July"},{"e":"Lebrado Avila","d":"2026-07-02","dd":"Jul 2, 2026","dept":"Fabrication","t":"Crush Injury","esi":"RPO","s":"Close","sup":"Chadu Moua","m":"July"},{"e":"Bernardo Gonzalez","d":"2026-07-02","dd":"Jul 2, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Juan Ramirez","m":"July"},{"e":"Raymundo Vargas Jr","d":"2026-07-02","dd":"Jul 2, 2026","dept":"Fabrication","t":"Slip, Trip, & Fall","esi":"RPO","s":"Close","sup":"Erwin Vega","m":"July"},{"e":"Jose Nunez","d":"2026-07-02","dd":"Jul 2, 2026","dept":"Fabrication","t":"Falling Objects","esi":"FA","s":"Close","sup":"Erwin Vega","m":"July"},{"e":"Edgar Hernandez","d":"2026-07-02","dd":"Jul 2, 2026","dept":"Harvest","t":"Burn","esi":"FA","s":"Close","sup":"Alex Vargas","m":"July"},{"e":"Juan Ceballos","d":"2026-07-01","dd":"Jul 1, 2026","dept":"Harvest","t":"Laceration","esi":"RECORDABLE","s":"Close","sup":"Michael Orozco","m":"July"},{"e":"Claudia Estrada Cruz","d":"2026-07-01","dd":"Jul 1, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Elizabeth Neufeld","m":"July"},{"e":"Vilma de Jesus","d":"2026-06-30","dd":"Jun 30, 2026","dept":"Fabrication","t":"Contact Stress","esi":"FA","s":"Close","sup":"Maria Garcia","m":"June"},{"e":"Edgar Guttierez","d":"2026-06-29","dd":"Jun 29, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Juan Carlos Martinez","m":"June"},{"e":"Eduardo Contreras","d":"2026-06-29","dd":"Jun 29, 2026","dept":"Harvest","t":"Slip, Trip, & Fall","esi":"RPO","s":"Close","sup":"Alex Vargas","m":"June"},{"e":"Aaron Ching","d":"2026-06-29","dd":"Jun 29, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Alex Vargas","m":"June"},{"e":"Kristy Davila","d":"2026-06-29","dd":"Jun 29, 2026","dept":"Fabrication","t":"Foreign Object","esi":"FA","s":"Close","sup":"Elizabeth Neufeld","m":"June"},{"e":"Steven Aceves","d":"2026-06-29","dd":"Jun 29, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Ovidio Sanchez","m":"June"},{"e":"Frederick Garcia","d":"2026-06-29","dd":"Jun 29, 2026","dept":"Harvest","t":"Foreign Object","esi":"FA","s":"Close","sup":"Alex Vargas","m":"June"},{"e":"Esmeralda Avalos Vazquez","d":"2026-06-26","dd":"Jun 26, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Rutilio Rodriguez","m":"June"},{"e":"Osbaldo Santiago","d":"2026-06-26","dd":"Jun 26, 2026","dept":"Harvest","t":"Burn","esi":"FA","s":"Close","sup":"Alex Vargas","m":"June"},{"e":"Juan Rivera","d":"2026-06-26","dd":"Jun 26, 2026","dept":"Buildings & Grounds","t":"Insect Bite/ Sting","esi":"RPO","s":"Close","sup":"Christopher Moreno","m":"June"},{"e":"Pablo de la Cruz","d":"2026-06-25","dd":"Jun 25, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Erwin Vega","m":"June"},{"e":"Douglas Cline","d":"2026-06-25","dd":"Jun 25, 2026","dept":"Fabrication","t":"Foreign Object","esi":"FA","s":"Close","sup":"Juan Ramirez","m":"June"},{"e":"Daniel Hernandez","d":"2026-06-25","dd":"Jun 25, 2026","dept":"Maintenance","t":"Struck By/Against Object","esi":"FA","s":"Close","sup":"Osbaldo Gutierrez","m":"June"},{"e":"Edgar Hernandez","d":"2026-06-25","dd":"Jun 25, 2026","dept":"Harvest","t":"Burn","esi":"FA","s":"Close","sup":"Alex Vargas","m":"June"},{"e":"Jayden Acosta","d":"2026-06-24","dd":"Jun 24, 2026","dept":"Fabrication","t":"Slip, Trip, & Fall","esi":"FA","s":"Close","sup":"Erwin Vega","m":"June"},{"e":"Albert Ramos","d":"2026-06-24","dd":"Jun 24, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Juan Ramirez","m":"June"},{"e":"Maricela Ruiz","d":"2026-06-24","dd":"Jun 24, 2026","dept":"Fabrication","t":"Puncture","esi":"FA","s":"Close","sup":"Elizabeth Neufeld","m":"June"},{"e":"Nicole Machuca","d":"2026-06-23","dd":"Jun 23, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Chadu Moua","m":"June"},{"e":"Jose Vazquez","d":"2026-06-23","dd":"Jun 23, 2026","dept":"Fabrication","t":"Foreign Object","esi":"FA","s":"Close","sup":"Ovidio Sanchez","m":"June"},{"e":"Jose Madrigal","d":"2026-06-23","dd":"Jun 23, 2026","dept":"Harvest","t":"Slip, Trip, & Fall","esi":"FA","s":"Close","sup":"Alex Vargas","m":"June"},{"e":"Juan Rivera","d":"2026-06-23","dd":"Jun 23, 2026","dept":"Buildings & Grounds","t":"Strain","esi":"FA","s":"Close","sup":"Christopher Moreno","m":"June"},{"e":"Rocio Bernal","d":"2026-06-23","dd":"Jun 23, 2026","dept":"Harvest","t":"Rash","esi":"FA","s":"Close","sup":"Samuel Sierra","m":"June"},{"e":"Luis Llamas","d":"2026-06-22","dd":"Jun 22, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Erwin Vega","m":"June"},{"e":"Rocio Bernal","d":"2026-06-22","dd":"Jun 22, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Samuel Sierra","m":"June"},{"e":"Angel Campas","d":"2026-06-22","dd":"Jun 22, 2026","dept":"Harvest","t":"Contact Stress","esi":"FA","s":"Close","sup":"Michael Orozco","m":"June"},{"e":"Celso Avendano","d":"2026-06-22","dd":"Jun 22, 2026","dept":"Fabrication","t":"Struck By/Against Object","esi":"FA","s":"Close","sup":"Ovidio Sanchez","m":"June"},{"e":"Juan Rodriguez","d":"2026-06-19","dd":"Jun 19, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Juan Rodriguez","m":"June"},{"e":"Esmeralda Avalos Vazquez","d":"2026-06-19","dd":"Jun 19, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Rutilio Rodriguez","m":"June"},{"e":"Justin Briggs","d":"2026-06-19","dd":"Jun 19, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Richard Xiong","m":"June"},{"e":"Jose Rivas","d":"2026-06-19","dd":"Jun 19, 2026","dept":"Maintenance","t":"Strain","esi":"FA","s":"Close","sup":"Osbaldo Gutierrez","m":"June"},{"e":"Jorge Maldonado","d":"2026-06-18","dd":"Jun 18, 2026","dept":"Fabrication","t":"Sprain","esi":"RECORDABLE","s":"Close","sup":"Diego Soria","m":"June"},{"e":"Tomasa Quinonez","d":"2026-06-16","dd":"Jun 16, 2026","dept":"Fabrication","t":"Pinch Point - Caught In","esi":"FA","s":"Close","sup":"Elizabeth Neufeld","m":"June"},{"e":"Miguel Sandoval","d":"2026-06-16","dd":"Jun 16, 2026","dept":"Harvest","t":"Puncture","esi":"FA","s":"Close","sup":"Rutilio Rodriguez","m":"June"},{"e":"Balwinder Kaur","d":"2026-06-16","dd":"Jun 16, 2026","dept":"Harvest","t":"Slip, Trip, & Fall","esi":"RPO","s":"Close","sup":"Samuel Sierra","m":"June"},{"e":"Frank Padilla","d":"2026-06-15","dd":"Jun 15, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Ovidio Sanchez","m":"June"},{"e":"Armando Gonzalez","d":"2026-06-15","dd":"Jun 15, 2026","dept":"Fabrication","t":"Puncture","esi":"FA","s":"Close","sup":"Mary Coffee","m":"June"},{"e":"Marly Delgado","d":"2026-06-12","dd":"Jun 12, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Ovidio Sanchez","m":"June"},{"e":"Abraham Gonzales","d":"2026-06-12","dd":"Jun 12, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Richard Xiong","m":"June"},{"e":"Jose Lopez","d":"2026-06-12","dd":"Jun 12, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Richard Xiong","m":"June"},{"e":"Ricardo Lopez","d":"2026-06-11","dd":"Jun 11, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Alex Vargas","m":"June"},{"e":"Eduardo Contreras","d":"2026-06-10","dd":"Jun 10, 2026","dept":"Harvest","t":"Rash","esi":"FA","s":"Close","sup":"Alex Vargas","m":"June"},{"e":"Jesus Bustos","d":"2026-06-10","dd":"Jun 10, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Juan Ramirez","m":"June"},{"e":"Justin Briggs","d":"2026-06-10","dd":"Jun 10, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Richard Xiong","m":"June"},{"e":"Rosalba Aseguero","d":"2026-06-09","dd":"Jun 9, 2026","dept":"Harvest","t":"Burn","esi":"FA","s":"Close","sup":"Alex Vargas","m":"June"},{"e":"Luis Perez","d":"2026-06-09","dd":"Jun 9, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Richard Xiong","m":"June"},{"e":"Brian Camacho","d":"2026-06-08","dd":"Jun 8, 2026","dept":"Outside Clean Up","t":"Slip, Trip, & Fall","esi":"RECORDABLE","s":"Close","sup":"Clara Salazar","m":"June"},{"e":"Jesse De La Torre","d":"2026-06-08","dd":"Jun 8, 2026","dept":"Fabrication","t":"Contact Stress","esi":"FA","s":"Close","sup":"Diego Soria","m":"June"},{"e":"Luis Flores","d":"2026-06-05","dd":"Jun 5, 2026","dept":"Fabrication","t":"Puncture","esi":"FA","s":"Close","sup":"Juan Ramirez","m":"June"},{"e":"Manpreet Singh","d":"2026-06-04","dd":"Jun 4, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Ovidio Sanchez","m":"June"},{"e":"Ismael Martinez","d":"2026-06-04","dd":"Jun 4, 2026","dept":"Fabrication","t":"Crush Injury","esi":"FA","s":"Close","sup":"Chadu Moua","m":"June"},{"e":"Juan Espinoza","d":"2026-06-03","dd":"Jun 3, 2026","dept":"Harvest","t":"Burn","esi":"FA","s":"Close","sup":"Richard Xiong","m":"June"},{"e":"Sandra Arrendondo","d":"2026-06-03","dd":"Jun 3, 2026","dept":"Fabrication","t":"Slip, Trip, & Fall","esi":"FA","s":"Close","sup":"Ovidio Sanchez","m":"June"},{"e":"Salvador Gutierez","d":"2026-06-02","dd":"Jun 2, 2026","dept":"Loading Dock","t":"Slip, Trip, & Fall","esi":"FA","s":"Close","sup":"Francisco Tapia","m":"June"},{"e":"Alejandro Pantoja","d":"2026-06-02","dd":"Jun 2, 2026","dept":"Harvest","t":"Puncture","esi":"FA","s":"Close","sup":"Michael Orozco","m":"June"},{"e":"Oshmar Hernandez","d":"2026-06-02","dd":"Jun 2, 2026","dept":"Harvest","t":"Rash","esi":"RPO","s":"Close","sup":"Michael Orozco","m":"June"},{"e":"Eduardo Contreras","d":"2026-06-01","dd":"Jun 1, 2026","dept":"Harvest","t":"Slip, Trip, & Fall","esi":"RPO","s":"Close","sup":"Alex Vargas","m":"June"},{"e":"Baljit Kaur","d":"2026-05-29","dd":"May 29, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Elizabeth Neufeld","m":"May"},{"e":"Ricardo Lopez","d":"2026-05-29","dd":"May 29, 2026","dept":"Harvest","t":"Contact Stress","esi":"FA","s":"Close","sup":"Alex Vargas","m":"May"},{"e":"Ricardo Lopez","d":"2026-05-29","dd":"May 29, 2026","dept":"Harvest","t":"Contact Stress","esi":"FA","s":"Close","sup":"Alex Vargas","m":"May"},{"e":"Diego Prciado","d":"2026-05-29","dd":"May 29, 2026","dept":"Harvest","t":"Rash","esi":"FA","s":"Close","sup":"Michael Orozco","m":"May"},{"e":"Paul Estrada","d":"2026-05-29","dd":"May 29, 2026","dept":"Corrals","t":"Slip, Trip, & Fall","esi":"FA","s":"Close","sup":"Marilyn Herrera","m":"May"},{"e":"Baljit Kaur","d":"2026-05-29","dd":"May 29, 2026","dept":"Fabrication","t":"Slip, Trip, & Fall","esi":"FA","s":"Close","sup":"Elizabeth Neufeld","m":"May"},{"e":"Daniel Verduzco","d":"2026-05-28","dd":"May 28, 2026","dept":"Harvest","t":"Abrasion","esi":"FA","s":"Close","sup":"Samuel Sierra","m":"May"},{"e":"Ralph Gonzalez","d":"2026-05-27","dd":"May 27, 2026","dept":"Harvest","t":"Strain","esi":"RPO","s":"Close","sup":"Samuel Sierra","m":"May"},{"e":"Gerardo Ibarra","d":"2026-05-26","dd":"May 26, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Ovidio Sanchez","m":"May"},{"e":"Michael Rocha","d":"2026-05-22","dd":"May 22, 2026","dept":"Fabrication","t":"Foreign Object","esi":"FA","s":"Close","sup":"Ovidio Sanchez","m":"May"},{"e":"Eduardo Peres","d":"2026-05-21","dd":"May 21, 2026","dept":"Fabrication","t":"Slip, Trip, & Fall","esi":"RPO","s":"Close","sup":"Ovidio Sanchez","m":"May"},{"e":"Saul Flores","d":"2026-05-19","dd":"May 19, 2026","dept":"Fabrication","t":"Slip, Trip, & Fall","esi":"RPO","s":"Close","sup":"Juan Rodriguez","m":"May"},{"e":"Adrian Chaidez","d":"2026-05-14","dd":"May 14, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Juan Ramirez","m":"May"},{"e":"Daniel Verduzco","d":"2026-05-13","dd":"May 13, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Samuel Sierra","m":"May"},{"e":"Joseph Gomez","d":"2026-05-13","dd":"May 13, 2026","dept":"Harvest","t":"Struck By/Against Object","esi":"FA","s":"Close","sup":"Richard Xiong","m":"May"},{"e":"Eden Segoviano","d":"2026-05-13","dd":"May 13, 2026","dept":"Fabrication","t":"Puncture","esi":"FA","s":"Close","sup":"Diego Soria","m":"May"},{"e":"Karina Torres","d":"2026-05-13","dd":"May 13, 2026","dept":"Harvest","t":"Crush Injury","esi":"RECORDABLE","s":"Open","sup":"Samuel Sierra","m":"May"},{"e":"Bernardo Gonzalez","d":"2026-05-12","dd":"May 12, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Juan Ramirez","m":"May"},{"e":"Manpreet Singh","d":"2026-05-12","dd":"May 12, 2026","dept":"Fabrication","t":"Contact Stress","esi":"FA","s":"Close","sup":"Ovidio Sanchez","m":"May"},{"e":"Angel Garcia","d":"2026-05-08","dd":"May 8, 2026","dept":"Harvest","t":"Burn","esi":"FA","s":"Close","sup":"Christian Lopez","m":"May"},{"e":"Manpreet Singh","d":"2026-05-08","dd":"May 8, 2026","dept":"Fabrication","t":"Puncture","esi":"FA","s":"Close","sup":"Ovidio Sanchez","m":"May"},{"e":"Jose R. Medina","d":"2026-05-07","dd":"May 7, 2026","dept":"Maintenance","t":"Electric Shock","esi":"FA","s":"Close","sup":"Kamran Tavagar","m":"May"},{"e":"Gabriela Martinez","d":"2026-05-06","dd":"May 6, 2026","dept":"Harvest","t":"Slip, Trip, & Fall","esi":"FA","s":"Close","sup":"Samuel Sierra","m":"May"},{"e":"Angel Garcia","d":"2026-05-05","dd":"May 5, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Christian Lopez","m":"May"},{"e":"Juan Maravilla","d":"2026-05-01","dd":"May 1, 2026","dept":"Fabrication","t":"Slip, Trip, & Fall","esi":"RPO","s":"Close","sup":"Valerena Begay","m":"May"},{"e":"Mapreet Singn","d":"2026-04-29","dd":"Apr 29, 2026","dept":"Fabrication","t":"Contact Stress","esi":"FA","s":"Close","sup":"Ovidio Sanchez","m":"April"},{"e":"Moises Flores","d":"2026-04-29","dd":"Apr 29, 2026","dept":"Fabrication","t":"Puncture","esi":"RPO","s":"Close","sup":"Juan Ramirez","m":"April"},{"e":"Maury Gillian","d":"2026-04-28","dd":"Apr 28, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Elizabeth Neufeld","m":"April"},{"e":"Cesar Mendoza","d":"2026-04-24","dd":"Apr 24, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Ovidio Sanchez","m":"April"},{"e":"Jesus Bustos","d":"2026-04-24","dd":"Apr 24, 2026","dept":"Fabrication","t":"Puncture","esi":"FA","s":"Close","sup":"Juan Ramirez","m":"April"},{"e":"Adrian Chaidez","d":"2026-04-24","dd":"Apr 24, 2026","dept":"Fabrication","t":"Abrasion","esi":"FA","s":"Close","sup":"Juan Ramirez","m":"April"},{"e":"James Entrocaso","d":"2026-04-23","dd":"Apr 23, 2026","dept":"Fabrication","t":"Puncture","esi":"FA","s":"Close","sup":"Ovidio Sanchez","m":"April"},{"e":"Brando Gonzalez","d":"2026-04-23","dd":"Apr 23, 2026","dept":"Fabrication","t":"Slip, Trip, & Fall","esi":"FA","s":"Close","sup":"Diego Soria","m":"April"},{"e":"Jhondri Madariaga","d":"2026-04-23","dd":"Apr 23, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Chadu Moua","m":"April"},{"e":"Francisco Lopez","d":"2026-04-22","dd":"Apr 22, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Chadu Moua","m":"April"},{"e":"Jonathan Ramirez","d":"2026-04-22","dd":"Apr 22, 2026","dept":"Fabrication","t":"Puncture","esi":"FA","s":"Close","sup":"Ovidio Sanchez","m":"April"},{"e":"Rosalba Oseguera Mendez","d":"2026-04-22","dd":"Apr 22, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Samuel Sierra","m":"April"},{"e":"Natividad Galicia","d":"2026-04-22","dd":"Apr 22, 2026","dept":"Harvest","t":"Puncture","esi":"FA","s":"Close","sup":"Ray Mascorro","m":"April"},{"e":"Sergio De Jesus","d":"2026-04-22","dd":"Apr 22, 2026","dept":"Fabrication","t":"Crush Injury","esi":"FA","s":"Close","sup":"Chadu Moua","m":"April"},{"e":"Gabriel Garcia","d":"2026-04-22","dd":"Apr 22, 2026","dept":"Fabrication","t":"Reaction","esi":"FA","s":"Close","sup":"Chadu Moua","m":"April"},{"e":"Honorina Lopez","d":"2026-04-21","dd":"Apr 21, 2026","dept":"Harvest","t":"Puncture","esi":"FA","s":"Close","sup":"Christian Lopez","m":"April"},{"e":"Jose Miranda","d":"2026-04-21","dd":"Apr 21, 2026","dept":"Fabrication","t":"Puncture","esi":"FA","s":"Close","sup":"Juan Rodriguez","m":"April"},{"e":"Juan Rodriguez","d":"2026-04-17","dd":"Apr 17, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Juan Rodriguez","m":"April"},{"e":"Jose Barajas","d":"2026-04-17","dd":"Apr 17, 2026","dept":"Fabrication","t":"Foreign Object","esi":"FA","s":"Close","sup":"Juan Ramirez","m":"April"},{"e":"Guilbert Beltran","d":"2026-04-17","dd":"Apr 17, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Samuel Sierra","m":"April"},{"e":"Ismael Martinez","d":"2026-04-16","dd":"Apr 16, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Chadu Moua","m":"April"},{"e":"Michael Rocha","d":"2026-04-15","dd":"Apr 15, 2026","dept":"Fabrication","t":"Foreign Object","esi":"FA","s":"Close","sup":"Ovidio Sanchez","m":"April"},{"e":"Rosangela Rodriguez","d":"2026-04-14","dd":"Apr 14, 2026","dept":"Fabrication","t":"Abrasion","esi":"RPO","s":"Close","sup":"Chadu Moua","m":"April"},{"e":"Frank Padilla","d":"2026-04-14","dd":"Apr 14, 2026","dept":"Fabrication","t":"Puncture","esi":"FA","s":"Close","sup":"Ovidio Sanchez","m":"April"},{"e":"Jesus Valadez","d":"2026-04-14","dd":"Apr 14, 2026","dept":"Fabrication","t":"Puncture","esi":"FA","s":"Close","sup":"Diego Soria","m":"April"},{"e":"Edalia Lopez","d":"2026-04-14","dd":"Apr 14, 2026","dept":"Harvest","t":"Burn","esi":"FA","s":"Close","sup":"Christian Lopez","m":"April"},{"e":"Noe Frage Ruiz","d":"2026-04-14","dd":"Apr 14, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Juan Ramirez","m":"April"},{"e":"Rafael Piceno","d":"2026-04-10","dd":"Apr 10, 2026","dept":"Fabrication","t":"Slip, Trip, & Fall","esi":"FA","s":"Close","sup":"Chadu Moua","m":"April"},{"e":"Omar Chavez","d":"2026-04-10","dd":"Apr 10, 2026","dept":"Harvest","t":"Struck By Cattle","esi":"FA","s":"Close","sup":"Richard Xiong","m":"April"},{"e":"Morgan Branning","d":"2026-04-10","dd":"Apr 10, 2026","dept":"Harvest","t":"Awkward Posture","esi":"FA","s":"Close","sup":"Michael Orozco","m":"April"},{"e":"Hector Raya","d":"2026-04-09","dd":"Apr 9, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Juan Rodriguez","m":"April"},{"e":"Jesus Bustos","d":"2026-04-09","dd":"Apr 9, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Juan Rodriguez","m":"April"},{"e":"Jesus Bustos","d":"2026-04-09","dd":"Apr 9, 2026","dept":"Fabrication","t":"Sprain","esi":"FA","s":"Close","sup":"Juan Ramirez","m":"April"},{"e":"Angel Garcia","d":"2026-04-09","dd":"Apr 9, 2026","dept":"Harvest","t":"Rash","esi":"FA","s":"Close","sup":"Christian Lopez","m":"April"},{"e":"Joseph Gomez","d":"2026-04-09","dd":"Apr 9, 2026","dept":"Harvest","t":"Foreign Object","esi":"FA","s":"Close","sup":"Richard Xiong","m":"April"},{"e":"Gladys Lugan","d":"2026-04-08","dd":"Apr 8, 2026","dept":"Harvest","t":"Struck By/Against Object","esi":"FA","s":"Close","sup":"Rutilio Rodriguez","m":"April"},{"e":"Jesus Olazava","d":"2026-04-08","dd":"Apr 8, 2026","dept":"FSQA","t":"Laceration","esi":"FA","s":"Close","sup":"Rene Canas","m":"April"},{"e":"Enrique Ramos","d":"2026-04-08","dd":"Apr 8, 2026","dept":"Fabrication","t":"Puncture","esi":"FA","s":"Close","sup":"Diego Soria","m":"April"},{"e":"Ana Mendoza","d":"2026-04-08","dd":"Apr 8, 2026","dept":"Fabrication","t":"Contact Stress","esi":"FA","s":"Close","sup":"Elizabeth Neufeld","m":"April"},{"e":"Jesse De La Torre","d":"2026-04-08","dd":"Apr 8, 2026","dept":"Fabrication","t":"Rash","esi":"FA","s":"Close","sup":"Diego Soria","m":"April"},{"e":"Samantha Guzman","d":"2026-04-07","dd":"Apr 7, 2026","dept":"Warehouse","t":"Struck By/Against Object","esi":"RPO","s":"Close","sup":"Jesus Avila","m":"April"},{"e":"Juan Vazquez","d":"2026-04-07","dd":"Apr 7, 2026","dept":"Fabrication","t":"Struck By/Against Object","esi":"RPO","s":"Close","sup":"Elizabeth Neufeld","m":"April"},{"e":"Juan Lugardo","d":"2026-04-03","dd":"Apr 3, 2026","dept":"Harvest","t":"Puncture","esi":"RECORDABLE","s":"Close","sup":"Ray Mascorro","m":"April"},{"e":"Guadalupe Barajas","d":"2026-04-03","dd":"Apr 3, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Juan Ramirez","m":"April"},{"e":"Samuel Cruz","d":"2026-04-03","dd":"Apr 3, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Juan Rodriguez","m":"April"},{"e":"Samuel Cruz","d":"2026-04-02","dd":"Apr 2, 2026","dept":"Fabrication","t":"Abrasion","esi":"FA","s":"Close","sup":"Juan Rodriguez","m":"April"},{"e":"Saul Flores","d":"2026-04-01","dd":"Apr 1, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Juan Rodriguez","m":"April"},{"e":"Yvonne Matinez","d":"2026-04-01","dd":"Apr 1, 2026","dept":"Fabrication","t":"NA - Stress","esi":"RPO","s":"Close","sup":"Elizabeth Neufeld","m":"April"},{"e":"Jorge Maldonado","d":"2026-03-31","dd":"Mar 31, 2026","dept":"Fabrication","t":"Puncture","esi":"FA","s":"Close","sup":"Diego Soria","m":"March"},{"e":"Rogelio Mendoza","d":"2026-03-31","dd":"Mar 31, 2026","dept":"Maintenance","t":"Strain","esi":"FA","s":"Close","sup":"Osbaldo Gutierrez","m":"March"},{"e":"Edgar Hernandez","d":"2026-03-30","dd":"Mar 30, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Samuel Sierra","m":"March"},{"e":"Isreal Cruz Hernandez","d":"2026-03-27","dd":"Mar 27, 2026","dept":"Harvest","t":"Laceration","esi":"FA","s":"Close","sup":"Christian Lopez","m":"March"},{"e":"RA Thach","d":"2026-03-27","dd":"Mar 27, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Juan Ramirez","m":"March"},{"e":"Mayra Solarte","d":"2026-03-24","dd":"Mar 24, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Samuel Sierra","m":"March"},{"e":"Jesus Topete","d":"2026-03-23","dd":"Mar 23, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Ovidio Sanchez","m":"March"},{"e":"Saul Flores","d":"2026-03-20","dd":"Mar 20, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Juan Rodriguez","m":"March"},{"e":"Alan Aranda","d":"2026-03-20","dd":"Mar 20, 2026","dept":"Fabrication","t":"Slip, Trip, & Fall","esi":"FA","s":"Close","sup":"Elizabeth Neufeld","m":"March"},{"e":"Xeng Vuew","d":"2026-03-20","dd":"Mar 20, 2026","dept":"Harvest","t":"Rash","esi":"FA","s":"Close","sup":"Samuel Sierra","m":"March"},{"e":"China Bonner","d":"2026-03-19","dd":"Mar 19, 2026","dept":"Fabrication","t":"Foreign Object","esi":"FA","s":"Close","sup":"Elizabeth Neufeld","m":"March"},{"e":"Edgar Guttierez","d":"2026-03-19","dd":"Mar 19, 2026","dept":"Fabrication","t":"Puncture","esi":"FA","s":"Close","sup":"Diego Soria","m":"March"},{"e":"Jesus Bernal","d":"2026-03-19","dd":"Mar 19, 2026","dept":"Harvest","t":"Foreign Object","esi":"FA","s":"Close","sup":"Marilyn Herrera","m":"March"},{"e":"Cesar Castellanos","d":"2026-03-19","dd":"Mar 19, 2026","dept":"Harvest","t":"Struck By Cattle","esi":"FA","s":"Close","sup":"Marilyn Herrera","m":"March"},{"e":"Griselda Floran","d":"2026-03-19","dd":"Mar 19, 2026","dept":"Harvest","t":"Rash","esi":"FA","s":"Close","sup":"Samuel Sierra","m":"March"},{"e":"Jhondri Madariaga","d":"2026-03-17","dd":"Mar 17, 2026","dept":"Fabrication","t":"Struck By Equipment","esi":"FA","s":"Close","sup":"Chadu Moua","m":"March"},{"e":"Kristy Davila","d":"2026-03-13","dd":"Mar 13, 2026","dept":"Fabrication","t":"Contact Stress","esi":"RPO","s":"Close","sup":"Elizabeth Neufeld","m":"March"},{"e":"Karen Vance","d":"2026-03-11","dd":"Mar 11, 2026","dept":"Maintenance","t":"Slip, Trip, & Fall","esi":"FA","s":"Close","sup":"Jonathan Hernandez","m":"March"},{"e":"Samuel Cruz","d":"2026-03-10","dd":"Mar 10, 2026","dept":"Fabrication","t":"Struck By/Against Object","esi":"FA","s":"Close","sup":"Juan Rodriguez","m":"March"},{"e":"Kathrine Montez","d":"2026-03-06","dd":"Mar 6, 2026","dept":"Harvest","t":"Crush Injury","esi":"FA","s":"Close","sup":"Samuel Sierra","m":"March"},{"e":"Armando Gonzalez","d":"2026-03-06","dd":"Mar 6, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Juan Ramirez","m":"March"},{"e":"Braulio Torres","d":"2026-03-06","dd":"Mar 6, 2026","dept":"Corrals","t":"Foreign Object","esi":"FA","s":"Close","sup":"Marilyn Herrera","m":"March"},{"e":"Israel Cruz Hernandez","d":"2026-03-06","dd":"Mar 6, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Samuel Sierra","m":"March"},{"e":"German Cerda","d":"2026-03-05","dd":"Mar 5, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Diego Soria","m":"March"},{"e":"Chadu Moua","d":"2026-03-05","dd":"Mar 5, 2026","dept":"Fabrication","t":"Struck By/Against Object","esi":"FA","s":"Close","sup":"David Zavala","m":"March"},{"e":"Juan Herrera","d":"2026-03-04","dd":"Mar 4, 2026","dept":"Fabrication","t":"Contact Stress","esi":"FA","s":"Close","sup":"Elizabeth Neufeld","m":"March"},{"e":"Juan Dominguez","d":"2026-03-04","dd":"Mar 4, 2026","dept":"Harvest","t":"Laceration","esi":"FA","s":"Close","sup":"Christian Lopez","m":"March"},{"e":"Jesus Morales","d":"2026-03-04","dd":"Mar 4, 2026","dept":"Corrals","t":"Crush Injury","esi":"RECORDABLE","s":"Close","sup":"Marilyn Herrera","m":"March"},{"e":"Karson Lowe","d":"2026-03-04","dd":"Mar 4, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Michael Orozco","m":"March"},{"e":"Maria Sanchez","d":"2026-03-03","dd":"Mar 3, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Ovidio Sanchez","m":"March"},{"e":"Guadalupe Fuentes","d":"2026-03-02","dd":"Mar 2, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Rutilio Rodriguez","m":"March"},{"e":"Devron Gassaway","d":"2026-02-27","dd":"Feb 27, 2026","dept":"Fabrication","t":"Slip, Trip, & Fall","esi":"FA","s":"Close","sup":"Chadu Moua","m":"February"},{"e":"Jesus Bustos","d":"2026-02-27","dd":"Feb 27, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Juan Ramirez","m":"February"},{"e":"Kristy Davila","d":"2026-02-27","dd":"Feb 27, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Elizabeth Neufeld","m":"February"},{"e":"Quiroz Sanchez","d":"2026-02-26","dd":"Feb 26, 2026","dept":"Harvest","t":"Inhalation / Reaction","esi":"RPO","s":"Close","sup":"Christian Lopez","m":"February"},{"e":"Valeria Vasquez","d":"2026-02-26","dd":"Feb 26, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Rutilio Rodriguez","m":"February"},{"e":"Jose Ramirez","d":"2026-02-25","dd":"Feb 25, 2026","dept":"Harvest","t":"Abrasion","esi":"FA","s":"Close","sup":"Christian Lopez","m":"February"},{"e":"Marquiz Gassaway","d":"2026-02-25","dd":"Feb 25, 2026","dept":"Harvest","t":"Rash","esi":"FA","s":"Close","sup":"Christian Lopez","m":"February"},{"e":"Oscar Torres","d":"2026-02-25","dd":"Feb 25, 2026","dept":"Fabrication","t":"Strain","esi":"RPO","s":"Close","sup":"Elizabeth Neufeld","m":"February"},{"e":"Joaquin Diaz","d":"2026-02-24","dd":"Feb 24, 2026","dept":"Harvest","t":"Burn","esi":"FA","s":"Close","sup":"Christian Lopez","m":"February"},{"e":"Martel Sanchez","d":"2026-02-23","dd":"Feb 23, 2026","dept":"Fabrication","t":"Puncture","esi":"FA","s":"Close","sup":"Diego Soria","m":"February"},{"e":"Fermin Martinez","d":"2026-02-23","dd":"Feb 23, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Elizabeth Neufeld","m":"February"},{"e":"Jesus Avila","d":"2026-02-23","dd":"Feb 23, 2026","dept":"Warehouse","t":"Inhalation / Reaction","esi":"FA","s":"Close","sup":"Rosia Rosas","m":"February"},{"e":"Imelda Ranger","d":"2026-02-23","dd":"Feb 23, 2026","dept":"Warehouse","t":"Inhalation / Reaction","esi":"FA","s":"Close","sup":"Jesus Avila","m":"February"},{"e":"Hilary Coberly","d":"2026-02-23","dd":"Feb 23, 2026","dept":"Warehouse","t":"Inhalation / Reaction","esi":"FA","s":"Close","sup":"Jesus Avila","m":"February"},{"e":"Adam Valdiva","d":"2026-02-23","dd":"Feb 23, 2026","dept":"Warehouse","t":"Inhalation / Reaction","esi":"RPO","s":"Close","sup":"Jesus Avila","m":"February"},{"e":"Moises Bahera","d":"2026-02-23","dd":"Feb 23, 2026","dept":"Warehouse","t":"Inhalation / Reaction","esi":"RPO","s":"Close","sup":"Jesus Avila","m":"February"},{"e":"Edalia Lopez","d":"2026-02-20","dd":"Feb 20, 2026","dept":"Harvest","t":"Abrasion","esi":"FA","s":"Close","sup":"Samuel Sierra","m":"February"},{"e":"Honorina Lopez","d":"2026-02-19","dd":"Feb 19, 2026","dept":"Harvest","t":"Struck By/Against Object","esi":"FA","s":"Close","sup":"Samuel Sierra","m":"February"},{"e":"Magalie Cadet","d":"2026-02-19","dd":"Feb 19, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Rutilio Rodriguez","m":"February"},{"e":"Cesar Castellanos","d":"2026-02-18","dd":"Feb 18, 2026","dept":"Corrals","t":"Struck By Cattle","esi":"FA","s":"Close","sup":"Marilyn Herrera","m":"February"},{"e":"Aaron Slorio","d":"2026-02-18","dd":"Feb 18, 2026","dept":"Harvest","t":"Rash","esi":"FA","s":"Close","sup":"Michael Orozco","m":"February"},{"e":"Joseph Gomez","d":"2026-02-18","dd":"Feb 18, 2026","dept":"Harvest","t":"Struck By Cattle","esi":"FA","s":"Close","sup":"Richard Xiong","m":"February"},{"e":"Adrian Chaidez","d":"2026-02-18","dd":"Feb 18, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Juan Ramirez","m":"February"},{"e":"Jose Lopez","d":"2026-02-17","dd":"Feb 17, 2026","dept":"Corrals","t":"Struck By Cattle","esi":"FA","s":"Close","sup":"Marilyn Herrera","m":"February"},{"e":"Raul Trejo","d":"2026-02-17","dd":"Feb 17, 2026","dept":"Fabrication","t":"Rash","esi":"FA","s":"Close","sup":"Erwin Vega","m":"February"},{"e":"Daniel Ortega","d":"2026-02-16","dd":"Feb 16, 2026","dept":"Harvest","t":"Struck By Equipment","esi":"RPO","s":"Close","sup":"Rutilio Rodriguez","m":"February"},{"e":"Esmeralda Avalos Vazquez","d":"2026-02-13","dd":"Feb 13, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Christian Lopez","m":"February"},{"e":"China Bonner","d":"2026-02-13","dd":"Feb 13, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Elizabeth Neufeld","m":"February"},{"e":"Po Thao","d":"2026-02-13","dd":"Feb 13, 2026","dept":"Harvest","t":"Laceration","esi":"FA","s":"Close","sup":"Samuel Sierra","m":"February"},{"e":"Daniel Vega","d":"2026-02-12","dd":"Feb 12, 2026","dept":"Fabrication","t":"Foreign Object","esi":"FA","s":"Close","sup":"Maria Garcia","m":"February"},{"e":"Chrisofer Diaz","d":"2026-02-12","dd":"Feb 12, 2026","dept":"Loading Dock","t":"Strain","esi":"FA","s":"Close","sup":"Francisco Tapia","m":"February"},{"e":"Servando Valencia","d":"2026-02-10","dd":"Feb 10, 2026","dept":"Maintenance","t":"Laceration","esi":"FA","s":"Close","sup":"Rayomond Corrales","m":"February"},{"e":"Joseph Munt","d":"2026-02-10","dd":"Feb 10, 2026","dept":"Fabrication","t":"Puncture","esi":"FA","s":"Close","sup":"Erwin Vega","m":"February"},{"e":"Arsenio Leyva","d":"2026-02-10","dd":"Feb 10, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Rutilio Rodriguez","m":"February"},{"e":"Sonia Orozco","d":"2026-02-06","dd":"Feb 6, 2026","dept":"Fabrication","t":"Sprain","esi":"FA","s":"Close","sup":"Chadu Moua","m":"February"},{"e":"Edgar Hernandez","d":"2026-02-06","dd":"Feb 6, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Rutilio Rodriguez","m":"February"},{"e":"Gabriel Garcia","d":"2026-02-06","dd":"Feb 6, 2026","dept":"Fabrication","t":"Contusion","esi":"FA","s":"Close","sup":"Chadu Moua","m":"February"},{"e":"Deshovana Wells","d":"2026-02-06","dd":"Feb 6, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Michael Orozco","m":"February"},{"e":"David Rodriguez","d":"2026-02-05","dd":"Feb 5, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Richard Xiong","m":"February"},{"e":"Mathew Lee","d":"2026-02-04","dd":"Feb 4, 2026","dept":"Maintenance","t":"Abrasion","esi":"FA","s":"Close","sup":"Carlos Mata","m":"February"},{"e":"Deshovana Wells","d":"2026-02-04","dd":"Feb 4, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Michael Orozco","m":"February"},{"e":"Ronald Barboza","d":"2026-02-04","dd":"Feb 4, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Juan Rodriguez","m":"February"},{"e":"Martin Escalera","d":"2026-02-02","dd":"Feb 2, 2026","dept":"Outside Clean Up","t":"Inhalation","esi":"RPO","s":"Close","sup":"Clara Salazar","m":"February"},{"e":"Esperanza Alvarez","d":"2026-02-02","dd":"Feb 2, 2026","dept":"Outside Clean Up","t":"Inhalation","esi":"RPO","s":"Close","sup":"Clara Salazar","m":"February"},{"e":"Frank Aguero","d":"2026-01-28","dd":"Jan 28, 2026","dept":"Fabrication","t":"Foreign Object","esi":"FA","s":"Close","sup":"Maria Garcia","m":"January"},{"e":"Esmeralda Avalos Vazquez","d":"2026-01-28","dd":"Jan 28, 2026","dept":"Harvest","t":"Slip, Trip, & Fall","esi":"FA","s":"Close","sup":"Christian Lopez","m":"January"},{"e":"Joseph Munt","d":"2026-01-27","dd":"Jan 27, 2026","dept":"Fabrication","t":"Slip, Trip, & Fall","esi":"RPO","s":"Close","sup":"Erwin Vega","m":"January"},{"e":"Gabriel Sandhu","d":"2026-01-27","dd":"Jan 27, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Elizabeth Neufeld","m":"January"},{"e":"Edgar Guttierez","d":"2026-01-26","dd":"Jan 26, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Diego Soria","m":"January"},{"e":"Michael Valdez","d":"2026-01-26","dd":"Jan 26, 2026","dept":"Fabrication","t":"Sprain","esi":"FA","s":"Close","sup":"Ovidio Sanchez","m":"January"},{"e":"Rayna Perez","d":"2026-01-23","dd":"Jan 23, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Rutilio Rodriguez","m":"January"},{"e":"Jesus Garcia","d":"2026-01-23","dd":"Jan 23, 2026","dept":"Harvest","t":"Rash","esi":"FA","s":"Close","sup":"Rutilio Rodriguez","m":"January"},{"e":"Edwin Parada","d":"2026-01-22","dd":"Jan 22, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Elizabeth Neufeld","m":"January"},{"e":"Aliyah Gonzalez","d":"2026-01-22","dd":"Jan 22, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Christian Lopez","m":"January"},{"e":"Braulio Torres","d":"2026-01-22","dd":"Jan 22, 2026","dept":"Harvest","t":"Abrasion","esi":"FA","s":"Close","sup":"Marilyn Herrera","m":"January"},{"e":"Israel Douglas","d":"2026-01-22","dd":"Jan 22, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Diego Soria","m":"January"},{"e":"Artemio Monje","d":"2026-01-21","dd":"Jan 21, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Diego Soria","m":"January"},{"e":"Diego Prciado","d":"2026-01-21","dd":"Jan 21, 2026","dept":"Harvest","t":"Foreign Object","esi":"FA","s":"Close","sup":"Michael Orozco","m":"January"},{"e":"Valeria Vasquez","d":"2026-01-21","dd":"Jan 21, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Rutilio Rodriguez","m":"January"},{"e":"Jonathan Golaviz","d":"2026-01-20","dd":"Jan 20, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Diego Soria","m":"January"},{"e":"Mayra Solarte","d":"2026-01-16","dd":"Jan 16, 2026","dept":"Harvest","t":"Rash","esi":"RPO","s":"Close","sup":"Rutilio Rodriguez","m":"January"},{"e":"Esmeralda Avalos Vazquez","d":"2026-01-16","dd":"Jan 16, 2026","dept":"Harvest","t":"Burn","esi":"FA","s":"Close","sup":"Christian Lopez","m":"January"},{"e":"Antonio Soto","d":"2026-01-16","dd":"Jan 16, 2026","dept":"Fabrication","t":"Puncture","esi":"FA","s":"Close","sup":"Maria Garcia","m":"January"},{"e":"Moises Flores","d":"2026-01-14","dd":"Jan 14, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Juan Ramirez","m":"January"},{"e":"Jose Aguilar","d":"2026-01-12","dd":"Jan 12, 2026","dept":"Maintenance","t":"Pinch-Point","esi":"FA","s":"Close","sup":"Rayomond Corrales","m":"January"},{"e":"Selfia Revuelta","d":"2026-01-12","dd":"Jan 12, 2026","dept":"Fabrication","t":"Puncture","esi":"FA","s":"Close","sup":"Juan Rodriguez","m":"January"},{"e":"Touthao Yang","d":"2026-01-12","dd":"Jan 12, 2026","dept":"Fabrication","t":"Laceration","esi":"FA","s":"Close","sup":"Francisco Tapia","m":"January"},{"e":"Kao Vang","d":"2026-01-09","dd":"Jan 9, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Maria Garcia","m":"January"},{"e":"Douglas Cline","d":"2026-01-08","dd":"Jan 8, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Diego Soria","m":"January"},{"e":"Patricia Castillo","d":"2026-01-08","dd":"Jan 8, 2026","dept":"Fabrication","t":"Strain","esi":"FA","s":"Close","sup":"Maria Garcia","m":"January"},{"e":"Luis Perez Baldez","d":"2026-01-08","dd":"Jan 8, 2026","dept":"Fabrication","t":"Laceration","esi":"RECORDABLE","s":"Close","sup":"Diego Soria","m":"January"},{"e":"Sarah Gonzalez","d":"2026-01-07","dd":"Jan 7, 2026","dept":"Harvest","t":"Strain","esi":"FA","s":"Close","sup":"Richard Xiong","m":"January"}]</script>
 
 <script>
-  // ---- Shared tooltip ----
+  // ==================================================================
+  // Data source
+  //   The incident rows ship embedded in this file so the page works
+  //   offline / over file://. When served over http(s) the dashboard also
+  //   re-fetches data/incidents.json, so regenerating that file and
+  //   hitting "Live data" surfaces newly added incidents.
+  // ==================================================================
+  const DATA_URL = 'data/incidents.json';
+  const EMBEDDED = JSON.parse(document.getElementById('incidentData').textContent);
+  let INCIDENTS = sortIncidents(EMBEDDED);
+
+  // 2025 year-to-date comparison figures, from the workbook's YTD table.
+  const PRIOR_YTD = {total:141, rec:7, fa:104, rpo:30};
+  const SEVERITY_SCORE = 43;          // workbook composite, not derived here
+  const DAYS_WITHOUT_GOAL = 30;
+
+  const MONTH_NAMES = ['January','February','March','April','May','June',
+                       'July','August','September','October','November','December'];
+  const MONTH_ABBR  = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const PALETTE = ['#12233f','#17a2b8','#2c6fb0','#5aa9d6','#8fc4e3','#cfe1f2'];
+
+  function sortIncidents(rows){
+    return [...rows].sort((a,b)=> a.d < b.d ? 1 : a.d > b.d ? -1 : 0);
+  }
+  function parseDate(iso){
+    const [y,m,d] = iso.split('-').map(Number);
+    return new Date(y, m-1, d);
+  }
+  function fmtShort(dt){ return `${MONTH_ABBR[dt.getMonth()]} ${dt.getDate()}`; }
+  function fmtLong(dt){ return `${MONTH_ABBR[dt.getMonth()]} ${dt.getDate()}, ${dt.getFullYear()}`; }
+  function escapeHtml(str){
+    return String(str).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  }
+  function tally(rows, keyFn){
+    const m = new Map();
+    rows.forEach(r=>{ const k = keyFn(r); m.set(k, (m.get(k)||0)+1); });
+    return m;
+  }
+  function rankedEntries(map){
+    return [...map.entries()].sort((a,b)=> b[1]-a[1] || String(a[0]).localeCompare(String(b[0])));
+  }
+
+  // ==================================================================
+  // Aggregation: every figure on this page derives from INCIDENTS
+  // ==================================================================
+  let AGG = {};
+
+  function computeAggregates(rows){
+    const total = rows.length;
+    const isRec = r => r.esi === 'RECORDABLE';
+    const rec = rows.filter(isRec).length;
+    const fa  = rows.filter(r=>r.esi === 'FA').length;
+    const rpo = rows.filter(r=>r.esi === 'RPO').length;
+
+    const dates = rows.map(r=>parseDate(r.d)).sort((a,b)=>a-b);
+    const firstIncident = dates[0], last = dates[dates.length-1];
+    const year  = last ? last.getFullYear() : new Date().getFullYear();
+    const yearStart = new Date(year, 0, 1);
+    // The reporting period runs from Jan 1, not from whenever the first
+    // incident happened to land.
+    const first = last ? yearStart : null;
+
+    // --- monthly ---
+    const monthCount = tally(rows, r=>r.m);
+    const monthsPresent = MONTH_NAMES.filter(m=>monthCount.has(m));
+    const monthly = monthsPresent.map(m=>monthCount.get(m));
+
+    // --- weekly (Monday-start buckets, first bucket clamped to Jan 1) ---
+    const weekMap = new Map();
+    rows.forEach(r=>{
+      const dt = parseDate(r.d);
+      const dow = (dt.getDay() + 6) % 7;               // 0 = Monday
+      let start = new Date(dt); start.setDate(dt.getDate() - dow);
+      if(start < yearStart) start = new Date(yearStart);
+      const key = start.toISOString().slice(0,10);
+      if(!weekMap.has(key)) weekMap.set(key, {start, v:0, r:0});
+      const bucket = weekMap.get(key);
+      bucket.v++; if(isRec(r)) bucket.r++;
+    });
+    // fill gap weeks so the timeline has no holes
+    const weeks = [];
+    if(firstIncident){
+      let cursor = new Date(firstIncident);
+      cursor.setDate(cursor.getDate() - ((cursor.getDay()+6)%7));
+      if(cursor < yearStart) cursor = new Date(yearStart);
+      while(cursor <= last){
+        const key = cursor.toISOString().slice(0,10);
+        const bucket = weekMap.get(key) || {start:new Date(cursor), v:0, r:0};
+        const end = new Date(cursor);
+        const dow = (cursor.getDay()+6)%7;
+        end.setDate(cursor.getDate() + (6 - dow));
+        weeks.push({start:new Date(cursor), label:`${fmtShort(cursor)}–${fmtShort(end)}`, v:bucket.v, r:bucket.r});
+        cursor = new Date(end); cursor.setDate(cursor.getDate()+1);
+      }
+    }
+
+    // --- daily, for the most recent month present ---
+    const latestMonthIdx = last ? last.getMonth() : 0;
+    const dayRows = rows.filter(r=>{
+      const dt = parseDate(r.d);
+      return dt.getMonth() === latestMonthIdx && dt.getFullYear() === year;
+    });
+    const dayCount = tally(dayRows, r=>parseDate(r.d).getDate());
+    const dayRec   = tally(dayRows.filter(isRec), r=>parseDate(r.d).getDate());
+    const lastDay  = last ? last.getDate() : 0;
+    const days = [];
+    for(let d=1; d<=lastDay; d++){
+      days.push({d, dd:`${MONTH_ABBR[latestMonthIdx]} ${d}`, v:dayCount.get(d)||0, r:dayRec.get(d)||0});
+    }
+
+    // --- days since last recordable ---
+    const recDates = rows.filter(isRec).map(r=>parseDate(r.d)).sort((a,b)=>b-a);
+    const daysSinceRec = recDates.length && last
+      ? Math.round((last - recDates[0]) / 86400000)
+      : null;
+
+    return {
+      rows, total, rec, fa, rpo,
+      first, last, year,
+      monthsPresent, monthly, weeks, days,
+      latestMonthIdx,
+      daysSinceRec,
+      byType: rankedEntries(tally(rows, r=>r.t)),
+      byDept: rankedEntries(tally(rows, r=>r.dept)),
+      bySup:  rankedEntries(tally(rows, r=>r.sup)),
+      recBySup: tally(rows.filter(isRec), r=>r.sup),
+      byEsi:  tally(rows, r=>r.esi),
+      byMonth: tally(rows, r=>r.m),
+      byStatus: tally(rows, r=>r.s)
+    };
+  }
+
+  function topGrouped(entries, keep){
+    const head = entries.slice(0, keep);
+    const restTotal = entries.slice(keep).reduce((s,e)=>s+e[1], 0);
+    const out = head.map(([label,value],i)=>({label, value, color:PALETTE[i % PALETTE.length]}));
+    if(restTotal) out.push({label:'Other', value:restTotal, color:PALETTE[PALETTE.length-1]});
+    return out;
+  }
+
+  // ==================================================================
+  // Shared tooltip
+  // ==================================================================
   const tooltip = document.getElementById('chartTooltip');
   function showTooltip(x,y,title,sub){
     tooltip.innerHTML = `<div>${title}</div>${sub?`<div class="tt-sub">${sub}</div>`:''}`;
-    tooltip.style.left = x+'px';
-    tooltip.style.top = y+'px';
+    tooltip.style.left = x+'px'; tooltip.style.top = y+'px';
     tooltip.classList.add('show');
   }
-  function moveTooltip(x,y){ tooltip.style.left = x+'px'; tooltip.style.top = y+'px'; }
   function hideTooltip(){ tooltip.classList.remove('show'); }
 
-  // ---- Injury Type donut ----
-  const injuryTypes = [
-    {label:'Strain', value:99, color:'#12233f'},
-    {label:'Slip, Trip & Fall', value:26, color:'#17a2b8'},
-    {label:'Puncture', value:25, color:'#2c6fb0'},
-    {label:'Foreign Object', value:18, color:'#5aa9d6'},
-    {label:'Rash', value:14, color:'#8fc4e3'},
-    {label:'Other', value:93, color:'#cfe1f2'}
-  ];
-  const totalInjury = injuryTypes.reduce((s,d)=>s+d.value,0);
+  // ==================================================================
+  // Header / KPI band
+  // ==================================================================
+  function renderHeadline(){
+    const a = AGG;
+    const pct = v => a.total ? Math.round((v/a.total)*100) : 0;
+    const delta = (cur, prior) => {
+      if(!prior) return `&#9679; no ${a.year-1} baseline`;
+      const diff = cur - prior;
+      const rel = Math.round((diff/prior)*100);
+      if(diff > 0) return `&#9650; +${rel}% vs ${a.year-1} (${prior})`;
+      if(diff < 0) return `&#9660; ${rel}% vs ${a.year-1} (${prior})`;
+      return `&#9679; +0 vs ${a.year-1} (${prior})`;
+    };
 
-  const donutSvg = document.getElementById('donutChart');
-  const cx=95, cy=95, r=70, sw=26;
-  const circumference = 2*Math.PI*r;
-  const donutSegEls = [];
-  let offset = 0;
-  injuryTypes.forEach((seg,idx)=>{
-    const frac = seg.value/totalInjury;
-    const len = frac*circumference;
-    const pct = (frac*100).toFixed(1);
-    const circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
-    circle.setAttribute('cx',cx); circle.setAttribute('cy',cy); circle.setAttribute('r',r);
-    circle.setAttribute('fill','none');
-    circle.setAttribute('stroke',seg.color);
-    circle.setAttribute('stroke-width',sw);
-    circle.setAttribute('stroke-dasharray', `${len} ${circumference-len}`);
-    circle.setAttribute('stroke-dashoffset', -offset);
-    circle.setAttribute('transform', `rotate(-90 ${cx} ${cy})`);
-    circle.addEventListener('mousemove', e=>{
-      showTooltip(e.clientX, e.clientY, seg.label, `${seg.value} incidents &middot; ${pct}%`);
-      highlightDonutSeg(idx);
+    document.getElementById('kpiTotal').textContent = a.total;
+    document.getElementById('kpiTotalDelta').innerHTML = delta(a.total, PRIOR_YTD.total);
+    document.getElementById('kpiRec').textContent = a.rec;
+    document.getElementById('kpiRecDelta').innerHTML = delta(a.rec, PRIOR_YTD.rec);
+    document.getElementById('kpiFa').textContent = a.fa;
+    document.getElementById('kpiFaDelta').textContent = `${pct(a.fa)}% of YTD incidents`;
+    document.getElementById('kpiRpo').textContent = a.rpo;
+    document.getElementById('kpiRpoDelta').textContent = `${pct(a.rpo)}% of YTD incidents`;
+
+    if(a.first && a.last){
+      document.getElementById('periodPill').innerHTML =
+        `&#128197; YTD ${a.year} (${fmtShort(a.first)} &ndash; ${fmtShort(a.last)})`;
+      document.getElementById('statRange').textContent =
+        `From ${fmtLong(a.first)} to ${fmtLong(a.last)}`;
+      document.getElementById('nrrFrom').innerHTML = `&#9728;&#65039; From ${fmtLong(a.first)} &middot; 12:00 AM`;
+      document.getElementById('nrrTo').innerHTML = `&#128337; To ${fmtLong(a.last)} &middot; 24:00 PM`;
+      document.getElementById('pageFooter').innerHTML =
+        `Source: Master_List_Of_Injuries_2025_2026 &middot; ${a.total} YTD incident records (${a.year}) &middot; Generated ${fmtLong(a.last)}`;
+    }
+    document.getElementById('statTotal').textContent = a.total;
+    document.getElementById('resultsTotal').textContent = a.total;
+
+    const relTotal = PRIOR_YTD.total ? Math.round(((a.total-PRIOR_YTD.total)/PRIOR_YTD.total)*100) : 0;
+    document.getElementById('sparkBadge').innerHTML = `${relTotal>=0?'&#9650;':'&#9660;'} ${Math.abs(relTotal)}%`;
+
+    document.getElementById('miniStats').innerHTML = a.byType.slice(0,3)
+      .map(([label,value])=>`<div><div class="n">${value}</div><div class="l">${escapeHtml(label)}</div></div>`)
+      .join('');
+  }
+
+  // ==================================================================
+  // Gauges
+  // ==================================================================
+  const GAUGE_CIRCUMFERENCE = 232.5;
+  function setArc(el, fraction){
+    el.setAttribute('stroke-dashoffset', (GAUGE_CIRCUMFERENCE * (1 - Math.max(0, Math.min(1, fraction)))).toFixed(1));
+  }
+  function renderGauges(){
+    const a = AGG;
+    const nonRec = a.total ? (a.total - a.rec)/a.total : 1;
+    document.getElementById('nrrText').textContent = `${(nonRec*100).toFixed(1)}%`;
+    setArc(document.getElementById('nrrArc'), nonRec);
+
+    if(a.daysSinceRec === null){
+      document.getElementById('dwrText').textContent = '—';
+      document.getElementById('dwrMeta').innerHTML = '&#128337; No recordable cases on file';
+      setArc(document.getElementById('dwrArc'), 1);
+    } else {
+      const frac = Math.min(a.daysSinceRec / DAYS_WITHOUT_GOAL, 1);
+      document.getElementById('dwrText').textContent = `${Math.round(frac*100)}%`;
+      document.getElementById('dwrMeta').innerHTML =
+        `&#128337; Currently at ${a.daysSinceRec} / ${DAYS_WITHOUT_GOAL} days`;
+      const pill = document.getElementById('dwrPill');
+      pill.textContent = frac >= 1 ? 'Goal met' : 'On Pace';
+      pill.className = 'status-pill ' + (frac >= 1 ? 'status-good' : 'status-fair');
+      setArc(document.getElementById('dwrArc'), frac);
+    }
+    const topDept = a.byDept[0], topType = a.byType[0];
+    if(topDept && topType){
+      document.getElementById('sevMeta').innerHTML =
+        `&#128204; ${escapeHtml(topDept[0])} &amp; ${escapeHtml(topType[0])} drive volume`;
+    }
+  }
+
+  // ==================================================================
+  // Injury type donut + legend
+  // ==================================================================
+  let donutSegEls = [];
+  function renderDonut(){
+    const segs = topGrouped(AGG.byType, 5);
+    const totalInjury = segs.reduce((s,d)=>s+d.value,0) || 1;
+    const svg = document.getElementById('donutChart');
+    const cx=95, cy=95, r=70, sw=26, circumference = 2*Math.PI*r;
+    svg.innerHTML = '';
+    donutSegEls = [];
+    let offset = 0;
+    segs.forEach((seg,idx)=>{
+      const len = (seg.value/totalInjury)*circumference;
+      const pct = ((seg.value/totalInjury)*100).toFixed(1);
+      const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      c.setAttribute('cx',cx); c.setAttribute('cy',cy); c.setAttribute('r',r);
+      c.setAttribute('fill','none'); c.setAttribute('stroke',seg.color);
+      c.setAttribute('stroke-width',sw);
+      c.setAttribute('stroke-dasharray', `${len} ${circumference-len}`);
+      c.setAttribute('stroke-dashoffset', -offset);
+      c.setAttribute('transform', `rotate(-90 ${cx} ${cy})`);
+      c.addEventListener('mousemove', e=>{
+        showTooltip(e.clientX, e.clientY, seg.label, `${seg.value} incidents &middot; ${pct}%`);
+        highlightDonutSeg(idx);
+      });
+      c.addEventListener('mouseleave', ()=>{ hideTooltip(); clearDonutHighlight(); });
+      svg.appendChild(c);
+      donutSegEls.push(c);
+      offset += len;
     });
-    circle.addEventListener('mouseleave', ()=>{ hideTooltip(); clearDonutHighlight(); });
-    donutSvg.appendChild(circle);
-    donutSegEls.push(circle);
-    offset += len;
-  });
+
+    const legend = document.getElementById('donutLegend');
+    legend.innerHTML = '';
+    segs.slice(0,4).forEach((seg,idx)=>{
+      const pct = ((seg.value/totalInjury)*100).toFixed(0);
+      const row = document.createElement('div');
+      row.className = 'legend-row';
+      row.innerHTML = `<span class="lbl"><span class="dot" style="background:${seg.color}"></span>${escapeHtml(seg.label)}</span><span class="pct">${pct}%</span>`;
+      row.addEventListener('mouseenter', ()=>highlightDonutSeg(idx));
+      row.addEventListener('mouseleave', clearDonutHighlight);
+      legend.appendChild(row);
+    });
+  }
   function highlightDonutSeg(idx){
     donutSegEls.forEach((c,i)=>{
       c.style.opacity = i===idx ? '1' : '0.32';
-      c.style.strokeWidth = i===idx ? (sw+4) : sw;
+      c.style.strokeWidth = i===idx ? 30 : 26;
     });
   }
   function clearDonutHighlight(){
-    donutSegEls.forEach(c=>{ c.style.opacity='1'; c.style.strokeWidth=sw; });
+    donutSegEls.forEach(c=>{ c.style.opacity='1'; c.style.strokeWidth=26; });
   }
 
-  const legendWrap = document.getElementById('donutLegend');
-  injuryTypes.slice(0,4).forEach((seg,idx)=>{
-    const pct = ((seg.value/totalInjury)*100).toFixed(0);
-    const row = document.createElement('div');
-    row.className='legend-row';
-    row.innerHTML = `<span class="lbl"><span class="dot" style="background:${seg.color}"></span>${seg.label}</span><span class="pct">${pct}%</span>`;
-    row.addEventListener('mouseenter', ()=>highlightDonutSeg(idx));
-    row.addEventListener('mouseleave', clearDonutHighlight);
-    legendWrap.appendChild(row);
-  });
-
-  // ---- Department bar chart ----
-  const departments = [
-    {label:'Fabrication', value:132, color:'#12233f'},
-    {label:'Harvest', value:106, color:'#17a2b8'},
-    {label:'Maintenance', value:10, color:'#2c6fb0'},
-    {label:'Corrals', value:8, color:'#5aa9d6'},
-    {label:'Warehouse', value:6, color:'#8fc4e3'},
-    {label:'Other', value:13, color:'#cfe1f2'}
-  ];
-  const totalDept = departments.reduce((s,d)=>s+d.value,0);
-  const maxDept = Math.max(...departments.map(d=>d.value));
-  const barWrap = document.getElementById('deptBars');
-  departments.forEach(d=>{
-    const pct = ((d.value/totalDept)*100).toFixed(0);
-    const heightPct = (d.value/maxDept)*100;
-    const col = document.createElement('div');
-    col.className='bar-col';
-    col.innerHTML = `<div class="bar-pct" style="color:${d.color==='#cfe1f2'?'#68758a':'#1a2433'}">${pct}%</div>
-      <div class="bar" style="height:${heightPct}%;background:${d.color}"></div>
-      <div class="bar-label">${d.label}</div>`;
-    col.addEventListener('mousemove', e=>{
-      showTooltip(e.clientX, e.clientY, d.label, `${d.value} incidents &middot; ${pct}% of YTD`);
+  // ==================================================================
+  // Department distribution
+  // ==================================================================
+  function renderDepartments(){
+    const a = AGG;
+    const bars = topGrouped(a.byDept, 5);
+    const totalDept = bars.reduce((s,d)=>s+d.value,0) || 1;
+    const maxDept = Math.max(...bars.map(d=>d.value), 1);
+    const wrap = document.getElementById('deptBars');
+    wrap.innerHTML = '';
+    bars.forEach(d=>{
+      const pct = ((d.value/totalDept)*100).toFixed(0);
+      const col = document.createElement('div');
+      col.className = 'bar-col';
+      col.innerHTML = `<div class="bar-pct" style="color:${d.color==='#cfe1f2'?'#68758a':'#1a2433'}">${pct}%</div>
+        <div class="bar" style="height:${(d.value/maxDept)*100}%;background:${d.color}"></div>
+        <div class="bar-label">${escapeHtml(d.label)}</div>`;
+      col.addEventListener('mousemove', e=>
+        showTooltip(e.clientX, e.clientY, d.label, `${d.value} incidents &middot; ${pct}% of YTD`));
+      col.addEventListener('mouseleave', hideTooltip);
+      wrap.appendChild(col);
     });
-    col.addEventListener('mouseleave', hideTooltip);
-    barWrap.appendChild(col);
-  });
 
-  // ---- Sparkline (monthly incidents Jan-Jul) ----
-  const monthly = [28,44,31,48,25,56,43];
-  const spark = document.getElementById('sparkline');
-  const sw2=140, sh2=34, pad=3;
-  const maxM = Math.max(...monthly), minM = Math.min(...monthly);
-  const stepX = (sw2-2*pad)/(monthly.length-1);
-  const pts = monthly.map((v,i)=>{
-    const x = pad + i*stepX;
-    const y = sh2-pad - ((v-minM)/(maxM-minM||1))*(sh2-2*pad);
-    return `${x},${y}`;
-  }).join(' ');
-  const poly = document.createElementNS('http://www.w3.org/2000/svg','polyline');
-  poly.setAttribute('points',pts);
-  poly.setAttribute('fill','none');
-  poly.setAttribute('stroke','#17a2b8');
-  poly.setAttribute('stroke-width','2');
-  poly.setAttribute('stroke-linecap','round');
-  poly.setAttribute('stroke-linejoin','round');
-  spark.appendChild(poly);
+    const esiRows = [
+      {key:'FA',         name:'FA (FIRST AID)'},
+      {key:'RPO',        name:'RPO / MOD DUTY'},
+      {key:'RECORDABLE', name:'RECORDABLE'}
+    ];
+    document.getElementById('protocolRows').innerHTML = esiRows.map(cfg=>{
+      const subset = a.rows.filter(r=>r.esi === cfg.key);
+      const share = a.total ? ((subset.length/a.total)*100).toFixed(1) : '0.0';
+      const topTwo = rankedEntries(tally(subset, r=>r.dept)).slice(0,2);
+      const detail = topTwo.length
+        ? topTwo.map(([dept,n])=>`<div><span>${escapeHtml(dept)}</span><span class="num">${n}</span></div>`).join('')
+        : '<div><span>No cases</span></div>';
+      return `<div class="protocol-row">
+          <div><div class="pname">${cfg.name}</div><div class="ppct">${share}%</div></div>
+          <div class="protocol-sub">${detail}</div>
+        </div>`;
+    }).join('');
+  }
 
-  // ---- Incident Trend: Month / Week / Day ----
-  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul'];
-  const fullMonths = ['January','February','March','April','May','June','July'];
-
-  // Weekly incidents, Jan 1 – Jul 26, 2026 (the in-progress 7/27 week is excluded — 0 incidents so far)
-  const weekData = [
-    {label:'1/1–1/4',start:'Jan 1',v:0,r:0},{label:'1/5–1/11',start:'Jan 5',v:5,r:1},
-    {label:'1/12–1/18',start:'Jan 12',v:7,r:0},{label:'1/19–1/25',start:'Jan 19',v:10,r:0},
-    {label:'1/26–2/1',start:'Jan 26',v:6,r:0},{label:'2/2–2/8',start:'Feb 2',v:10,r:0},
-    {label:'2/9–2/15',start:'Feb 9',v:8,r:0},{label:'2/16–2/22',start:'Feb 16',v:10,r:0},
-    {label:'2/23–3/1',start:'Feb 23',v:16,r:0},{label:'3/2–3/8',start:'Mar 2',v:12,r:1},
-    {label:'3/9–3/15',start:'Mar 9',v:3,r:0},{label:'3/16–3/22',start:'Mar 16',v:9,r:0},
-    {label:'3/23–3/29',start:'Mar 23',v:4,r:0},{label:'3/30–4/5',start:'Mar 30',v:9,r:1},
-    {label:'4/6–4/12',start:'Apr 6',v:15,r:0},{label:'4/13–4/19',start:'Apr 13',v:10,r:0},
-    {label:'4/20–4/26',start:'Apr 20',v:14,r:0},{label:'4/27–5/3',start:'Apr 27',v:4,r:0},
-    {label:'5/4–5/10',start:'May 4',v:5,r:0},{label:'5/11–5/17',start:'May 11',v:7,r:1},
-    {label:'5/18–5/24',start:'May 18',v:3,r:0},{label:'5/25–5/31',start:'May 25',v:9,r:0},
-    {label:'6/1–6/7',start:'Jun 1',v:9,r:0},{label:'6/8–6/14',start:'Jun 8',v:11,r:1},
-    {label:'6/15–6/21',start:'Jun 15',v:10,r:1},{label:'6/22–6/28',start:'Jun 22',v:19,r:0},
-    {label:'6/29–7/5',start:'Jun 29',v:19,r:1},{label:'7/6–7/12',start:'Jul 6',v:16,r:0},
-    {label:'7/13–7/19',start:'Jul 13',v:7,r:0},{label:'7/20–7/26',start:'Jul 20',v:8,r:0}
-  ];
-
-  // Daily incidents, July 1–27, 2026 (through the dashboard's "as of" date)
-  const dayData = [
-    {d:1,dd:'Jul 1',v:2,r:1},{d:2,dd:'Jul 2',v:5,r:0},{d:3,dd:'Jul 3',v:5,r:0},{d:4,dd:'Jul 4',v:0,r:0},
-    {d:5,dd:'Jul 5',v:0,r:0},{d:6,dd:'Jul 6',v:0,r:0},{d:7,dd:'Jul 7',v:3,r:0},{d:8,dd:'Jul 8',v:5,r:0},
-    {d:9,dd:'Jul 9',v:5,r:0},{d:10,dd:'Jul 10',v:3,r:0},{d:11,dd:'Jul 11',v:0,r:0},{d:12,dd:'Jul 12',v:0,r:0},
-    {d:13,dd:'Jul 13',v:1,r:0},{d:14,dd:'Jul 14',v:4,r:0},{d:15,dd:'Jul 15',v:1,r:0},{d:16,dd:'Jul 16',v:0,r:0},
-    {d:17,dd:'Jul 17',v:1,r:0},{d:18,dd:'Jul 18',v:0,r:0},{d:19,dd:'Jul 19',v:0,r:0},{d:20,dd:'Jul 20',v:1,r:0},
-    {d:21,dd:'Jul 21',v:2,r:0},{d:22,dd:'Jul 22',v:3,r:0},{d:23,dd:'Jul 23',v:1,r:0},{d:24,dd:'Jul 24',v:1,r:0},
-    {d:25,dd:'Jul 25',v:0,r:0},{d:26,dd:'Jul 26',v:0,r:0},{d:27,dd:'Jul 27',v:0,r:0}
-  ];
-
-  const trendModes = {
-    month: {
-      dense:false,
-      subtitle:'January – July 2026 · by month',
-      items: months.map((m,i)=>({label:m, tt:`${fullMonths[i]} 2026`, sub:`${monthly[i]} incidents`, v:monthly[i], r:0}))
-    },
-    week: {
-      dense:true,
-      subtitle:'31 weeks · Jan 1 – Jul 26, 2026',
-      items: weekData.map((w,i)=>({
-        label: i%4===0 ? w.start : '',
-        tt: `Week of ${w.label}`,
-        sub: `${w.v} incident${w.v===1?'':'s'}${w.r? ' · '+w.r+' recordable':''}`,
-        v:w.v, r:w.r
-      }))
-    },
-    day: {
-      dense:true,
-      subtitle:'July 1 – 27, 2026 · daily',
-      items: dayData.map(d=>({
-        label:String(d.d),
-        tt:`${d.dd}, 2026`,
-        sub:`${d.v} incident${d.v===1?'':'s'}${d.r? ' · '+d.r+' recordable':''}`,
-        v:d.v, r:d.r
-      }))
-    }
-  };
+  // ==================================================================
+  // Sparkline + Incident Trend (Month / Week / Day)
+  // ==================================================================
+  function renderSparkline(){
+    const monthly = AGG.monthly;
+    const svg = document.getElementById('sparkline');
+    svg.innerHTML = '';
+    if(monthly.length < 2) return;
+    const w=140, hgt=34, pad=3;
+    const maxM = Math.max(...monthly), minM = Math.min(...monthly);
+    const stepX = (w-2*pad)/(monthly.length-1);
+    const pts = monthly.map((v,i)=>{
+      const x = pad + i*stepX;
+      const y = hgt-pad - ((v-minM)/(maxM-minM||1))*(hgt-2*pad);
+      return `${x},${y}`;
+    }).join(' ');
+    const poly = document.createElementNS('http://www.w3.org/2000/svg','polyline');
+    poly.setAttribute('points',pts);
+    poly.setAttribute('fill','none'); poly.setAttribute('stroke','#17a2b8');
+    poly.setAttribute('stroke-width','2');
+    poly.setAttribute('stroke-linecap','round'); poly.setAttribute('stroke-linejoin','round');
+    svg.appendChild(poly);
+  }
 
   const trendWrap = document.getElementById('trendBars');
   const trendSubtitleEl = document.getElementById('trendSubtitle');
 
+  function trendConfig(mode){
+    const a = AGG;
+    if(mode === 'week'){
+      return {
+        dense:true,
+        subtitle:`${a.weeks.length} weeks · ${a.first?fmtShort(a.first):''} – ${a.last?fmtShort(a.last):''}, ${a.year}`,
+        items: a.weeks.map((w,i)=>({
+          label: i % 4 === 0 ? fmtShort(w.start) : '',
+          tt: `Week of ${w.label}`,
+          sub: `${w.v} incident${w.v===1?'':'s'}${w.r?' · '+w.r+' recordable':''}`,
+          v:w.v, r:w.r
+        }))
+      };
+    }
+    if(mode === 'day'){
+      return {
+        dense:true,
+        subtitle:`${MONTH_NAMES[a.latestMonthIdx]} 1 – ${a.last?a.last.getDate():0}, ${a.year} · daily`,
+        items: a.days.map(d=>({
+          label:String(d.d),
+          tt:`${d.dd}, ${a.year}`,
+          sub:`${d.v} incident${d.v===1?'':'s'}${d.r?' · '+d.r+' recordable':''}`,
+          v:d.v, r:d.r
+        }))
+      };
+    }
+    return {
+      dense:false,
+      subtitle:`${a.monthsPresent[0]||''} – ${a.monthsPresent[a.monthsPresent.length-1]||''} ${a.year} · by month`,
+      items: a.monthsPresent.map((m,i)=>({
+        label: MONTH_ABBR[MONTH_NAMES.indexOf(m)],
+        tt:`${m} ${a.year}`,
+        sub:`${a.monthly[i]} incidents`,
+        v:a.monthly[i], r:0
+      }))
+    };
+  }
+
   function renderTrend(mode){
-    const cfg = trendModes[mode];
+    const cfg = trendConfig(mode);
     trendWrap.classList.add('fading');
     window.setTimeout(()=>{
       trendWrap.classList.toggle('dense', cfg.dense);
@@ -1090,8 +1261,7 @@
           ${it.r>0?'<div class="trend-rec-dot" title="Recordable"></div>':''}
           <div class="trend-bar" style="height:${Math.max((it.v/maxV)*100, it.v>0?4:1.5)}%"></div>
           <div class="trend-lbl">${it.label}</div>
-        </div>
-      `).join('');
+        </div>`).join('');
       trendSubtitleEl.textContent = cfg.subtitle;
       trendWrap.classList.remove('fading');
       trendWrap.querySelectorAll('.trend-col').forEach((col,i)=>{
@@ -1099,11 +1269,9 @@
         col.addEventListener('mousemove', e=> showTooltip(e.clientX, e.clientY, it.tt, it.sub));
         col.addEventListener('mouseleave', hideTooltip);
       });
-      requestAnimationFrame(()=>{
-        requestAnimationFrame(()=>{
-          trendWrap.querySelectorAll('.trend-col').forEach(el=>el.classList.add('visible'));
-        });
-      });
+      requestAnimationFrame(()=>requestAnimationFrame(()=>{
+        trendWrap.querySelectorAll('.trend-col').forEach(el=>el.classList.add('visible'));
+      }));
     }, 140);
   }
 
@@ -1114,77 +1282,97 @@
     btn.classList.add('active');
     renderTrend(btn.dataset.mode);
   });
-
-  renderTrend('month');
-
-  // ---- "View recent incidents" link: scroll + focus search ----
-  document.querySelector('.view-more').addEventListener('click', ()=>{
-    window.setTimeout(()=>{
-      const el = document.getElementById('incidentSearch');
-      if(el) el.focus();
-    }, 420);
-  });
-
-  // ==================================================================
-  // Incident Explorer: fully searchable, multi-filter incident browser
-  // ==================================================================
-  const INCIDENTS = JSON.parse(document.getElementById('incidentData').textContent);
-  const TOTAL_INCIDENTS = INCIDENTS.length;
-
-  const state = { q:'', dept:new Set(), esi:new Set(), status:new Set(), month:new Set() };
-
-  function escapeHtml(str){
-    return String(str).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  function activeTrendMode(){
+    return document.querySelector('#trendTabs .seg-btn.active').dataset.mode;
   }
+
+  // ==================================================================
+  // Key findings
+  // ==================================================================
+  function renderFindings(){
+    const a = AGG;
+    const out = [];
+    const n = a.monthly.length;
+    if(n){
+      const latest = a.monthsPresent[n-1], v = a.monthly[n-1];
+      if(n > 1){
+        const diff = v - a.monthly[n-2];
+        out.push(`${latest} stands at ${v} incidents, ${diff===0?'flat':(diff>0?'up '+diff:'down '+Math.abs(diff))} month-over-month.`);
+      } else {
+        out.push(`${latest} stands at ${v} incidents.`);
+      }
+    }
+    const topDept = a.byDept[0];
+    if(topDept) out.push(`${topDept[0]} leads all departments with a ${Math.round((topDept[1]/a.total)*100)}% share of YTD incidents.`);
+    const topType = a.byType[0];
+    if(topType) out.push(`${topType[0]} is the #1 injury type YTD with ${topType[1]} recorded cases.`);
+    const recRate = a.total ? ((a.rec/a.total)*100).toFixed(1) : '0.0';
+    out.push(`Recordable cases stand at ${a.rec} vs. ${PRIOR_YTD.rec} last year — rate ${recRate}%.`);
+    if(PRIOR_YTD.total){
+      const rel = Math.round(((a.total-PRIOR_YTD.total)/PRIOR_YTD.total)*100);
+      out.push(`YTD volume is ${rel>=0?'up':'down'} ${Math.abs(rel)}% vs. ${a.year-1} (${a.total} vs. ${PRIOR_YTD.total}).`);
+    }
+    document.getElementById('findingsList').innerHTML =
+      out.map(t=>`<li>${escapeHtml(t)}</li>`).join('');
+
+    if(topDept && topType){
+      document.getElementById('actionBox').innerHTML =
+        `<b>Action:</b> Focus ergonomics coaching in ${escapeHtml(topDept[0])} and target ${escapeHtml(topType[0])}-reduction exposures.`;
+    }
+  }
+
+  // ==================================================================
+  // Incident Explorer
+  // ==================================================================
+  const state = { q:'', dept:new Set(), esi:new Set(), status:new Set(), month:new Set() };
+  const searchInput   = document.getElementById('incidentSearch');
+  const searchClearX  = document.getElementById('searchClearX');
+
   function esiClass(esi){
     if(esi==='FA') return 'badge-fa';
     if(esi==='RPO') return 'badge-rpo';
     if(esi==='RECORDABLE') return 'badge-rec';
     return 'badge-open';
   }
-  function statusClass(s){
-    return s==='Close' ? 'badge-close' : 'badge-open';
-  }
-  function countBy(key){
-    const m = new Map();
-    INCIDENTS.forEach(r=>{ m.set(r[key], (m.get(r[key])||0)+1); });
-    return m;
-  }
+  const statusClass = s => s==='Close' ? 'badge-close' : 'badge-open';
 
-  function renderChipGroup(containerId, group, order, counts, labelMap){
-    const wrap = document.getElementById(containerId);
-    wrap.innerHTML = order.map(v=>{
+  function chipGroupHTML(group, order, counts, labelMap, active){
+    return order.map(v=>{
       const label = (labelMap && labelMap[v]) || v;
-      const count = counts.get(v) || 0;
-      return `<button type="button" class="chip" data-group="${group}" data-value="${escapeHtml(v)}">${escapeHtml(label)}<span class="chip-count">${count}</span></button>`;
+      return `<button type="button" class="chip ${active.has(v)?'active':''}" data-group="${group}" data-value="${escapeHtml(v)}">${escapeHtml(label)}<span class="chip-count">${counts.get(v)||0}</span></button>`;
     }).join('');
   }
 
-  const deptCounts = countBy('dept');
-  const deptOrder = [...deptCounts.entries()].sort((a,b)=>b[1]-a[1]).map(e=>e[0]);
-  renderChipGroup('chipsDept','dept',deptOrder,deptCounts);
+  function renderChips(){
+    const a = AGG;
+    // drop selections that no longer exist in the data
+    [['dept', a.byDept.map(e=>e[0])], ['esi', [...a.byEsi.keys()]],
+     ['status', [...a.byStatus.keys()]], ['month', [...a.byMonth.keys()]]
+    ].forEach(([g, valid])=>{
+      [...state[g]].forEach(v=>{ if(!valid.includes(v)) state[g].delete(v); });
+    });
 
-  const esiCounts = countBy('esi');
-  renderChipGroup('chipsEsi','esi',['FA','RPO','RECORDABLE'],esiCounts,{FA:'First Aid',RPO:'RPO / Mod Duty',RECORDABLE:'Recordable'});
-
-  const statusCounts = countBy('s');
-  renderChipGroup('chipsStatus','status',['Close','Open'],statusCounts,{Close:'Closed',Open:'Open'});
-
-  const monthCounts = countBy('m');
-  const monthOrder = ['January','February','March','April','May','June','July'].filter(m=>monthCounts.has(m));
-  renderChipGroup('chipsMonth','month',monthOrder,monthCounts);
+    document.getElementById('chipsDept').innerHTML =
+      chipGroupHTML('dept', a.byDept.map(e=>e[0]), new Map(a.byDept), null, state.dept);
+    document.getElementById('chipsEsi').innerHTML =
+      chipGroupHTML('esi', ['FA','RPO','RECORDABLE'].filter(k=>a.byEsi.has(k)), a.byEsi,
+        {FA:'First Aid', RPO:'RPO / Mod Duty', RECORDABLE:'Recordable'}, state.esi);
+    document.getElementById('chipsStatus').innerHTML =
+      chipGroupHTML('status', ['Close','Open'].filter(k=>a.byStatus.has(k)), a.byStatus,
+        {Close:'Closed', Open:'Open'}, state.status);
+    document.getElementById('chipsMonth').innerHTML =
+      chipGroupHTML('month', MONTH_NAMES.filter(m=>a.byMonth.has(m)), a.byMonth, null, state.month);
+  }
 
   document.getElementById('filterChips').addEventListener('click', e=>{
     const chip = e.target.closest('.chip');
     if(!chip) return;
-    const group = chip.dataset.group, value = chip.dataset.value;
+    const {group, value} = chip.dataset;
     if(state[group].has(value)) state[group].delete(value); else state[group].add(value);
     chip.classList.toggle('active');
     applyFilters();
   });
 
-  const searchInput = document.getElementById('incidentSearch');
-  const searchClearX = document.getElementById('searchClearX');
   searchInput.addEventListener('input', ()=>{
     state.q = searchInput.value;
     searchClearX.classList.toggle('show', state.q.length>0);
@@ -1196,7 +1384,6 @@
     searchInput.focus();
     applyFilters();
   });
-
   document.getElementById('clearAllBtn').addEventListener('click', ()=>{
     state.q=''; searchInput.value=''; searchClearX.classList.remove('show');
     ['dept','esi','status','month'].forEach(g=>state[g].clear());
@@ -1206,8 +1393,7 @@
 
   function updateClearBtn(){
     const filterCount = state.dept.size + state.esi.size + state.status.size + state.month.size;
-    const active = state.q || filterCount;
-    document.getElementById('clearAllBtn').classList.toggle('show', !!active);
+    document.getElementById('clearAllBtn').classList.toggle('show', !!(state.q || filterCount));
     const summary = document.getElementById('activeSummary');
     if(filterCount){
       summary.innerHTML = `<b>${filterCount}</b> filter${filterCount>1?'s':''} active`;
@@ -1236,11 +1422,9 @@
         ? list.map(rowHTML).join('')
         : `<div class="empty-state"><div class="icon">&#128269;</div><div><b>No incidents match your filters</b></div><div class="hint">Try a different search term or clear a filter.</div></div>`;
       body.classList.remove('fading');
-      requestAnimationFrame(()=>{
-        requestAnimationFrame(()=>{
-          body.querySelectorAll('.result-row').forEach(el=>el.classList.add('visible'));
-        });
-      });
+      requestAnimationFrame(()=>requestAnimationFrame(()=>{
+        body.querySelectorAll('.result-row').forEach(el=>el.classList.add('visible'));
+      }));
     }, 150);
   }
 
@@ -1251,76 +1435,13 @@
       if(state.esi.size && !state.esi.has(r.esi)) return false;
       if(state.status.size && !state.status.has(r.s)) return false;
       if(state.month.size && !state.month.has(r.m)) return false;
-      if(q){
-        const hay = `${r.e} ${r.dept} ${r.t} ${r.sup} ${r.esi} ${r.s} ${r.m}`.toLowerCase();
-        if(!hay.includes(q)) return false;
-      }
+      if(q && !`${r.e} ${r.dept} ${r.t} ${r.sup} ${r.esi} ${r.s} ${r.m}`.toLowerCase().includes(q)) return false;
       return true;
     });
     renderResults(filtered);
     document.getElementById('resultsCount').textContent = filtered.length;
     updateClearBtn();
   }
-
-  applyFilters();
-
-  // ==================================================================
-  // Top Supervisors: searchable list, click a name to filter incidents
-  // ==================================================================
-  const SUPERVISORS = [
-    {n:'Samuel Sierra',v:24,rec:1},{n:'Elizabeth Neufeld',v:23,rec:0},{n:'Ovidio Sanchez',v:21,rec:0},
-    {n:'Juan Ramirez',v:21,rec:0},{n:'Alex Vargas',v:19,rec:0},{n:'Diego Soria',v:18,rec:2},
-    {n:'Christian Lopez',v:15,rec:0},{n:'Chadu Moua',v:15,rec:0},{n:'Richard Xiong',v:15,rec:0},
-    {n:'Rutilio Rodriguez',v:14,rec:0},{n:'Juan Rodriguez',v:13,rec:0},{n:'Michael Orozco',v:13,rec:1},
-    {n:'Marilyn Herrera',v:12,rec:1},{n:'Maria Garcia',v:8,rec:0},{n:'Erwin Vega',v:8,rec:0},
-    {n:'Jesus Avila',v:5,rec:0},{n:'Christopher Moreno',v:4,rec:0},{n:'Francisco Tapia',v:4,rec:0},
-    {n:'Osbaldo Gutierrez',v:3,rec:0},{n:'Clara Salazar',v:3,rec:1},{n:'Jonathan Hernandez',v:2,rec:0},
-    {n:'Kamran Tavagar',v:2,rec:0},{n:'Rene Canas',v:2,rec:0},{n:'Ray Mascorro',v:2,rec:1},
-    {n:'Rayomond Corrales',v:2,rec:0},{n:'Juan Carlos Martinez',v:1,rec:0},{n:'Carlos Mata',v:1,rec:0},
-    {n:'David Zavala',v:1,rec:0},{n:'Juan Murillo',v:1,rec:0},{n:'Mary Coffee',v:1,rec:0},
-    {n:'Rosia Rosas',v:1,rec:0},{n:'Valerena Begay',v:1,rec:0}
-  ].map((s,i)=>({...s, rank:i+1}));
-
-  function supRowHTML(s,i){
-    return `<div class="sup-row-item" data-name="${escapeHtml(s.n)}" style="transition-delay:${Math.min(i,14)*18}ms" title="View incidents for ${escapeHtml(s.n)}">
-      <span class="rank">${s.rank}</span>
-      <span class="sup-name">${escapeHtml(s.n)}</span>
-      <span class="num">${s.v}</span>
-      <span class="num">${s.rec}</span>
-    </div>`;
-  }
-
-  function renderSupervisors(query){
-    const q = query.trim().toLowerCase();
-    const filtered = SUPERVISORS.filter(s=>s.n.toLowerCase().includes(q));
-    document.getElementById('supCount').textContent = filtered.length;
-    const body = document.getElementById('supBody');
-    body.classList.add('fading');
-    window.setTimeout(()=>{
-      body.innerHTML = filtered.length
-        ? filtered.map(supRowHTML).join('')
-        : `<div class="sup-empty">No supervisors match &ldquo;${escapeHtml(query)}&rdquo;</div>`;
-      body.classList.remove('fading');
-      requestAnimationFrame(()=>{
-        requestAnimationFrame(()=>{
-          body.querySelectorAll('.sup-row-item').forEach(el=>el.classList.add('visible'));
-        });
-      });
-    }, 130);
-  }
-
-  const supSearchInput = document.getElementById('supervisorSearch');
-  const supSearchClearX = document.getElementById('supSearchClearX');
-  supSearchInput.addEventListener('input', ()=>{
-    supSearchClearX.classList.toggle('show', supSearchInput.value.length>0);
-    renderSupervisors(supSearchInput.value);
-  });
-  supSearchClearX.addEventListener('click', ()=>{
-    supSearchInput.value='';
-    supSearchClearX.classList.remove('show');
-    supSearchInput.focus();
-    renderSupervisors('');
-  });
 
   function jumpToIncidentSearch(name){
     ['dept','esi','status','month'].forEach(g=>state[g].clear());
@@ -1331,70 +1452,67 @@
     applyFilters();
     document.getElementById('recent').scrollIntoView({behavior:'smooth', block:'start'});
     const row = document.querySelector('#recent .search-row');
-    row.classList.remove('flash');
-    void row.offsetWidth;
-    row.classList.add('flash');
+    row.classList.remove('flash'); void row.offsetWidth; row.classList.add('flash');
   }
 
+  document.querySelector('.view-more').addEventListener('click', ()=>{
+    window.setTimeout(()=>searchInput.focus(), 420);
+  });
+
+  // ==================================================================
+  // Top Supervisors
+  // ==================================================================
+  const supSearchInput  = document.getElementById('supervisorSearch');
+  const supSearchClearX = document.getElementById('supSearchClearX');
+  let SUPERVISORS = [];
+
+  function buildSupervisors(){
+    SUPERVISORS = AGG.bySup.map(([name, count], i)=>({
+      n:name, v:count, rec:AGG.recBySup.get(name)||0, rank:i+1
+    }));
+    document.getElementById('supTotal').textContent = SUPERVISORS.length;
+  }
+
+  function renderSupervisors(query){
+    const q = (query||'').trim().toLowerCase();
+    const filtered = SUPERVISORS.filter(s=>s.n.toLowerCase().includes(q));
+    document.getElementById('supCount').textContent = filtered.length;
+    const body = document.getElementById('supBody');
+    body.classList.add('fading');
+    window.setTimeout(()=>{
+      body.innerHTML = filtered.length
+        ? filtered.map((s,i)=>`<div class="sup-row-item" data-name="${escapeHtml(s.n)}" style="transition-delay:${Math.min(i,14)*18}ms" title="View incidents for ${escapeHtml(s.n)}">
+            <span class="rank">${s.rank}</span>
+            <span class="sup-name">${escapeHtml(s.n)}</span>
+            <span class="num">${s.v}</span>
+            <span class="num">${s.rec}</span>
+          </div>`).join('')
+        : `<div class="sup-empty">No supervisors match &ldquo;${escapeHtml(query)}&rdquo;</div>`;
+      body.classList.remove('fading');
+      requestAnimationFrame(()=>requestAnimationFrame(()=>{
+        body.querySelectorAll('.sup-row-item').forEach(el=>el.classList.add('visible'));
+      }));
+    }, 130);
+  }
+
+  supSearchInput.addEventListener('input', ()=>{
+    supSearchClearX.classList.toggle('show', supSearchInput.value.length>0);
+    renderSupervisors(supSearchInput.value);
+  });
+  supSearchClearX.addEventListener('click', ()=>{
+    supSearchInput.value=''; supSearchClearX.classList.remove('show');
+    supSearchInput.focus(); renderSupervisors('');
+  });
   document.getElementById('supBody').addEventListener('click', e=>{
     const row = e.target.closest('.sup-row-item');
-    if(!row) return;
-    jumpToIncidentSearch(row.dataset.name);
-  });
-
-  renderSupervisors('');
-
-  // ==================================================================
-  // Refresh button: re-renders every view from the same source data
-  // and stamps the "Updated" timestamp with the real refresh time.
-  // ==================================================================
-  const refreshBtn = document.getElementById('refreshBtn');
-  const refreshLabel = refreshBtn.querySelector('.refresh-label');
-  const lastUpdatedEl = document.getElementById('lastUpdated');
-
-  function formatUpdatedNow(){
-    const time = new Date().toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
-    return `Updated just now (${time})`;
-  }
-
-  refreshBtn.addEventListener('click', ()=>{
-    if(refreshBtn.disabled) return;
-    refreshBtn.disabled = true;
-    refreshBtn.classList.add('spinning');
-    refreshLabel.textContent = 'Refreshing…';
-
-    window.setTimeout(()=>{
-      const activeMode = document.querySelector('#trendTabs .seg-btn.active').dataset.mode;
-      renderTrend(activeMode);
-      applyFilters();
-      renderSupervisors(supSearchInput.value);
-
-      document.querySelectorAll('.card, .gauge-card').forEach(card=>{
-        card.classList.add('refresh-pulse');
-        window.setTimeout(()=>card.classList.remove('refresh-pulse'), 700);
-      });
-
-      lastUpdatedEl.classList.add('fade');
-      window.setTimeout(()=>{
-        lastUpdatedEl.textContent = formatUpdatedNow();
-        lastUpdatedEl.classList.remove('fade');
-      }, 180);
-
-      checkForNewIncidents();
-
-      refreshBtn.classList.remove('spinning');
-      refreshBtn.disabled = false;
-      refreshLabel.textContent = 'Live data';
-    }, 850);
+    if(row) jumpToIncidentSearch(row.dataset.name);
   });
 
   // ==================================================================
-  // Notification bell: flags incidents that appeared in the data since
-  // this browser last acknowledged them (baseline kept in localStorage).
+  // Notification bell
   // ==================================================================
   const SEEN_KEY = 'incidentReport.seenIncidentIds';
   const NOTIF_LIMIT = 25;
-
   const incidentId = r => `${r.d}|${r.e}|${r.t}`;
 
   function loadSeen(){
@@ -1404,17 +1522,15 @@
     }catch(err){ return null; }
   }
   function saveSeen(ids){
-    try{ window.localStorage.setItem(SEEN_KEY, JSON.stringify([...ids])); }
-    catch(err){ /* private mode or storage full: badge simply won't persist */ }
+    try{ window.localStorage.setItem(SEEN_KEY, JSON.stringify([...ids])); }catch(err){}
   }
 
-  const bell = document.getElementById('notifBell');
-  const badge = document.getElementById('notifBadge');
-  const panel = document.getElementById('notifPanel');
-  const notifList = document.getElementById('notifList');
-  const notifFoot = document.getElementById('notifFoot');
-  const markReadBtn = document.getElementById('notifMarkRead');
-
+  const bell         = document.getElementById('notifBell');
+  const badge        = document.getElementById('notifBadge');
+  const panel        = document.getElementById('notifPanel');
+  const notifList    = document.getElementById('notifList');
+  const notifFoot    = document.getElementById('notifFoot');
+  const markReadBtn  = document.getElementById('notifMarkRead');
   let unreadIds = new Set();
 
   function renderNotifications(){
@@ -1424,8 +1540,7 @@
       return;
     }
     notifList.innerHTML = recent.map(r=>{
-      const id = incidentId(r);
-      const isNew = unreadIds.has(id);
+      const isNew = unreadIds.has(incidentId(r));
       return `<div class="notif-item ${isNew?'unread':''}" data-name="${escapeHtml(r.e)}">
         <span class="notif-dot"></span>
         <div class="notif-body">
@@ -1448,22 +1563,21 @@
   function checkForNewIncidents(){
     const allIds = INCIDENTS.map(incidentId);
     const seen = loadSeen();
+    let found = 0;
     if(seen === null){
-      // First visit on this browser: establish a baseline so the bell only
-      // ever reports incidents added after this point.
-      saveSeen(new Set(allIds));
+      saveSeen(new Set(allIds));      // first visit: establish a baseline
       unreadIds = new Set();
     } else {
       const fresh = allIds.filter(id => !seen.has(id));
-      if(fresh.length){
+      found = fresh.length;
+      if(found){
         fresh.forEach(id => unreadIds.add(id));
-        bell.classList.remove('ringing');
-        void bell.offsetWidth;
-        bell.classList.add('ringing');
+        bell.classList.remove('ringing'); void bell.offsetWidth; bell.classList.add('ringing');
       }
     }
     updateBadge();
     renderNotifications();
+    return found;
   }
 
   function markAllRead(){
@@ -1477,7 +1591,6 @@
     panel.classList.toggle('open', open);
     bell.setAttribute('aria-expanded', String(open));
   }
-
   bell.addEventListener('click', e=>{
     e.stopPropagation();
     setPanelOpen(!panel.classList.contains('open'));
@@ -1505,11 +1618,91 @@
   document.addEventListener('click', e=>{
     if(!e.target.closest('.notif-wrap')) setPanelOpen(false);
   });
-  document.addEventListener('keydown', e=>{
-    if(e.key === 'Escape') setPanelOpen(false);
+  document.addEventListener('keydown', e=>{ if(e.key === 'Escape') setPanelOpen(false); });
+
+  // ==================================================================
+  // Full render + live refresh
+  // ==================================================================
+  function renderAll(){
+    AGG = computeAggregates(INCIDENTS);
+    renderHeadline();
+    renderGauges();
+    renderDonut();
+    renderDepartments();
+    renderSparkline();
+    renderTrend(activeTrendMode());
+    renderFindings();
+    renderChips();
+    applyFilters();
+    buildSupervisors();
+    renderSupervisors(supSearchInput.value);
+  }
+
+  // Pulls data/incidents.json when the page is served over http(s).
+  // Returns true when the incident set actually changed.
+  async function fetchLatestIncidents(){
+    if(!window.location.protocol.startsWith('http')) return false;
+    const res = await fetch(`${DATA_URL}?t=${Date.now()}`, {cache:'no-store'});
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    const rows = await res.json();
+    if(!Array.isArray(rows) || !rows.length) throw new Error('empty dataset');
+    const next = sortIncidents(rows);
+    const changed = next.length !== INCIDENTS.length ||
+      next.some((r,i)=> incidentId(r) !== incidentId(INCIDENTS[i]));
+    if(changed) INCIDENTS = next;
+    return changed;
+  }
+
+  const refreshBtn    = document.getElementById('refreshBtn');
+  const refreshLabel  = refreshBtn.querySelector('.refresh-label');
+  const lastUpdatedEl = document.getElementById('lastUpdated');
+
+  function stampUpdated(){
+    const time = new Date().toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
+    lastUpdatedEl.classList.add('fade');
+    window.setTimeout(()=>{
+      lastUpdatedEl.textContent = `Updated just now (${time})`;
+      lastUpdatedEl.classList.remove('fade');
+    }, 180);
+  }
+
+  refreshBtn.addEventListener('click', async ()=>{
+    if(refreshBtn.disabled) return;
+    refreshBtn.disabled = true;
+    refreshBtn.classList.add('spinning');
+    refreshLabel.textContent = 'Refreshing…';
+
+    let changed = false;
+    try{ changed = await fetchLatestIncidents(); }
+    catch(err){ /* offline or no data file: fall back to what's loaded */ }
+
+    // keep the spinner visible long enough to read as a real action
+    await new Promise(done=>window.setTimeout(done, 500));
+
+    renderAll();
+    const found = checkForNewIncidents();
+
+    document.querySelectorAll('.card, .gauge-card').forEach(card=>{
+      card.classList.add('refresh-pulse');
+      window.setTimeout(()=>card.classList.remove('refresh-pulse'), 700);
+    });
+    stampUpdated();
+
+    refreshBtn.classList.remove('spinning');
+    refreshBtn.disabled = false;
+    refreshLabel.textContent = found ? `${found} new` : 'Live data';
+    if(found){
+      window.setTimeout(()=>{ refreshLabel.textContent = 'Live data'; }, 2600);
+    }
   });
 
+  // ---- boot ----
+  renderAll();
   checkForNewIncidents();
+  // pick up a newer data file on first paint too, when one is reachable
+  fetchLatestIncidents()
+    .then(changed=>{ if(changed){ renderAll(); checkForNewIncidents(); } })
+    .catch(()=>{});
 </script>
 
 </body>
