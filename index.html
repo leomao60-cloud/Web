@@ -105,6 +105,8 @@
   }
   .welcome-row h1{font-size:19px;margin:0;font-weight:700;}
   .welcome-row .sub{font-size:12.5px;color:#a9c0da;margin-top:3px;font-weight:400;}
+  #lastUpdated{transition:opacity .18s ease;}
+  #lastUpdated.fade{opacity:0;}
   .pill-group{display:flex;gap:10px;flex-wrap:wrap;}
   .pill{
     border:1px solid rgba(255,255,255,0.25);
@@ -117,6 +119,21 @@
     transition:background .2s ease, border-color .2s ease, transform .2s ease;
   }
   .pill:hover{background:rgba(255,255,255,0.13);border-color:rgba(255,255,255,0.45);transform:translateY(-1px);}
+  button.pill-refresh{
+    font-family:inherit;cursor:pointer;-webkit-appearance:none;appearance:none;
+    display:inline-flex;align-items:center;gap:6px;
+  }
+  button.pill-refresh:disabled{cursor:default;opacity:.85;transform:none;}
+  .pill-refresh .refresh-icon{display:inline-block;transition:transform .2s ease;}
+  @keyframes spin{ to{transform:rotate(360deg);} }
+  .pill-refresh.spinning .refresh-icon{animation:spin .7s linear infinite;}
+
+  @keyframes cardPulse{
+    0%{box-shadow:0 1px 3px rgba(20,30,50,0.08);}
+    35%{box-shadow:0 0 0 3px rgba(23,162,184,0.25), 0 1px 3px rgba(20,30,50,0.08);}
+    100%{box-shadow:0 1px 3px rgba(20,30,50,0.08);}
+  }
+  .card.refresh-pulse,.gauge-card.refresh-pulse{animation:cardPulse .7s ease;}
 
   .kpi-row{
     display:grid;
@@ -513,12 +530,14 @@
   <div class="welcome-row">
     <div>
       <h1>Welcome, Safety Team</h1>
-      <div class="sub">Master List of Injuries &middot; Focus Year 2026 &middot; Updated Jul 27, 2026</div>
+      <div class="sub">Master List of Injuries &middot; Focus Year 2026 &middot; <span id="lastUpdated">Updated Jul 27, 2026</span></div>
     </div>
     <div class="pill-group">
       <div class="pill">&#128197; YTD 2026 (Jan 1 &ndash; Jul 27)</div>
       <div class="pill">&#9889; Medium Risk &middot; Sev 43</div>
-      <div class="pill">&#8635; Live data</div>
+      <button type="button" class="pill pill-refresh" id="refreshBtn" title="Refresh dashboard data">
+        <span class="refresh-icon">&#8635;</span> <span class="refresh-label">Live data</span>
+      </button>
     </div>
   </div>
 
@@ -1243,6 +1262,48 @@
   });
 
   renderSupervisors('');
+
+  // ==================================================================
+  // Refresh button: re-renders every view from the same source data
+  // and stamps the "Updated" timestamp with the real refresh time.
+  // ==================================================================
+  const refreshBtn = document.getElementById('refreshBtn');
+  const refreshLabel = refreshBtn.querySelector('.refresh-label');
+  const lastUpdatedEl = document.getElementById('lastUpdated');
+
+  function formatUpdatedNow(){
+    const time = new Date().toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
+    return `Updated just now (${time})`;
+  }
+
+  refreshBtn.addEventListener('click', ()=>{
+    if(refreshBtn.disabled) return;
+    refreshBtn.disabled = true;
+    refreshBtn.classList.add('spinning');
+    refreshLabel.textContent = 'Refreshing…';
+
+    window.setTimeout(()=>{
+      const activeMode = document.querySelector('#trendTabs .seg-btn.active').dataset.mode;
+      renderTrend(activeMode);
+      applyFilters();
+      renderSupervisors(supSearchInput.value);
+
+      document.querySelectorAll('.card, .gauge-card').forEach(card=>{
+        card.classList.add('refresh-pulse');
+        window.setTimeout(()=>card.classList.remove('refresh-pulse'), 700);
+      });
+
+      lastUpdatedEl.classList.add('fade');
+      window.setTimeout(()=>{
+        lastUpdatedEl.textContent = formatUpdatedNow();
+        lastUpdatedEl.classList.remove('fade');
+      }, 180);
+
+      refreshBtn.classList.remove('spinning');
+      refreshBtn.disabled = false;
+      refreshLabel.textContent = 'Live data';
+    }, 850);
+  });
 </script>
 
 </body>
