@@ -37,19 +37,49 @@ source .venv/bin/activate          # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### 2. Add your Excel file
+### 2. Point at your Excel file
 
-Drop your workbook into `backend/data/` and name it `dashboard.xlsx` — that's the default path. A sample workbook is already included so you can run the app immediately.
+The dashboard reads **one** file, and edits will only show up if you're saving to *that* file. Two ways to set it:
 
-To use a different name or location, open `backend/main.py` and change the `EXCEL_PATH` constant near the top:
+**Option A — environment variable (recommended, no code change):**
+
+Windows (Command Prompt):
+```cmd
+set EXCEL_PATH=C:\Users\You\OneDrive\Documents\Master_List_Of_Injuries.xlsx
+uvicorn main:app --reload --port 8000
+```
+
+Windows (PowerShell):
+```powershell
+$env:EXCEL_PATH = "C:\Users\You\OneDrive\Documents\Master_List_Of_Injuries.xlsx"
+uvicorn main:app --reload --port 8000
+```
+
+macOS / Linux:
+```bash
+export EXCEL_PATH="/Users/you/Documents/report.xlsx"
+uvicorn main:app --reload --port 8000
+```
+
+**Option B — hard-code the default** by editing `backend/main.py`:
 
 ```python
 EXCEL_PATH: Path = Path(__file__).parent / "data" / "dashboard.xlsx"
-# or an absolute path:
-# EXCEL_PATH: Path = Path("/Users/you/Documents/report.xlsx")
+# swap for an absolute path:
+# EXCEL_PATH: Path = Path(r"C:\Users\You\OneDrive\Documents\Master_List_Of_Injuries.xlsx")
 ```
 
+If neither is set, the backend falls back to the sample workbook at `backend/data/dashboard.xlsx` so the app still runs.
+
 You can also change which sheet is read with `SHEET_NAME` (defaults to the first sheet).
+
+### Finding your file's absolute path on Windows
+
+1. Open File Explorer and navigate to your Excel file.
+2. Hold **Shift**, right-click the file, and choose **Copy as path**.
+3. Paste it — you'll get something like `"C:\Users\You\OneDrive\Documents\Master_List_Of_Injuries.xlsx"`. Drop the surrounding quotes when using it with `set EXCEL_PATH=...`.
+
+> ⚠ OneDrive tip: if your file only shows a cloud icon in File Explorer, right-click it → **Always keep on this device**. If the file isn't downloaded locally the backend can't read it.
 
 ### 3. Run the backend
 
@@ -113,7 +143,7 @@ Error (`404` / `500`):
 
 | Where | Setting | What it does |
 | --- | --- | --- |
-| `backend/main.py` | `EXCEL_PATH` | Path to the Excel file |
+| `backend/main.py` | `EXCEL_PATH` | Path to the Excel file (env var of the same name overrides it) |
 | `backend/main.py` | `SHEET_NAME` | Sheet name or index (default: first sheet) |
 | `backend/main.py` | `CORS_ORIGINS` | Allowed frontend origins (`["*"]` for local dev) |
 | `frontend/app.js` | `API_URL` | Backend endpoint the frontend hits |
@@ -132,8 +162,11 @@ The frontend leaves obvious hooks for growth:
 **"Unable to load data" / status shows Offline**
 The backend isn't running or isn't reachable. Check that `uvicorn` is up on port 8000 and that `API_URL` in `app.js` matches.
 
+**Dashboard loads but doesn't update when I save Excel**
+The backend only reads the one file at `EXCEL_PATH`. If you're editing a different copy (e.g. the original in Downloads while the backend reads a copy in `backend/data/`), nothing will change. Set `EXCEL_PATH` to the absolute path of the file you're actually editing — see step 2 above.
+
 **404 `FILE_NOT_FOUND`**
-No file at `EXCEL_PATH`. Confirm the file exists and the path in `main.py` is correct.
+No file at `EXCEL_PATH`. Confirm the file exists and the path in `main.py` (or the `EXCEL_PATH` env var) is correct. On Windows, use `Shift + Right-click → Copy as path` to grab it exactly.
 
 **500 `READ_ERROR`**
 Usually one of:
