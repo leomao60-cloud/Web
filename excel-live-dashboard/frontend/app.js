@@ -5,12 +5,16 @@
  * No frameworks — plain DOM updates.
  * ----------------------------------------------------------------------- */
 
-// URL of the backend API. If you serve the frontend from a different origin
-// (say, GitHub Pages) point this at your deployed backend instead.
-const API_URL = "http://localhost:8000/api/data";
+// URLs for the backend. If you serve the frontend from a different origin
+// (say, GitHub Pages) point these at your deployed backend instead.
+const API_BASE  = "http://localhost:8000";
+const API_URL   = `${API_BASE}/api/data`;
+const MTIME_URL = `${API_BASE}/api/mtime`;
 
-// How often to refresh, in milliseconds.
+// Full-data poll interval — safety fallback if the mtime endpoint is down.
 const REFRESH_MS = 15_000;
+// Cheap mtime poll — reacts to Excel saves almost instantly (~2s).
+const MTIME_POLL_MS = 2_000;
 
 // Grab all the elements we'll be updating up front so we don't re-query them
 // on every tick.
@@ -32,13 +36,20 @@ const el = {
   chartCanvas:     document.getElementById("main-chart"),
   chartSubtitle:   document.getElementById("chart-subtitle"),
   chartEmpty:      document.getElementById("chart-empty"),
+  deptCanvas:      document.getElementById("dept-chart"),
+  deptEmpty:       document.getElementById("dept-empty"),
+  supervisorList:  document.getElementById("supervisor-list"),
   rowCountLabel:   document.getElementById("row-count-label"),
   tableHead:       document.getElementById("table-head"),
   tableBody:       document.getElementById("table-body"),
 };
 
-// Holds the Chart.js instance so we can destroy/recreate it on each refresh.
+// Holds the Chart.js instances so we can destroy/recreate them on each refresh.
 let chart = null;
+let deptChart = null;
+
+// Last mtime we've fetched full data for. When /api/mtime changes, we refetch.
+let lastKnownMtime = null;
 
 // Case-insensitive column resolver — finds "DOI" whether the header is
 // "DOI", "doi", " DOI ", etc. Returns the actual column name from the
@@ -284,6 +295,113 @@ function renderChart(columns, rows) {
 }
 
 /* -----------------------------------------------------------------------
+ * Department breakdown — horizontal bar of counts per department
+ * ----------------------------------------------------------------------- */
+
+function renderDeptChart(columns, rows) {
+  const deptCol = findColumn(columns, "Department", "Department ", "Dept");
+  if (!deptCol) {
+    el.deptCanvas.classList.add("hidden");
+    el.deptEmpty.classList.remove("hidden");
+    return;
+  }
+  el.deptCanvas.classList.remove("hidden");
+  el.deptEmpty.classList.add("hidden");
+
+  // Tally, ignoring blanks. Trim to collapse "Harvest" vs "Harvest ".
+  const tally = new Map();
+  for (const r of rows) {
+    const raw = r[deptCol];
+    if (raw == null || String(raw).trim() === "") continue;
+    const key = String(raw).trim();
+    tally.set(key, (tally.get(key) || 0) + 1);
+  }
+  const sorted = [...tally.entries()].sort((a, b) => b[1] - a[1]);
+
+  if (deptChart) deptChart.destroy();
+  deptChart = new Chart(el.deptCanvas, {
+    type: "bar",
+    data: {
+      labels: sorted.map(([name]) => name),
+      datasets: [{
+        label: "Incidents",
+        data: sorted.map(([, count]) => count),
+        backgroundColor: "#14b8a6",  // teal-500
+        borderRadius: 4,
+      }],
+    },
+    options: {
+      indexAxis: "y",
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { beginAtZero: true, ticks: { precision: 0 } },
+        y: { grid: { display: false } },
+      },
+    },
+  });
+}
+
+/* -----------------------------------------------------------------------
+ * Top supervisors by open incidents
+ * ----------------------------------------------------------------------- */
+
+function renderSupervisorList(columns, rows) {
+  const supCol    = findColumn(columns, "Supervisor");
+  const statusCol = findColumn(columns, "Status");
+
+  if (!supCol) {
+    el.supervisorList.innerHTML =
+      `<li class="text-slate-400 text-center py-8">No Supervisor column found.</li>`;
+    return;
+  }
+
+  // If we have a Status column, filter to open rows only. Otherwise fall
+  // back to counting all incidents per supervisor.
+  const openRows = statusCol
+    ? rows.filter(r => !isClosed(r[statusCol]))
+    : rows;
+
+  const tally = new Map();
+  for (const r of openRows) {
+    const raw = r[supCol];
+    if (raw == null || String(raw).trim() === "") continue;
+    const key = String(raw).trim();
+    tally.set(key, (tally.get(key) || 0) + 1);
+  }
+
+  const top = [...tally.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 8);
+
+  if (!top.length) {
+    el.supervisorList.innerHTML =
+      `<li class="text-slate-400 text-center py-8">No open incidents.</li>`;
+    return;
+  }
+
+  const max = top[0][1];
+  el.supervisorList.innerHTML = top.map(([name, count], i) => {
+    const widthPct = Math.max(4, Math.round((count / max) * 100));
+    return `
+      <li class="flex items-center gap-3">
+        <span class="w-5 text-xs text-slate-400 tabular-nums">${i + 1}.</span>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center justify-between text-slate-700">
+            <span class="truncate">${escapeHtml(name)}</span>
+            <span class="font-semibold text-slate-900 ml-2">${count}</span>
+          </div>
+          <div class="h-1.5 bg-slate-100 rounded-full mt-1 overflow-hidden">
+            <div class="h-full bg-amber-400" style="width:${widthPct}%"></div>
+          </div>
+        </div>
+      </li>
+    `;
+  }).join("");
+}
+
+/* -----------------------------------------------------------------------
  * Main fetch + render cycle
  * ----------------------------------------------------------------------- */
 
@@ -318,8 +436,14 @@ async function refresh() {
 
     renderKPIs(payload.columns, payload.data);
     renderChart(payload.columns, payload.data);
+    renderDeptChart(payload.columns, payload.data);
+    renderSupervisorList(payload.columns, payload.data);
     renderTableHead(payload.columns);
     renderTableBody(payload.columns, payload.data);
+
+    // Remember what version of the file we just rendered so the fast
+    // mtime poll doesn't immediately refetch.
+    lastKnownMtime = payload.last_updated;
 
   } catch (err) {
     setStatus("error");
@@ -331,8 +455,32 @@ async function refresh() {
  * Kick things off
  * ----------------------------------------------------------------------- */
 
-refresh();                          // initial load
-setInterval(refresh, REFRESH_MS);   // then every 15 seconds
+/* -----------------------------------------------------------------------
+ * Near-instant updates via cheap mtime polling
+ * -----------------------------------------------------------------------
+ * We hit /api/mtime every couple of seconds — it just stats the file —
+ * and only call the full /api/data endpoint when the mtime actually
+ * changes. Result: an Excel save shows up in ~2s instead of up to 15s.
+ * The 15s full refresh stays as a safety net in case the mtime endpoint
+ * is unreachable.
+ * ----------------------------------------------------------------------- */
+async function checkForChanges() {
+  try {
+    const res = await fetch(MTIME_URL, { cache: "no-store" });
+    if (!res.ok) return;
+    const payload = await res.json();
+    if (!payload.success) return;
+    if (payload.last_updated !== lastKnownMtime) {
+      refresh();
+    }
+  } catch {
+    // Silent — the 15s full-refresh tick will surface any real outage.
+  }
+}
+
+refresh();                                   // initial load
+setInterval(refresh, REFRESH_MS);            // safety-net full refresh
+setInterval(checkForChanges, MTIME_POLL_MS); // fast mtime poll
 
 // Manual refresh — useful for verifying an Excel edit without waiting.
 el.refreshBtn.addEventListener("click", refresh);

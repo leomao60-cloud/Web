@@ -133,6 +133,27 @@ def root() -> dict[str, str]:
     }
 
 
+@app.get("/api/mtime")
+def get_mtime() -> JSONResponse:
+    """
+    Cheap poll endpoint — just the file's last-modified time.
+
+    The frontend hits this every couple of seconds and only refetches the
+    full /api/data payload when this timestamp actually changes. Costs a
+    single stat() call, so it's fine to poll frequently.
+    """
+    if not EXCEL_PATH.exists():
+        return _error(
+            status=404,
+            message=f"Excel file not found at: {EXCEL_PATH}",
+            code="FILE_NOT_FOUND",
+        )
+    return JSONResponse(
+        content={"success": True, "last_updated": _file_mtime_iso(EXCEL_PATH)},
+        headers={"Cache-Control": "no-store, no-cache, must-revalidate, max-age=0"},
+    )
+
+
 @app.get("/api/data")
 def get_data() -> JSONResponse:
     """
