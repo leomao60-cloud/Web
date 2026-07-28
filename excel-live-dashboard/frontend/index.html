@@ -73,6 +73,14 @@
       </div>
     </div>
 
+    <!-- Date-range filter chips. Applied client-side to the cached payload -->
+    <!-- so switching filters is instant and doesn't hit the backend. -->
+    <section class="flex flex-wrap items-center gap-2">
+      <span class="text-xs uppercase tracking-wide text-slate-500 mr-2">Range</span>
+      <div id="filter-bar" class="flex flex-wrap gap-1.5"></div>
+      <span id="filter-summary" class="text-xs text-slate-500 ml-auto">—</span>
+    </section>
+
     <!-- KPI cards -->
     <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       <div class="bg-white border border-slate-200 rounded-lg p-4">
@@ -99,19 +107,32 @@
       <p id="kpi-cols" class="hidden"></p>
     </section>
 
-    <!-- Chart: incidents per month, latest year -->
-    <section class="bg-white border border-slate-200 rounded-lg p-6">
-      <div class="flex items-center justify-between mb-4">
-        <h2 class="text-sm font-semibold text-slate-700">Incidents by month</h2>
-        <span id="chart-subtitle" class="text-xs text-slate-500">—</span>
+    <!-- Monthly chart (wide) + Status donut (side) -->
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div class="bg-white border border-slate-200 rounded-lg p-6 lg:col-span-2">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-sm font-semibold text-slate-700">Incidents by month</h2>
+          <span id="chart-subtitle" class="text-xs text-slate-500">—</span>
+        </div>
+        <div class="h-64">
+          <canvas id="main-chart"></canvas>
+        </div>
+        <p id="chart-empty"
+           class="hidden text-center text-slate-400 text-sm py-16">
+          No DOI column found — can't chart monthly incidents.
+        </p>
       </div>
-      <div class="h-64">
-        <canvas id="main-chart"></canvas>
+
+      <div class="bg-white border border-slate-200 rounded-lg p-6">
+        <h2 class="text-sm font-semibold text-slate-700 mb-4">Open vs closed</h2>
+        <div class="h-64 relative">
+          <canvas id="status-chart"></canvas>
+        </div>
+        <p id="status-empty"
+           class="hidden text-center text-slate-400 text-sm py-16">
+          No Status column found.
+        </p>
       </div>
-      <p id="chart-empty"
-         class="hidden text-center text-slate-400 text-sm py-16">
-        No DOI column found — can't chart monthly incidents.
-      </p>
     </section>
 
     <!-- Two-column: department breakdown + top supervisors by open incidents -->

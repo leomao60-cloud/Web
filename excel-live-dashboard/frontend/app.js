@@ -39,6 +39,10 @@ const el = {
   deptCanvas:      document.getElementById("dept-chart"),
   deptEmpty:       document.getElementById("dept-empty"),
   supervisorList:  document.getElementById("supervisor-list"),
+  statusCanvas:    document.getElementById("status-chart"),
+  statusEmpty:     document.getElementById("status-empty"),
+  filterBar:       document.getElementById("filter-bar"),
+  filterSummary:   document.getElementById("filter-summary"),
   rowCountLabel:   document.getElementById("row-count-label"),
   tableHead:       document.getElementById("table-head"),
   tableBody:       document.getElementById("table-body"),
@@ -47,9 +51,67 @@ const el = {
 // Holds the Chart.js instances so we can destroy/recreate them on each refresh.
 let chart = null;
 let deptChart = null;
+let statusChart = null;
 
 // Last mtime we've fetched full data for. When /api/mtime changes, we refetch.
 let lastKnownMtime = null;
+
+// Cache of the most recent /api/data response so filter chip clicks can
+// re-render everything without another network round-trip.
+let latestPayload = null;
+
+/* -----------------------------------------------------------------------
+ * Date-range filter
+ * ----------------------------------------------------------------------- */
+
+// Each filter takes the anchor date (the most recent DOI in the data) and
+// returns a predicate for whether a given Date belongs in that range.
+const FILTERS = [
+  { key: "all",       label: "All",           test: () => true },
+  { key: "ytd",       label: "YTD",           test: (d, anchor) => d.getFullYear() === anchor.getFullYear() },
+  { key: "last90",    label: "Last 90 days",  test: (d, anchor) => (anchor - d) / 86_400_000 <= 90 },
+  { key: "last30",    label: "Last 30 days",  test: (d, anchor) => (anchor - d) / 86_400_000 <= 30 },
+  { key: "month",     label: "Latest month",  test: (d, anchor) =>
+      d.getFullYear() === anchor.getFullYear() && d.getMonth() === anchor.getMonth() },
+];
+
+let currentFilter = "all";
+
+function getFilteredRows(payload) {
+  const dateCol = findColumn(payload.columns, "DOI", "Date of Injury", "Date");
+  if (!dateCol || currentFilter === "all") return payload.data;
+
+  const filter = FILTERS.find(f => f.key === currentFilter);
+  if (!filter) return payload.data;
+
+  const dates = payload.data.map(r => parseDate(r[dateCol])).filter(Boolean);
+  if (!dates.length) return payload.data;
+  const anchor = new Date(Math.max(...dates.map(d => d.getTime())));
+
+  return payload.data.filter(r => {
+    const d = parseDate(r[dateCol]);
+    return d && filter.test(d, anchor);
+  });
+}
+
+function renderFilterBar() {
+  el.filterBar.innerHTML = FILTERS.map(f => `
+    <button data-filter="${f.key}"
+            class="px-3 py-1 rounded-md text-xs font-medium border transition
+                   ${f.key === currentFilter
+                     ? "bg-slate-900 text-white border-slate-900"
+                     : "bg-white text-slate-600 border-slate-200 hover:bg-slate-100"}">
+      ${f.label}
+    </button>
+  `).join("");
+  el.filterBar.querySelectorAll("button").forEach(btn => {
+    btn.addEventListener("click", () => {
+      currentFilter = btn.dataset.filter;
+      renderFilterBar();  // repaint chip active state
+      if (latestPayload) renderAll(latestPayload);
+    });
+  });
+}
 
 // Case-insensitive column resolver — finds "DOI" whether the header is
 // "DOI", "doi", " DOI ", etc. Returns the actual column name from the
@@ -402,6 +464,89 @@ function renderSupervisorList(columns, rows) {
 }
 
 /* -----------------------------------------------------------------------
+ * Status donut — open vs closed
+ * ----------------------------------------------------------------------- */
+
+function renderStatusChart(columns, rows) {
+  const statusCol = findColumn(columns, "Status");
+  if (!statusCol) {
+    el.statusCanvas.classList.add("hidden");
+    el.statusEmpty.classList.remove("hidden");
+    return;
+  }
+  el.statusCanvas.classList.remove("hidden");
+  el.statusEmpty.classList.add("hidden");
+
+  let open = 0, closed = 0;
+  for (const r of rows) {
+    if (isClosed(r[statusCol])) closed += 1; else open += 1;
+  }
+
+  if (statusChart) statusChart.destroy();
+  statusChart = new Chart(el.statusCanvas, {
+    type: "doughnut",
+    data: {
+      labels: ["Open", "Closed"],
+      datasets: [{
+        data: [open, closed],
+        backgroundColor: ["#f59e0b", "#10b981"],  // amber-500, emerald-500
+        borderWidth: 0,
+      }],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: "62%",
+      plugins: {
+        legend: { position: "bottom", labels: { boxWidth: 12, font: { size: 12 } } },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => {
+              const total = open + closed;
+              const pct = total ? ((ctx.parsed / total) * 100).toFixed(1) : 0;
+              return `${ctx.label}: ${ctx.parsed} (${pct}%)`;
+            },
+          },
+        },
+      },
+    },
+  });
+}
+
+/* -----------------------------------------------------------------------
+ * renderAll — applies the current filter, then repaints every panel
+ * ----------------------------------------------------------------------- */
+
+function renderAll(payload) {
+  const filtered = getFilteredRows(payload);
+  const total    = payload.data.length;
+  const shown    = filtered.length;
+
+  // KPIs and table use the filtered rows.
+  el.kpiRows.textContent = shown.toLocaleString();
+  el.kpiRowsSub.textContent = shown === total
+    ? "across all records"
+    : `${shown.toLocaleString()} of ${total.toLocaleString()} records`;
+  el.rowCountLabel.textContent =
+    `${shown.toLocaleString()} row${shown === 1 ? "" : "s"}`;
+
+  // Filter summary in the toolbar.
+  const filterLabel = FILTERS.find(f => f.key === currentFilter)?.label || "";
+  el.filterSummary.textContent =
+    shown === total
+      ? `${total.toLocaleString()} records`
+      : `${shown.toLocaleString()} of ${total.toLocaleString()} • ${filterLabel}`;
+
+  renderKPIs(payload.columns, filtered);
+  renderChart(payload.columns, filtered);
+  renderStatusChart(payload.columns, filtered);
+  renderDeptChart(payload.columns, filtered);
+  renderSupervisorList(payload.columns, filtered);
+  renderTableHead(payload.columns);
+  renderTableBody(payload.columns, filtered);
+}
+
+/* -----------------------------------------------------------------------
  * Main fetch + render cycle
  * ----------------------------------------------------------------------- */
 
@@ -424,22 +569,17 @@ async function refresh() {
     hideError();
     setStatus("live");
 
-    el.lastUpdated.textContent   = formatTimestamp(payload.last_updated);
-    el.kpiRows.textContent       = payload.row_count.toLocaleString();
-    el.kpiCols.textContent       = payload.columns.length.toLocaleString();
-    el.rowCountLabel.textContent = `${payload.row_count.toLocaleString()} row${payload.row_count === 1 ? "" : "s"}`;
+    el.lastUpdated.textContent = formatTimestamp(payload.last_updated);
+    el.kpiCols.textContent     = payload.columns.length.toLocaleString();
 
     if (payload.source_file) {
       el.sourceFile.textContent = payload.source_file;
       el.sourceFile.parentElement.setAttribute("title", payload.source_file);
     }
 
-    renderKPIs(payload.columns, payload.data);
-    renderChart(payload.columns, payload.data);
-    renderDeptChart(payload.columns, payload.data);
-    renderSupervisorList(payload.columns, payload.data);
-    renderTableHead(payload.columns);
-    renderTableBody(payload.columns, payload.data);
+    // Cache the payload so filter chip clicks can re-render offline.
+    latestPayload = payload;
+    renderAll(payload);
 
     // Remember what version of the file we just rendered so the fast
     // mtime poll doesn't immediately refetch.
@@ -478,6 +618,7 @@ async function checkForChanges() {
   }
 }
 
+renderFilterBar();                           // paint the chips once
 refresh();                                   // initial load
 setInterval(refresh, REFRESH_MS);            // safety-net full refresh
 setInterval(checkForChanges, MTIME_POLL_MS); // fast mtime poll
