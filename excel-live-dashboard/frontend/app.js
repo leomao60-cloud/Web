@@ -18,6 +18,8 @@ const el = {
   statusDot:      document.getElementById("status-dot"),
   statusText:     document.getElementById("status-text"),
   lastUpdated:    document.getElementById("last-updated"),
+  sourceFile:     document.getElementById("source-file"),
+  refreshBtn:     document.getElementById("refresh-btn"),
   errorBanner:    document.getElementById("error-banner"),
   errorMessage:   document.getElementById("error-message"),
   kpiRows:        document.getElementById("kpi-rows"),
@@ -160,6 +162,11 @@ async function refresh() {
     el.kpiCols.textContent       = payload.columns.length.toLocaleString();
     el.rowCountLabel.textContent = `${payload.row_count.toLocaleString()} row${payload.row_count === 1 ? "" : "s"}`;
 
+    if (payload.source_file) {
+      el.sourceFile.textContent = payload.source_file;
+      el.sourceFile.parentElement.setAttribute("title", payload.source_file);
+    }
+
     renderTableHead(payload.columns);
     renderTableBody(payload.columns, payload.data);
 
@@ -178,3 +185,6 @@ async function refresh() {
 
 refresh();                          // initial load
 setInterval(refresh, REFRESH_MS);   // then every 15 seconds
+
+// Manual refresh — useful for verifying an Excel edit without waiting.
+el.refreshBtn.addEventListener("click", refresh);

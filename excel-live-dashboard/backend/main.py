@@ -174,6 +174,7 @@ def get_data() -> JSONResponse:
         content={
             "success": True,
             "last_updated": _file_mtime_iso(EXCEL_PATH),
+            "source_file": str(EXCEL_PATH),
             "row_count": len(records),
             "columns": list(df.columns),
             "data": records,

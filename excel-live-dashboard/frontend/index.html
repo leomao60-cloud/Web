@@ -25,9 +25,15 @@
   <!-- Header -->
   <header class="bg-white border-b border-slate-200">
     <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-      <div>
+      <div class="min-w-0">
         <h1 class="text-xl font-semibold text-slate-900">Excel Live Dashboard</h1>
         <p class="text-sm text-slate-500">Auto-refreshes every 15 seconds</p>
+        <!-- Which file the backend is reading. Helps you confirm you're -->
+        <!-- editing the same file the dashboard is watching. -->
+        <p class="text-xs text-slate-400 mt-0.5 truncate" title="">
+          <span class="font-medium text-slate-500">Source:</span>
+          <span id="source-file" class="font-mono">—</span>
+        </p>
       </div>
 
       <!-- Live status indicator + last updated time -->
@@ -36,6 +42,11 @@
           <p class="text-xs text-slate-500 uppercase tracking-wide">Last updated</p>
           <p id="last-updated" class="text-sm font-medium text-slate-800">—</p>
         </div>
+        <button id="refresh-btn"
+                class="text-sm font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 border border-slate-200 px-3 py-1.5 rounded-md transition"
+                title="Fetch immediately instead of waiting for the next poll">
+          Refresh now
+        </button>
         <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100">
           <span id="status-dot" class="status-dot h-2.5 w-2.5 rounded-full bg-slate-400"></span>
           <span id="status-text" class="text-sm font-medium text-slate-600">Connecting…</span>
