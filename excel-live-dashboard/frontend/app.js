@@ -32,13 +32,15 @@ const el = {
   kpiRecordable:   document.getElementById("kpi-recordable"),
   kpiThisMonth:    document.getElementById("kpi-this-month"),
   kpiThisMonthSub: document.getElementById("kpi-this-month-sub"),
-  kpiCols:         document.getElementById("kpi-cols"),
+  chartWrap:       document.getElementById("main-chart-wrap"),
   chartCanvas:     document.getElementById("main-chart"),
   chartSubtitle:   document.getElementById("chart-subtitle"),
   chartEmpty:      document.getElementById("chart-empty"),
+  deptWrap:        document.getElementById("dept-chart-wrap"),
   deptCanvas:      document.getElementById("dept-chart"),
   deptEmpty:       document.getElementById("dept-empty"),
   supervisorList:  document.getElementById("supervisor-list"),
+  statusWrap:      document.getElementById("status-chart-wrap"),
   statusCanvas:    document.getElementById("status-chart"),
   statusEmpty:     document.getElementById("status-empty"),
   filterBar:       document.getElementById("filter-bar"),
@@ -59,6 +61,10 @@ let lastKnownMtime = null;
 // Cache of the most recent /api/data response so filter chip clicks can
 // re-render everything without another network round-trip.
 let latestPayload = null;
+
+// Guard so overlapping polls (the 15s tick + the 2s mtime tick) don't fire
+// duplicate concurrent /api/data fetches.
+let refreshInFlight = false;
 
 /* -----------------------------------------------------------------------
  * Date-range filter
@@ -120,6 +126,21 @@ function findColumn(columns, ...candidates) {
   const norm = s => String(s).trim().toLowerCase();
   const wanted = candidates.map(norm);
   return columns.find(c => wanted.includes(norm(c))) || null;
+}
+
+// Show/hide the empty-state message for a chart panel. Also destroys the
+// previous Chart.js instance when going empty so stale charts don't linger
+// underneath a hidden canvas.
+function toggleChartEmpty({ wrap, empty, isEmpty, existingChart }) {
+  if (isEmpty) {
+    wrap.classList.add("hidden");
+    empty.classList.remove("hidden");
+    if (existingChart) existingChart.destroy();
+    return true;
+  }
+  wrap.classList.remove("hidden");
+  empty.classList.add("hidden");
+  return false;
 }
 
 /* -----------------------------------------------------------------------
@@ -306,24 +327,19 @@ const MONTH_LABELS = [
 
 function renderChart(columns, rows) {
   const dateCol = findColumn(columns, "DOI", "Date of Injury", "Date");
+  const dates   = dateCol ? rows.map(r => parseDate(r[dateCol])).filter(Boolean) : [];
 
-  // Nothing to chart without dates.
-  if (!dateCol) {
-    el.chartCanvas.classList.add("hidden");
-    el.chartEmpty.classList.remove("hidden");
-    el.chartSubtitle.textContent = "";
+  if (toggleChartEmpty({
+    wrap: el.chartWrap, empty: el.chartEmpty,
+    isEmpty: !dateCol || !dates.length,
+    existingChart: chart,
+  })) {
+    chart = null;
+    el.chartSubtitle.textContent = !dateCol ? "" : "no dated rows";
     return;
   }
-  el.chartCanvas.classList.remove("hidden");
-  el.chartEmpty.classList.add("hidden");
 
   // Bucket rows by (year, month), then focus on the most recent year.
-  const dates = rows.map(r => parseDate(r[dateCol])).filter(Boolean);
-  if (!dates.length) {
-    el.chartSubtitle.textContent = "no dated rows";
-    return;
-  }
-
   const latestYear = Math.max(...dates.map(d => d.getFullYear()));
   const counts = new Array(12).fill(0);
   for (const d of dates) {
@@ -362,13 +378,14 @@ function renderChart(columns, rows) {
 
 function renderDeptChart(columns, rows) {
   const deptCol = findColumn(columns, "Department", "Department ", "Dept");
-  if (!deptCol) {
-    el.deptCanvas.classList.add("hidden");
-    el.deptEmpty.classList.remove("hidden");
+  if (toggleChartEmpty({
+    wrap: el.deptWrap, empty: el.deptEmpty,
+    isEmpty: !deptCol,
+    existingChart: deptChart,
+  })) {
+    deptChart = null;
     return;
   }
-  el.deptCanvas.classList.remove("hidden");
-  el.deptEmpty.classList.add("hidden");
 
   // Tally, ignoring blanks. Trim to collapse "Harvest" vs "Harvest ".
   const tally = new Map();
@@ -469,13 +486,14 @@ function renderSupervisorList(columns, rows) {
 
 function renderStatusChart(columns, rows) {
   const statusCol = findColumn(columns, "Status");
-  if (!statusCol) {
-    el.statusCanvas.classList.add("hidden");
-    el.statusEmpty.classList.remove("hidden");
+  if (toggleChartEmpty({
+    wrap: el.statusWrap, empty: el.statusEmpty,
+    isEmpty: !statusCol,
+    existingChart: statusChart,
+  })) {
+    statusChart = null;
     return;
   }
-  el.statusCanvas.classList.remove("hidden");
-  el.statusEmpty.classList.add("hidden");
 
   let open = 0, closed = 0;
   for (const r of rows) {
@@ -551,6 +569,8 @@ function renderAll(payload) {
  * ----------------------------------------------------------------------- */
 
 async function refresh() {
+  if (refreshInFlight) return;   // another fetch is already running
+  refreshInFlight = true;
   setStatus("loading");
 
   try {
@@ -570,7 +590,6 @@ async function refresh() {
     setStatus("live");
 
     el.lastUpdated.textContent = formatTimestamp(payload.last_updated);
-    el.kpiCols.textContent     = payload.columns.length.toLocaleString();
 
     if (payload.source_file) {
       el.sourceFile.textContent = payload.source_file;
@@ -588,6 +607,8 @@ async function refresh() {
   } catch (err) {
     setStatus("error");
     showError(err.message || "Could not reach the backend.");
+  } finally {
+    refreshInFlight = false;
   }
 }
 

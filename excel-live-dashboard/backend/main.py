@@ -40,10 +40,19 @@ EXCEL_PATH: Path = Path(
 )
 
 # Which sheet to read. Use 0 for the first sheet, or a name like "Sales".
-# Overridable via the SHEET_NAME environment variable at run time.
-SHEET_NAME: str | int | None = os.environ.get(
-    "SHEET_NAME", "Master_List_Of_Injuries"
-)
+# Overridable via the SHEET_NAME environment variable at run time. A purely
+# numeric value like "0" or "2" is treated as a sheet index; anything else
+# is passed through as a sheet name.
+def _resolve_sheet_name(raw: str | None) -> str | int:
+    if raw is None:
+        return "Master_List_Of_Injuries"
+    stripped = raw.strip()
+    if stripped.lstrip("-").isdigit():
+        return int(stripped)
+    return stripped
+
+
+SHEET_NAME: str | int | None = _resolve_sheet_name(os.environ.get("SHEET_NAME"))
 
 # Which origins are allowed to call this API. "*" is fine for local dev.
 # For production, list your real frontend origin(s) instead.
