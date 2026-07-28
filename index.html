@@ -572,6 +572,113 @@
     .seg-control{width:100%;}
     .seg-btn{flex:1;text-align:center;}
   }
+  /* ---------- Data settings modal ---------- */
+  .modal-backdrop{
+    position:fixed;inset:0;z-index:120;background:rgba(12,22,40,0.55);
+    display:flex;align-items:flex-start;justify-content:center;padding:40px 20px;
+    opacity:0;pointer-events:none;transition:opacity .2s ease;overflow-y:auto;
+  }
+  .modal-backdrop.open{opacity:1;pointer-events:auto;}
+  .modal{
+    background:var(--card);border-radius:14px;width:100%;max-width:620px;
+    box-shadow:0 24px 60px rgba(8,16,32,0.32);
+    transform:translateY(-10px) scale(.985);transition:transform .22s cubic-bezier(.22,1,.36,1);
+    display:flex;flex-direction:column;max-height:calc(100vh - 80px);
+  }
+  .modal-backdrop.open .modal{transform:translateY(0) scale(1);}
+  .modal-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:20px 22px 14px;border-bottom:1px solid var(--line);}
+  .modal-head h2{margin:0;font-size:16px;font-weight:700;}
+  .modal-sub{font-size:12px;color:var(--muted);margin-top:3px;}
+  .modal-close{
+    border:none;background:#f1f4f9;color:var(--muted);width:28px;height:28px;border-radius:7px;
+    cursor:pointer;font-size:12px;flex-shrink:0;transition:background .16s ease,color .16s ease;
+  }
+  .modal-close:hover{background:#e4e9f0;color:var(--ink);}
+  .modal-body{padding:18px 22px;overflow-y:auto;}
+  .modal-foot{
+    display:flex;justify-content:space-between;align-items:center;gap:10px;
+    padding:14px 22px;border-top:1px solid var(--line);background:#fafbfd;
+    border-radius:0 0 14px 14px;flex-wrap:wrap;
+  }
+  .foot-right{display:flex;gap:8px;margin-left:auto;}
+  .btn{
+    border:1px solid transparent;border-radius:8px;padding:9px 16px;font-size:12.5px;
+    font-weight:700;cursor:pointer;font-family:inherit;
+    transition:background .16s ease,color .16s ease,border-color .16s ease,transform .12s ease;
+  }
+  .btn:active{transform:scale(.97);}
+  .btn-primary{background:var(--navy-800);color:#fff;}
+  .btn-primary:hover:not(:disabled){background:var(--navy-700);}
+  .btn-primary:disabled{background:#c8d2e0;cursor:default;}
+  .btn-ghost{background:transparent;color:var(--muted);border-color:var(--line);}
+  .btn-ghost:hover{background:#eef1f5;color:var(--ink);}
+
+  .source-strip{
+    display:flex;align-items:center;gap:8px;font-size:12px;
+    background:#f4f7fb;border:1px solid var(--line);border-radius:9px;
+    padding:9px 12px;margin-bottom:14px;color:var(--muted);
+  }
+  .source-strip b{color:var(--ink);}
+  .source-badge{
+    font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px;
+    background:var(--blue-pale);color:var(--navy-800);text-transform:uppercase;letter-spacing:.3px;
+  }
+  .source-badge.custom{background:var(--good-bg);color:var(--good);}
+
+  .dropzone{
+    border:2px dashed #c9d6e6;border-radius:12px;padding:26px 20px;text-align:center;
+    cursor:pointer;background:#fbfcfe;
+    transition:border-color .18s ease,background .18s ease,transform .18s ease;
+  }
+  .dropzone:hover,.dropzone:focus-visible{border-color:var(--teal);background:#f4fbfc;outline:none;}
+  .dropzone.dragging{border-color:var(--teal);background:#e9f7fa;transform:scale(1.01);}
+  .dropzone.busy{opacity:.6;pointer-events:none;}
+  .dz-icon{font-size:26px;margin-bottom:8px;}
+  .dz-title{font-size:13.5px;font-weight:600;color:var(--ink);}
+  .dz-link{color:var(--blue-mid);text-decoration:underline;}
+  .dz-hint{font-size:11.5px;color:var(--muted);margin-top:5px;}
+
+  .load-error{
+    display:none;margin-top:12px;padding:11px 13px;border-radius:9px;
+    background:var(--poor-bg);color:#a5352d;font-size:12.5px;line-height:1.5;
+    border-left:3px solid var(--poor);
+  }
+  .load-error.show{display:block;}
+  .load-error b{color:#7f2a23;}
+
+  .mapper{display:none;margin-top:16px;}
+  .mapper.show{display:block;}
+  .mapper-row{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+  .mapper-row label{width:92px;flex-shrink:0;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .mapper select{
+    flex:1;padding:8px 10px;border:1px solid var(--line);border-radius:8px;
+    font-family:inherit;font-size:12.5px;color:var(--ink);background:#fff;cursor:pointer;
+    transition:border-color .16s ease,box-shadow .16s ease;
+  }
+  .mapper select:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(23,162,184,0.14);}
+  .mapper select.missing{border-color:var(--poor);background:#fffafa;}
+  .mapper-divider{display:flex;align-items:center;gap:10px;margin:16px 0 12px;}
+  .mapper-divider::before,.mapper-divider::after{content:"";flex:1;height:1px;background:var(--line);}
+  .mapper-divider span{font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+  .mapper-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;}
+  .map-field label{display:block;font-size:11px;font-weight:700;color:var(--muted);margin-bottom:4px;}
+  .map-field label .req{color:var(--poor);}
+  .map-field label .opt{color:#9aa7ba;font-weight:600;text-transform:none;letter-spacing:0;}
+  .map-field select{width:100%;}
+  .mapper-preview{
+    margin-top:14px;padding:11px 13px;border-radius:9px;background:#f4f7fb;
+    font-size:12px;color:var(--muted);line-height:1.6;border-left:3px solid var(--teal);
+  }
+  .mapper-preview b{color:var(--ink);}
+  .mapper-preview .warn{color:#9a6212;}
+
+  @media (max-width:560px){
+    .mapper-grid{grid-template-columns:1fr;}
+    .modal-foot{flex-direction:column;align-items:stretch;}
+    .foot-right{margin-left:0;}
+    .foot-right .btn{flex:1;}
+  }
+
   @media (prefers-reduced-motion:reduce){
     *{transition-duration:0.01ms !important;scroll-behavior:auto !important;}
   }
@@ -603,6 +710,7 @@
         <div class="notif-foot" id="notifFoot"></div>
       </div>
     </div>
+    <button type="button" class="icon-btn" id="settingsBtn" title="Data settings">&#9881;</button>
     <div class="avatar">ST</div>
   </div>
 </header>
@@ -850,6 +958,55 @@
     </div>
   </div>
 
+  <!-- Data settings -->
+  <div class="modal-backdrop" id="settingsModal" role="dialog" aria-modal="true" aria-label="Data settings">
+    <div class="modal">
+      <div class="modal-head">
+        <div>
+          <h2>Data Settings</h2>
+          <div class="modal-sub">Load your own Master List of Injuries workbook</div>
+        </div>
+        <button type="button" class="modal-close" id="settingsClose" title="Close">&#10005;</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="source-strip" id="sourceStrip"></div>
+
+        <div class="dropzone" id="dropzone" tabindex="0" role="button"
+             aria-label="Choose a spreadsheet or drop one here">
+          <div class="dz-icon">&#128202;</div>
+          <div class="dz-title">Drop your Excel file here, or <span class="dz-link">browse</span></div>
+          <div class="dz-hint">.xlsx, .xlsm or .csv &middot; read in your browser, never uploaded anywhere</div>
+          <input type="file" id="fileInput" accept=".xlsx,.xlsm,.csv" hidden>
+        </div>
+
+        <div class="load-error" id="loadError"></div>
+
+        <div class="mapper" id="mapper">
+          <div class="mapper-row">
+            <label for="sheetSelect">Sheet</label>
+            <select id="sheetSelect"></select>
+          </div>
+          <div class="mapper-row">
+            <label for="yearSelect">Focus year</label>
+            <select id="yearSelect"></select>
+          </div>
+          <div class="mapper-divider"><span>Column mapping</span></div>
+          <div class="mapper-grid" id="mapperGrid"></div>
+          <div class="mapper-preview" id="mapperPreview"></div>
+        </div>
+      </div>
+
+      <div class="modal-foot">
+        <button type="button" class="btn btn-ghost" id="resetDataBtn">Reset to bundled data</button>
+        <div class="foot-right">
+          <button type="button" class="btn btn-ghost" id="cancelBtn">Cancel</button>
+          <button type="button" class="btn btn-primary" id="applyBtn" disabled>Apply</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="chart-tooltip" id="chartTooltip"></div>
 
   <footer id="pageFooter">Source: Master_List_Of_Injuries_2025_2026 &middot; 275 YTD incident records (2026) &middot; Generated Jul 27, 2026</footer>
@@ -868,6 +1025,7 @@
   const DATA_URL = 'data/incidents.json';
   const EMBEDDED = JSON.parse(document.getElementById('incidentData').textContent);
   let INCIDENTS = sortIncidents(EMBEDDED);
+  let usingCustomData = false;   // set when the user loads their own workbook
 
   // 2025 year-to-date comparison figures, from the workbook's YTD table.
   const PRIOR_YTD = {total:141, rec:7, fa:104, rpo:30};
@@ -1641,6 +1799,8 @@
   // Pulls data/incidents.json when the page is served over http(s).
   // Returns true when the incident set actually changed.
   async function fetchLatestIncidents(){
+    // A workbook the user loaded themselves takes priority over the feed.
+    if(usingCustomData) return false;
     if(!window.location.protocol.startsWith('http')) return false;
     const res = await fetch(`${DATA_URL}?t=${Date.now()}`, {cache:'no-store'});
     if(!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -1696,7 +1856,551 @@
     }
   });
 
+  // ==================================================================
+  // Data settings: load a workbook from the user's own machine.
+  //
+  // .xlsx is a ZIP of XML parts, so it is read here with the platform's
+  // own DecompressionStream rather than pulling in a spreadsheet library.
+  // Nothing is uploaded — the file never leaves the browser.
+  // ==================================================================
+  const CUSTOM_KEY = 'incidentReport.customDataset';
+  const ZIP_EOCD_SIG = 0x06054b50, ZIP_CDIR_SIG = 0x02014b50, ZIP_LOCAL_SIG = 0x04034b50;
+
+  // Column roles the dashboard needs, with the header names seen in the wild.
+  const FIELD_SPECS = [
+    {key:'e',    label:'Employee name', required:true,
+     match:['employeename','employee','name','worker','injuredemployee','injuredworker']},
+    {key:'d',    label:'Date of injury', required:true,
+     match:['doi','dateofinjury','date','incidentdate','injurydate','dateofincident']},
+    {key:'dept', label:'Department', required:true,
+     match:['department','dept','area department','businessunit']},
+    {key:'t',    label:'Injury / illness type', required:true,
+     match:['injuryillnesstype','injurytype','illnesstype','injury','type','naturofinjury','natureofinjury']},
+    {key:'esi',  label:'ESI status', required:true,
+     match:['esistatus','esi','classification','casetype','severity','osharecordability']},
+    {key:'sup',  label:'Supervisor', required:false,
+     match:['supervisor','lead','manager','leadperson','reportsto']},
+    {key:'s',    label:'Case status', required:false,
+     match:['status','casestatus','claimstatus','openclosed']}
+  ];
+
+  // ---------- ZIP ----------
+  async function unzip(buffer){
+    const view = new DataView(buffer), bytes = new Uint8Array(buffer);
+    let eocd = -1;
+    const floor = Math.max(0, buffer.byteLength - 66000);
+    for(let i = buffer.byteLength - 22; i >= floor; i--){
+      if(view.getUint32(i, true) === ZIP_EOCD_SIG){ eocd = i; break; }
+    }
+    if(eocd < 0) throw new Error("This doesn't look like an .xlsx file — no spreadsheet archive was found inside it.");
+
+    const count = view.getUint16(eocd + 10, true);
+    let offset = view.getUint32(eocd + 16, true);
+    const entries = new Map();
+    for(let i = 0; i < count; i++){
+      if(offset + 46 > buffer.byteLength || view.getUint32(offset, true) !== ZIP_CDIR_SIG) break;
+      const method     = view.getUint16(offset + 10, true);
+      const compSize   = view.getUint32(offset + 20, true);
+      const nameLen    = view.getUint16(offset + 28, true);
+      const extraLen   = view.getUint16(offset + 30, true);
+      const commentLen = view.getUint16(offset + 32, true);
+      const localOff   = view.getUint32(offset + 42, true);
+      const name = new TextDecoder().decode(bytes.subarray(offset + 46, offset + 46 + nameLen));
+      entries.set(name, {method, compSize, localOff});
+      offset += 46 + nameLen + extraLen + commentLen;
+    }
+    if(!entries.size) throw new Error('The .xlsx archive appears to be empty or damaged.');
+    return {entries, bytes, view};
+  }
+
+  async function readZipText(zip, name){
+    const entry = zip.entries.get(name);
+    if(!entry) return null;
+    const {view, bytes} = zip;
+    const lo = entry.localOff;
+    if(view.getUint32(lo, true) !== ZIP_LOCAL_SIG) throw new Error('The spreadsheet archive is damaged.');
+    const start = lo + 30 + view.getUint16(lo + 26, true) + view.getUint16(lo + 28, true);
+    const data = bytes.subarray(start, start + entry.compSize);
+    if(entry.method === 0) return new TextDecoder().decode(data);
+    if(entry.method !== 8) throw new Error('This .xlsx uses an unsupported compression method.');
+    if(typeof DecompressionStream === 'undefined'){
+      throw new Error('This browser cannot unpack .xlsx files. Please update it, or save the sheet as .csv and load that instead.');
+    }
+    const stream = new Blob([data]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+    return new TextDecoder().decode(await new Response(stream).arrayBuffer());
+  }
+
+  // ---------- XLSX ----------
+  const parseXml = text => new DOMParser().parseFromString(text, 'application/xml');
+
+  function directChildText(el, tag){
+    for(const child of el.children){
+      if(child.localName === tag) return child.textContent;
+    }
+    return null;
+  }
+  function colIndex(ref){
+    let n = 0;
+    for(const ch of ref){
+      const code = ch.charCodeAt(0);
+      if(code < 65 || code > 90) break;
+      n = n * 26 + (code - 64);
+    }
+    return n - 1;
+  }
+
+  async function parseWorkbook(buffer){
+    const zip = await unzip(buffer);
+
+    const sharedXml = await readZipText(zip, 'xl/sharedStrings.xml');
+    const shared = [];
+    if(sharedXml){
+      for(const si of parseXml(sharedXml).getElementsByTagName('si')){
+        shared.push(Array.from(si.getElementsByTagName('t')).map(t=>t.textContent).join(''));
+      }
+    }
+
+    const bookXml = await readZipText(zip, 'xl/workbook.xml');
+    if(!bookXml) throw new Error('No worksheet index found inside the .xlsx file.');
+    const relsXml = await readZipText(zip, 'xl/_rels/workbook.xml.rels');
+    const relTargets = new Map();
+    if(relsXml){
+      for(const rel of parseXml(relsXml).getElementsByTagName('Relationship')){
+        relTargets.set(rel.getAttribute('Id'), rel.getAttribute('Target'));
+      }
+    }
+
+    const sheets = [];
+    const sheetNodes = parseXml(bookXml).getElementsByTagName('sheet');
+    for(let i = 0; i < sheetNodes.length; i++){
+      const node = sheetNodes[i];
+      const rid = node.getAttribute('r:id') || node.getAttributeNS?.(
+        'http://schemas.openxmlformats.org/officeDocument/2006/relationships', 'id');
+      let target = relTargets.get(rid) || `worksheets/sheet${i+1}.xml`;
+      target = target.replace(/^\/?xl\//, '').replace(/^\//, '');
+      sheets.push({name: node.getAttribute('name') || `Sheet${i+1}`, path: `xl/${target}`});
+    }
+    if(!sheets.length) throw new Error('This workbook has no worksheets.');
+
+    for(const sheet of sheets){
+      const xml = await readZipText(zip, sheet.path);
+      sheet.rows = xml ? extractRows(parseXml(xml), shared) : [];
+    }
+    return sheets;
+  }
+
+  function extractRows(doc, shared){
+    const rows = [];
+    for(const rowEl of doc.getElementsByTagName('row')){
+      const cells = [];
+      for(const c of rowEl.children){
+        if(c.localName !== 'c') continue;
+        const idx = colIndex(c.getAttribute('r') || '');
+        const type = c.getAttribute('t');
+        let value = '';
+        if(type === 'inlineStr'){
+          value = Array.from(c.getElementsByTagName('t')).map(t=>t.textContent).join('');
+        } else {
+          const raw = directChildText(c, 'v');
+          if(raw !== null){
+            value = type === 's' ? (shared[Number(raw)] ?? '') : raw;
+          }
+        }
+        if(idx >= 0) cells[idx] = value;
+      }
+      rows.push(cells);
+    }
+    // trim fully blank trailing rows
+    while(rows.length && !rows[rows.length-1].some(v=>String(v ?? '').trim())) rows.pop();
+    return rows;
+  }
+
+  // ---------- CSV ----------
+  function parseCsv(text){
+    const rows = [];
+    let row = [], field = '', quoted = false;
+    for(let i = 0; i < text.length; i++){
+      const ch = text[i];
+      if(quoted){
+        if(ch === '"'){
+          if(text[i+1] === '"'){ field += '"'; i++; }
+          else quoted = false;
+        } else field += ch;
+      } else if(ch === '"'){ quoted = true; }
+      else if(ch === ','){ row.push(field); field = ''; }
+      else if(ch === '\n'){ row.push(field); rows.push(row); row = []; field = ''; }
+      else if(ch !== '\r'){ field += ch; }
+    }
+    if(field || row.length){ row.push(field); rows.push(row); }
+    while(rows.length && !rows[rows.length-1].some(v=>String(v ?? '').trim())) rows.pop();
+    return rows;
+  }
+
+  // ---------- value coercion ----------
+  const normHeader = s => String(s ?? '').toLowerCase().replace(/[^a-z0-9]/g, '');
+
+  // Excel stores dates as days since 1899-12-30 (the 1900 leap-year bug).
+  // Built in UTC so a browser's local timezone can't shift the day.
+  function excelSerialToDate(serial){
+    const ms = Math.round((Number(serial) - 25569) * 86400000);
+    const dt = new Date(ms);
+    return isNaN(dt.getTime()) ? null : dt;
+  }
+  function coerceDate(value){
+    if(value == null || value === '') return null;
+    const text = String(value).trim();
+    if(/^-?\d+(\.\d+)?$/.test(text)){
+      const serial = Number(text);
+      if(serial > 1 && serial < 80000) return excelSerialToDate(serial);
+    }
+    let m = text.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if(m) return new Date(Date.UTC(+m[1], +m[2]-1, +m[3]));
+    m = text.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{2,4})$/);
+    if(m){
+      let year = +m[3]; if(year < 100) year += year < 70 ? 2000 : 1900;
+      return new Date(Date.UTC(year, +m[1]-1, +m[2]));   // US month/day order
+    }
+    const parsed = new Date(text);
+    return isNaN(parsed.getTime())
+      ? null
+      : new Date(Date.UTC(parsed.getFullYear(), parsed.getMonth(), parsed.getDate()));
+  }
+
+  // Mirrors scripts/regenerate_data.py so both paths yield the same categories.
+  const STRUCK_VARIANTS = new Set([
+    'struck by-against object','struck by - against object',
+    'struck by against object','struck by/against object'
+  ]);
+  const TITLE_TYPES = new Set(['struck by equipment','struck by cattle']);
+  function normaliseInjuryType(value){
+    if(value == null || String(value).trim() === '') return 'Unspecified';
+    let text = String(value).replace(/\s+/g,' ').trim().replace(/Stess/g,'Stress');
+    const key = text.toLowerCase();
+    if(STRUCK_VARIANTS.has(key)) return 'Struck By/Against Object';
+    if(TITLE_TYPES.has(key)) return text.replace(/\w\S*/g, w=>w[0].toUpperCase()+w.slice(1).toLowerCase());
+    return text;
+  }
+  const cleanCell = (v, fallback='') => {
+    const text = String(v ?? '').replace(/\s+/g,' ').trim();
+    return text || fallback;
+  };
+
+  // ---------- workbook -> incident records ----------
+  function autoDetect(headers){
+    const normalised = headers.map(normHeader);
+    const mapping = {}, taken = new Set();
+    for(const spec of FIELD_SPECS){
+      let found = -1;
+      for(const candidate of spec.match){          // exact header match first
+        const idx = normalised.indexOf(candidate);
+        if(idx >= 0 && !taken.has(idx)){ found = idx; break; }
+      }
+      if(found < 0){                                // then a contains-match
+        for(const candidate of spec.match){
+          const idx = normalised.findIndex((h,i)=> h && !taken.has(i) && (h.includes(candidate) || candidate.includes(h)));
+          if(idx >= 0){ found = idx; break; }
+        }
+      }
+      if(found >= 0){ mapping[spec.key] = found; taken.add(found); }
+    }
+    return mapping;
+  }
+
+  function findHeaderRow(rows){
+    let best = 0, bestScore = -1;
+    for(let i = 0; i < Math.min(rows.length, 15); i++){
+      const mapped = Object.keys(autoDetect(rows[i] || [])).length;
+      const filled = (rows[i] || []).filter(v=>String(v ?? '').trim()).length;
+      const score = mapped * 10 + filled;
+      if(mapped > 0 && score > bestScore){ best = i; bestScore = score; }
+    }
+    return best;
+  }
+
+  function buildRecords(rows, headerRow, mapping, focusYear){
+    const out = [], skipped = {date:0, year:0};
+    for(let i = headerRow + 1; i < rows.length; i++){
+      const row = rows[i] || [];
+      if(!row.some(v=>String(v ?? '').trim())) continue;
+      const at = key => mapping[key] >= 0 && mapping[key] != null ? row[mapping[key]] : '';
+
+      const date = coerceDate(at('d'));
+      if(!date){ skipped.date++; continue; }
+      const year = date.getUTCFullYear();
+      if(focusYear && year !== focusYear){ skipped.year++; continue; }
+
+      const month = date.getUTCMonth(), day = date.getUTCDate();
+      out.push({
+        e: cleanCell(at('e')),
+        d: `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`,
+        dd: `${MONTH_ABBR[month]} ${day}, ${year}`,
+        dept: cleanCell(at('dept'), 'Unassigned'),
+        t: normaliseInjuryType(at('t')),
+        esi: cleanCell(at('esi')).toUpperCase(),
+        s: cleanCell(at('s'), 'Open'),
+        sup: cleanCell(at('sup'), 'Unassigned'),
+        m: MONTH_NAMES[month]
+      });
+    }
+    return {records: sortIncidents(out), skipped};
+  }
+
+  function yearsIn(rows, headerRow, mapping){
+    const counts = new Map();
+    for(let i = headerRow + 1; i < rows.length; i++){
+      const row = rows[i] || [];
+      const date = coerceDate(mapping.d >= 0 ? row[mapping.d] : null);
+      if(date) counts.set(date.getUTCFullYear(), (counts.get(date.getUTCFullYear())||0) + 1);
+    }
+    return [...counts.entries()].sort((a,b)=>b[0]-a[0]);
+  }
+
+  // ---------- settings UI ----------
+  const settingsModal = document.getElementById('settingsModal');
+  const dropzone   = document.getElementById('dropzone');
+  const fileInput  = document.getElementById('fileInput');
+  const loadError  = document.getElementById('loadError');
+  const mapper     = document.getElementById('mapper');
+  const sheetSelect = document.getElementById('sheetSelect');
+  const yearSelect  = document.getElementById('yearSelect');
+  const mapperGrid  = document.getElementById('mapperGrid');
+  const mapperPreview = document.getElementById('mapperPreview');
+  const applyBtn   = document.getElementById('applyBtn');
+  const sourceStrip = document.getElementById('sourceStrip');
+
+  let pending = null;   // {fileName, sheets, sheetIdx, headerRow, mapping, focusYear}
+
+  function showError(html){
+    loadError.innerHTML = html;
+    loadError.classList.add('show');
+  }
+  const clearError = () => loadError.classList.remove('show');
+
+  function describeSource(){
+    let saved = null;
+    try{ saved = JSON.parse(window.localStorage.getItem(CUSTOM_KEY) || 'null'); }catch(err){}
+    if(saved && saved.records){
+      sourceStrip.innerHTML = `<span class="source-badge custom">Your file</span>
+        <span><b>${escapeHtml(saved.fileName)}</b> — ${saved.records.length} incidents, loaded ${escapeHtml(saved.loadedAt)}</span>`;
+    } else {
+      sourceStrip.innerHTML = `<span class="source-badge">Bundled</span>
+        <span>Master_List_Of_Injuries_2025_2026 — <b>${INCIDENTS.length}</b> incidents</span>`;
+    }
+  }
+
+  function openSettings(){
+    describeSource();
+    settingsModal.classList.add('open');
+  }
+  function closeSettings(){
+    settingsModal.classList.remove('open');
+    pending = null;
+    mapper.classList.remove('show');
+    clearError();
+    applyBtn.disabled = true;
+    fileInput.value = '';
+  }
+
+  document.getElementById('settingsBtn').addEventListener('click', openSettings);
+  document.getElementById('settingsClose').addEventListener('click', closeSettings);
+  document.getElementById('cancelBtn').addEventListener('click', closeSettings);
+  settingsModal.addEventListener('click', e=>{ if(e.target === settingsModal) closeSettings(); });
+  document.addEventListener('keydown', e=>{
+    if(e.key === 'Escape' && settingsModal.classList.contains('open')) closeSettings();
+  });
+
+  dropzone.addEventListener('click', ()=>fileInput.click());
+  dropzone.addEventListener('keydown', e=>{
+    if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); fileInput.click(); }
+  });
+  fileInput.addEventListener('change', ()=>{ if(fileInput.files[0]) handleFile(fileInput.files[0]); });
+  ['dragenter','dragover'].forEach(ev=>dropzone.addEventListener(ev, e=>{
+    e.preventDefault(); dropzone.classList.add('dragging');
+  }));
+  ['dragleave','drop'].forEach(ev=>dropzone.addEventListener(ev, e=>{
+    e.preventDefault(); dropzone.classList.remove('dragging');
+  }));
+  dropzone.addEventListener('drop', e=>{
+    const file = e.dataTransfer.files[0];
+    if(file) handleFile(file);
+  });
+
+  async function handleFile(file){
+    clearError();
+    mapper.classList.remove('show');
+    applyBtn.disabled = true;
+    dropzone.classList.add('busy');
+    try{
+      const name = file.name.toLowerCase();
+      let sheets;
+      if(name.endsWith('.csv')){
+        sheets = [{name:'CSV', rows: parseCsv(await file.text())}];
+      } else if(name.endsWith('.xlsx') || name.endsWith('.xlsm')){
+        sheets = await parseWorkbook(await file.arrayBuffer());
+      } else if(name.endsWith('.xls')){
+        throw new Error('Legacy .xls files aren\'t supported. Open it in Excel and re-save as <b>.xlsx</b>.');
+      } else {
+        throw new Error('Unsupported file type. Please choose an <b>.xlsx</b>, <b>.xlsm</b> or <b>.csv</b> file.');
+      }
+
+      const usable = sheets.filter(s=>s.rows && s.rows.length);
+      if(!usable.length) throw new Error('That file has no readable rows.');
+
+      // prefer the sheet that maps the most required columns
+      let bestIdx = 0, bestScore = -1;
+      usable.forEach((sheet, i)=>{
+        const hr = findHeaderRow(sheet.rows);
+        const score = Object.keys(autoDetect(sheet.rows[hr] || [])).length;
+        if(score > bestScore){ bestScore = score; bestIdx = i; }
+      });
+
+      pending = {fileName: file.name, sheets: usable, sheetIdx: bestIdx};
+      sheetSelect.innerHTML = usable.map((s,i)=>
+        `<option value="${i}">${escapeHtml(s.name)} (${Math.max(s.rows.length-1,0)} rows)</option>`).join('');
+      sheetSelect.value = String(bestIdx);
+      selectSheet(bestIdx);
+      mapper.classList.add('show');
+    }catch(err){
+      pending = null;
+      showError(`<b>Couldn't read that file.</b><br>${err.message}`);
+    }finally{
+      dropzone.classList.remove('busy');
+    }
+  }
+
+  function selectSheet(idx){
+    const sheet = pending.sheets[idx];
+    pending.sheetIdx = idx;
+    pending.headerRow = findHeaderRow(sheet.rows);
+    pending.mapping = autoDetect(sheet.rows[pending.headerRow] || []);
+
+    const years = yearsIn(sheet.rows, pending.headerRow, pending.mapping);
+    pending.years = years;
+    pending.focusYear = years.length ? years[0][0] : null;
+    yearSelect.innerHTML = years.length
+      ? years.map(([y,n])=>`<option value="${y}">${y} — ${n} rows</option>`).join('') +
+        `<option value="all">All years — ${years.reduce((s,e)=>s+e[1],0)} rows</option>`
+      : '<option value="all">All rows</option>';
+    if(years.length) yearSelect.value = String(years[0][0]);
+
+    renderMapper();
+  }
+
+  function renderMapper(){
+    const sheet = pending.sheets[pending.sheetIdx];
+    const headers = sheet.rows[pending.headerRow] || [];
+    const options = headers.map((h,i)=>({i, label: cleanCell(h) || `Column ${i+1}`}));
+
+    mapperGrid.innerHTML = FIELD_SPECS.map(spec=>{
+      const current = pending.mapping[spec.key];
+      const missing = spec.required && (current == null || current < 0);
+      return `<div class="map-field">
+        <label>${spec.label} ${spec.required?'<span class="req">*</span>':'<span class="opt">(optional)</span>'}</label>
+        <select data-field="${spec.key}" class="${missing?'missing':''}">
+          <option value="">— not in file —</option>
+          ${options.map(o=>`<option value="${o.i}" ${o.i===current?'selected':''}>${escapeHtml(o.label)}</option>`).join('')}
+        </select>
+      </div>`;
+    }).join('');
+
+    mapperGrid.querySelectorAll('select').forEach(sel=>{
+      sel.addEventListener('change', ()=>{
+        const value = sel.value === '' ? null : Number(sel.value);
+        pending.mapping[sel.dataset.field] = value;
+        renderMapper();
+      });
+    });
+
+    updatePreview();
+  }
+
+  function updatePreview(){
+    const sheet = pending.sheets[pending.sheetIdx];
+    const missing = FIELD_SPECS.filter(f=>f.required &&
+      (pending.mapping[f.key] == null || pending.mapping[f.key] < 0));
+
+    if(missing.length){
+      mapperPreview.innerHTML =
+        `<b class="warn">Map these before applying:</b> ${missing.map(f=>escapeHtml(f.label)).join(', ')}.
+         <br>Pick the matching column above, or load a file that includes them.`;
+      applyBtn.disabled = true;
+      return;
+    }
+
+    const year = yearSelect.value === 'all' ? null : Number(yearSelect.value);
+    const {records, skipped} = buildRecords(sheet.rows, pending.headerRow, pending.mapping, year);
+    pending.preview = records;
+
+    if(!records.length){
+      mapperPreview.innerHTML = `<b class="warn">No usable rows found.</b> Check the sheet, focus year and date column.`;
+      applyBtn.disabled = true;
+      return;
+    }
+
+    const notes = [];
+    if(skipped.date) notes.push(`${skipped.date} row${skipped.date>1?'s':''} skipped — unreadable date`);
+    if(skipped.year) notes.push(`${skipped.year} row${skipped.year>1?'s':''} outside ${year}`);
+    const esi = new Map();
+    records.forEach(r=>esi.set(r.esi, (esi.get(r.esi)||0)+1));
+
+    mapperPreview.innerHTML =
+      `<b>${records.length} incidents</b> ready · ${new Set(records.map(r=>r.dept)).size} departments ·
+       ${new Set(records.map(r=>r.sup)).size} supervisors
+       <br>Newest: <b>${escapeHtml(records[0].dd)}</b> — ${escapeHtml(records[0].e)} · ${escapeHtml(records[0].t)}
+       <br>ESI: ${[...esi.entries()].map(([k,v])=>`${escapeHtml(k||'(blank)')} ${v}`).join(' · ')}
+       ${notes.length?`<br><span class="warn">${notes.join(' · ')}</span>`:''}`;
+    applyBtn.disabled = false;
+  }
+
+  sheetSelect.addEventListener('change', ()=>selectSheet(Number(sheetSelect.value)));
+  yearSelect.addEventListener('change', updatePreview);
+
+  applyBtn.addEventListener('click', ()=>{
+    if(!pending || !pending.preview || !pending.preview.length) return;
+    const payload = {
+      fileName: pending.fileName,
+      loadedAt: new Date().toLocaleString([], {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'}),
+      records: pending.preview
+    };
+    try{
+      window.localStorage.setItem(CUSTOM_KEY, JSON.stringify(payload));
+    }catch(err){
+      showError('<b>That dataset is too large to remember between visits.</b><br>It has been applied for this session, but you will need to load it again next time.');
+    }
+    INCIDENTS = sortIncidents(payload.records);
+    usingCustomData = true;
+    renderAll();
+    checkForNewIncidents();
+    describeSource();
+    lastUpdatedEl.textContent = `${payload.fileName} · loaded ${payload.loadedAt}`;
+    closeSettings();
+  });
+
+  document.getElementById('resetDataBtn').addEventListener('click', ()=>{
+    try{ window.localStorage.removeItem(CUSTOM_KEY); }catch(err){}
+    INCIDENTS = sortIncidents(EMBEDDED);
+    usingCustomData = false;
+    renderAll();
+    checkForNewIncidents();
+    describeSource();
+    lastUpdatedEl.textContent = 'Bundled dataset';
+    closeSettings();
+  });
+
+  function restoreCustomDataset(){
+    let saved = null;
+    try{ saved = JSON.parse(window.localStorage.getItem(CUSTOM_KEY) || 'null'); }catch(err){}
+    if(saved && Array.isArray(saved.records) && saved.records.length){
+      INCIDENTS = sortIncidents(saved.records);
+      usingCustomData = true;
+      lastUpdatedEl.textContent = `${saved.fileName} · loaded ${saved.loadedAt}`;
+      return true;
+    }
+    return false;
+  }
+
   // ---- boot ----
+  restoreCustomDataset();
   renderAll();
   checkForNewIncidents();
   // pick up a newer data file on first paint too, when one is reachable

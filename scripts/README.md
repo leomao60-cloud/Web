@@ -1,5 +1,31 @@
 # Updating the dashboard data
 
+There are two ways to load a new workbook.
+
+## 1. In the browser (no tooling needed)
+
+Click the **gear icon** in the dashboard header, then drop in an `.xlsx`,
+`.xlsm` or `.csv` file. The dashboard picks the most likely sheet, finds the
+header row, and maps the columns automatically — you can correct any mapping
+from the dropdowns, and it previews exactly what will be loaded before you
+apply. Your choice is remembered on that browser, and **Reset to bundled
+data** returns to the shipped dataset.
+
+The file is read entirely in the browser and never uploaded anywhere. Reading
+`.xlsx` uses the browser's built-in decompression, which needs a current
+Chrome, Edge, Firefox or Safari; on an older browser, save the sheet as
+`.csv` and load that instead.
+
+Required columns: employee name, date of injury, department, injury/illness
+type and ESI status. Supervisor and case status are optional (a blank case
+status is treated as `Open`). Month and year are derived from the date, so
+those columns aren't needed.
+
+## 2. From the command line
+
+Use this to regenerate the files committed to the repo, so the published
+dashboard ships with new data for everyone rather than just one browser.
+
 The dashboard reads its incidents from two places, both generated from the
 master Excel workbook:
 
