@@ -1,0 +1,29 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+.Python
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# --- Excel / office temp files ---
+# Excel writes ~$ lockfiles while a workbook is open — never commit those.
+~$*
+*.xlsx#
+.~lock.*
+
+# Uncomment if you don't want to commit your actual data files:
+# backend/data/*.xlsx
+
+# --- Editors / OS ---
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# --- Logs ---
+*.log

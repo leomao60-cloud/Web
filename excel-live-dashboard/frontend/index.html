@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Excel Live Dashboard</title>
+
+  <!-- Tailwind via CDN — no build step required. -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Chart.js for future charts. -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+
+  <style>
+    /* Pulsing dot animation for the live status indicator. */
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%      { opacity: 0.5; transform: scale(1.2); }
+    }
+    .status-dot { animation: pulse-dot 2s ease-in-out infinite; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen">
+
+  <!-- Header -->
+  <header class="bg-white border-b border-slate-200">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div>
+        <h1 class="text-xl font-semibold text-slate-900">Excel Live Dashboard</h1>
+        <p class="text-sm text-slate-500">Auto-refreshes every 15 seconds</p>
+      </div>
+
+      <!-- Live status indicator + last updated time -->
+      <div class="flex items-center gap-6">
+        <div class="text-right">
+          <p class="text-xs text-slate-500 uppercase tracking-wide">Last updated</p>
+          <p id="last-updated" class="text-sm font-medium text-slate-800">—</p>
+        </div>
+        <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100">
+          <span id="status-dot" class="status-dot h-2.5 w-2.5 rounded-full bg-slate-400"></span>
+          <span id="status-text" class="text-sm font-medium text-slate-600">Connecting…</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-6 py-6 space-y-6">
+
+    <!-- Error banner (hidden until something goes wrong) -->
+    <div id="error-banner"
+         class="hidden bg-red-50 border border-red-200 text-red-800 rounded-lg px-4 py-3">
+      <div class="flex items-start gap-3">
+        <svg class="w-5 h-5 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd"
+                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                clip-rule="evenodd"/>
+        </svg>
+        <div>
+          <p class="font-medium">Unable to load data</p>
+          <p id="error-message" class="text-sm text-red-700 mt-0.5"></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- KPI cards (placeholders for later) -->
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="bg-white border border-slate-200 rounded-lg p-4">
+        <p class="text-xs text-slate-500 uppercase tracking-wide">Rows</p>
+        <p id="kpi-rows" class="text-2xl font-semibold text-slate-900 mt-1">—</p>
+      </div>
+      <div class="bg-white border border-slate-200 rounded-lg p-4">
+        <p class="text-xs text-slate-500 uppercase tracking-wide">Columns</p>
+        <p id="kpi-cols" class="text-2xl font-semibold text-slate-900 mt-1">—</p>
+      </div>
+      <div class="bg-white border border-slate-200 rounded-lg p-4">
+        <p class="text-xs text-slate-500 uppercase tracking-wide">KPI 3</p>
+        <p class="text-2xl font-semibold text-slate-400 mt-1">—</p>
+      </div>
+      <div class="bg-white border border-slate-200 rounded-lg p-4">
+        <p class="text-xs text-slate-500 uppercase tracking-wide">KPI 4</p>
+        <p class="text-2xl font-semibold text-slate-400 mt-1">—</p>
+      </div>
+    </section>
+
+    <!-- Chart placeholder — wire up Chart.js here later -->
+    <section class="bg-white border border-slate-200 rounded-lg p-6">
+      <h2 class="text-sm font-semibold text-slate-700 mb-4">Chart</h2>
+      <div class="h-64 flex items-center justify-center text-slate-400 text-sm border border-dashed border-slate-200 rounded">
+        <canvas id="main-chart" class="hidden"></canvas>
+        <span id="chart-placeholder">Chart placeholder — add your Chart.js code in app.js</span>
+      </div>
+    </section>
+
+    <!-- Data table -->
+    <section class="bg-white border border-slate-200 rounded-lg overflow-hidden">
+      <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+        <h2 class="text-sm font-semibold text-slate-700">Data</h2>
+        <span id="row-count-label" class="text-xs text-slate-500">0 rows</span>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead id="table-head" class="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+            <!-- Populated by app.js -->
+          </thead>
+          <tbody id="table-body" class="divide-y divide-slate-100">
+            <tr>
+              <td class="px-6 py-8 text-center text-slate-400" colspan="99">Loading…</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
