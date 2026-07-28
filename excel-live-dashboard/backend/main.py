@@ -39,8 +39,11 @@ EXCEL_PATH: Path = Path(
     or Path(__file__).parent / "data" / "dashboard.xlsx"
 )
 
-# Which sheet to read. Use None for the first sheet, or a name like "Sales".
-SHEET_NAME: str | int | None = 0
+# Which sheet to read. Use 0 for the first sheet, or a name like "Sales".
+# Overridable via the SHEET_NAME environment variable at run time.
+SHEET_NAME: str | int | None = os.environ.get(
+    "SHEET_NAME", "Master_List_Of_Injuries"
+)
 
 # Which origins are allowed to call this API. "*" is fine for local dev.
 # For production, list your real frontend origin(s) instead.
