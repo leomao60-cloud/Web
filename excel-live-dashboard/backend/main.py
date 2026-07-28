@@ -12,6 +12,7 @@ Run locally:
 from __future__ import annotations
 
 import math
+import os
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -25,10 +26,18 @@ from fastapi.responses import JSONResponse
 # Configuration — edit these to point at your file.
 # ---------------------------------------------------------------------------
 
-# Path to the Excel file, relative to this script. Change this to whatever
-# workbook you want the dashboard to read from. It can also be an absolute
-# path like Path("/Users/you/Documents/report.xlsx").
-EXCEL_PATH: Path = Path(__file__).parent / "data" / "dashboard.xlsx"
+# Path to the Excel file. Two ways to set it:
+#   1. Preferred: set the EXCEL_PATH environment variable to an absolute path,
+#      e.g. on Windows:
+#          set EXCEL_PATH=C:\Users\You\OneDrive\Documents\Master_List_Of_Injuries.xlsx
+#      on macOS/Linux:
+#          export EXCEL_PATH="/Users/you/Documents/report.xlsx"
+#   2. Or hard-code the default below by editing the fallback path.
+# The fallback is the sample file bundled inside this repo.
+EXCEL_PATH: Path = Path(
+    os.environ.get("EXCEL_PATH")
+    or Path(__file__).parent / "data" / "dashboard.xlsx"
+)
 
 # Which sheet to read. Use None for the first sheet, or a name like "Sales".
 SHEET_NAME: str | int | None = 0
@@ -168,5 +177,12 @@ def get_data() -> JSONResponse:
             "row_count": len(records),
             "columns": list(df.columns),
             "data": records,
-        }
+        },
+        # Belt-and-braces: tell browsers/proxies never to cache this response
+        # so the frontend's 15s poll always gets fresh data.
+        headers={
+            "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+            "Pragma": "no-cache",
+            "Expires": "0",
+        },
     )
