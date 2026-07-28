@@ -1,0 +1,3 @@
+# Session-local scratchpad: build artifacts, downloaded packages, one-off
+# scripts. Nothing here is part of the published dashboard's source.
+scratchpad/
