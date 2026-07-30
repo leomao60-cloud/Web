@@ -15,6 +15,8 @@ const MTIME_URL = `${API_BASE}/api/mtime`;
 const REFRESH_MS = 15_000;
 // Cheap mtime poll — reacts to Excel saves almost instantly (~2s).
 const MTIME_POLL_MS = 2_000;
+// Window length for the "Days Without Recordables" KPI.
+const CLEAN_DAYS_WINDOW = 30;
 
 // Grab all the elements we'll be updating up front so we don't re-query them
 // on every tick.
@@ -32,6 +34,9 @@ const el = {
   kpiRecordable:   document.getElementById("kpi-recordable"),
   kpiThisMonth:    document.getElementById("kpi-this-month"),
   kpiThisMonthSub: document.getElementById("kpi-this-month-sub"),
+  kpiCleanDays:    document.getElementById("kpi-clean-days"),
+  kpiCleanWindow:  document.getElementById("kpi-clean-window"),
+  kpiCleanSub:     document.getElementById("kpi-clean-sub"),
   chartWrap:       document.getElementById("main-chart-wrap"),
   chartCanvas:     document.getElementById("main-chart"),
   chartSubtitle:   document.getElementById("chart-subtitle"),
@@ -481,6 +486,63 @@ function renderSupervisorList(columns, rows) {
 }
 
 /* -----------------------------------------------------------------------
+ * Days Without Recordables KPI
+ * -----------------------------------------------------------------------
+ * Counts how many of the last N calendar days had no recordable incident.
+ * The anchor is the date of the most recent RECORDABLE in the data — not
+ * "today" and not the most recent DOI — because in a historical dataset
+ * that's the only anchor that lets you say "the last recordable was N
+ * days ago and there were K clean days in the run-up." Matches the
+ * standard 27/30-style reading on your workbook.
+ * ----------------------------------------------------------------------- */
+
+function renderCleanDaysKPI(columns, rows) {
+  const dateCol = findColumn(columns, "DOI", "Date of Injury", "Date");
+  const recCol  = findColumn(columns, "Recordable_Flag", "Recordable");
+
+  el.kpiCleanWindow.textContent = CLEAN_DAYS_WINDOW;
+
+  if (!dateCol || !recCol) {
+    el.kpiCleanDays.textContent = "—";
+    el.kpiCleanSub.textContent = !dateCol ? "no DOI column" : "no Recordable column";
+    return;
+  }
+
+  // Collect distinct calendar days that had a recordable incident.
+  const recordableDays = new Set();
+  for (const r of rows) {
+    if (!isRecordable(r[recCol])) continue;
+    const d = parseDate(r[dateCol]);
+    if (!d) continue;
+    recordableDays.add(d.toDateString());
+  }
+
+  if (!recordableDays.size) {
+    el.kpiCleanDays.textContent = String(CLEAN_DAYS_WINDOW);
+    el.kpiCleanSub.textContent = "no recordable incidents on record";
+    return;
+  }
+
+  // Anchor = the latest recordable date.
+  const anchor = new Date(Math.max(
+    ...[...recordableDays].map(k => new Date(k).getTime())
+  ));
+
+  // Walk the window, counting how many days had a recordable hit.
+  let dirty = 0;
+  for (let i = 0; i < CLEAN_DAYS_WINDOW; i++) {
+    const d = new Date(anchor);
+    d.setDate(anchor.getDate() - i);
+    if (recordableDays.has(d.toDateString())) dirty += 1;
+  }
+  const clean = CLEAN_DAYS_WINDOW - dirty;
+
+  el.kpiCleanDays.textContent = String(clean);
+  el.kpiCleanSub.textContent =
+    `window ending ${anchor.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}`;
+}
+
+/* -----------------------------------------------------------------------
  * Status donut — open vs closed
  * ----------------------------------------------------------------------- */
 
@@ -539,6 +601,11 @@ function renderAll(payload) {
   const filtered = getFilteredRows(payload);
   const total    = payload.data.length;
   const shown    = filtered.length;
+
+  // "Days Without Recordables" is a global safety KPI — always computed
+  // against the full unfiltered dataset so it doesn't move when the user
+  // switches the date-range chips.
+  renderCleanDaysKPI(payload.columns, payload.data);
 
   // KPIs and table use the filtered rows.
   el.kpiRows.textContent = shown.toLocaleString();
