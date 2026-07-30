@@ -650,7 +650,7 @@
     <div class="kpi-card">
       <div class="kpi-icon">&#127974;</div>
       <div class="kpi-body">
-        <div class="kpi-label">RPO / Modified Duty</div>
+        <div class="kpi-label">RPO</div>
         <div class="kpi-value" id="kpiRpo">40</div>
         <div class="kpi-delta share" id="kpiRpoDelta">15% of YTD incidents</div>
       </div>
@@ -1167,7 +1167,7 @@
 
     const esiRows = [
       {key:'FA',         name:'FA (FIRST AID)'},
-      {key:'RPO',        name:'RPO / MOD DUTY'},
+      {key:'RPO',        name:'RPO'},
       {key:'RECORDABLE', name:'RECORDABLE'}
     ];
     document.getElementById('protocolRows').innerHTML = esiRows.map(cfg=>{
@@ -1356,7 +1356,7 @@
       chipGroupHTML('dept', a.byDept.map(e=>e[0]), new Map(a.byDept), null, state.dept);
     document.getElementById('chipsEsi').innerHTML =
       chipGroupHTML('esi', ['FA','RPO','RECORDABLE'].filter(k=>a.byEsi.has(k)), a.byEsi,
-        {FA:'First Aid', RPO:'RPO / Mod Duty', RECORDABLE:'Recordable'}, state.esi);
+        {FA:'First Aid', RPO:'RPO', RECORDABLE:'Recordable'}, state.esi);
     document.getElementById('chipsStatus').innerHTML =
       chipGroupHTML('status', ['Close','Open'].filter(k=>a.byStatus.has(k)), a.byStatus,
         {Close:'Closed', Open:'Open'}, state.status);
