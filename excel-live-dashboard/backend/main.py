@@ -39,8 +39,20 @@ EXCEL_PATH: Path = Path(
     or Path(__file__).parent / "data" / "dashboard.xlsx"
 )
 
-# Which sheet to read. Use None for the first sheet, or a name like "Sales".
-SHEET_NAME: str | int | None = 0
+# Which sheet to read. Use 0 for the first sheet, or a name like "Sales".
+# Overridable via the SHEET_NAME environment variable at run time. A purely
+# numeric value like "0" or "2" is treated as a sheet index; anything else
+# is passed through as a sheet name.
+def _resolve_sheet_name(raw: str | None) -> str | int:
+    if raw is None:
+        return "Master_List_Of_Injuries"
+    stripped = raw.strip()
+    if stripped.lstrip("-").isdigit():
+        return int(stripped)
+    return stripped
+
+
+SHEET_NAME: str | int | None = _resolve_sheet_name(os.environ.get("SHEET_NAME"))
 
 # Which origins are allowed to call this API. "*" is fine for local dev.
 # For production, list your real frontend origin(s) instead.
@@ -130,6 +142,27 @@ def root() -> dict[str, str]:
     }
 
 
+@app.get("/api/mtime")
+def get_mtime() -> JSONResponse:
+    """
+    Cheap poll endpoint — just the file's last-modified time.
+
+    The frontend hits this every couple of seconds and only refetches the
+    full /api/data payload when this timestamp actually changes. Costs a
+    single stat() call, so it's fine to poll frequently.
+    """
+    if not EXCEL_PATH.exists():
+        return _error(
+            status=404,
+            message=f"Excel file not found at: {EXCEL_PATH}",
+            code="FILE_NOT_FOUND",
+        )
+    return JSONResponse(
+        content={"success": True, "last_updated": _file_mtime_iso(EXCEL_PATH)},
+        headers={"Cache-Control": "no-store, no-cache, must-revalidate, max-age=0"},
+    )
+
+
 @app.get("/api/data")
 def get_data() -> JSONResponse:
     """
@@ -174,6 +207,7 @@ def get_data() -> JSONResponse:
         content={
             "success": True,
             "last_updated": _file_mtime_iso(EXCEL_PATH),
+            "source_file": str(EXCEL_PATH),
             "row_count": len(records),
             "columns": list(df.columns),
             "data": records,

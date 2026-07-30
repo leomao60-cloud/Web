@@ -25,9 +25,15 @@
   <!-- Header -->
   <header class="bg-white border-b border-slate-200">
     <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-      <div>
+      <div class="min-w-0">
         <h1 class="text-xl font-semibold text-slate-900">Excel Live Dashboard</h1>
         <p class="text-sm text-slate-500">Auto-refreshes every 15 seconds</p>
+        <!-- Which file the backend is reading. Helps you confirm you're -->
+        <!-- editing the same file the dashboard is watching. -->
+        <p class="text-xs text-slate-400 mt-0.5 truncate" title="">
+          <span class="font-medium text-slate-500">Source:</span>
+          <span id="source-file" class="font-mono">—</span>
+        </p>
       </div>
 
       <!-- Live status indicator + last updated time -->
@@ -36,6 +42,11 @@
           <p class="text-xs text-slate-500 uppercase tracking-wide">Last updated</p>
           <p id="last-updated" class="text-sm font-medium text-slate-800">—</p>
         </div>
+        <button id="refresh-btn"
+                class="text-sm font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 border border-slate-200 px-3 py-1.5 rounded-md transition"
+                title="Fetch immediately instead of waiting for the next poll">
+          Refresh now
+        </button>
         <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100">
           <span id="status-dot" class="status-dot h-2.5 w-2.5 rounded-full bg-slate-400"></span>
           <span id="status-text" class="text-sm font-medium text-slate-600">Connecting…</span>
@@ -62,32 +73,95 @@
       </div>
     </div>
 
-    <!-- KPI cards (placeholders for later) -->
-    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <!-- Date-range filter chips. Applied client-side to the cached payload -->
+    <!-- so switching filters is instant and doesn't hit the backend. -->
+    <section class="flex flex-wrap items-center gap-2">
+      <span class="text-xs uppercase tracking-wide text-slate-500 mr-2">Range</span>
+      <div id="filter-bar" class="flex flex-wrap gap-1.5"></div>
+      <span id="filter-summary" class="text-xs text-slate-500 ml-auto">—</span>
+    </section>
+
+    <!-- KPI cards -->
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
       <div class="bg-white border border-slate-200 rounded-lg p-4">
-        <p class="text-xs text-slate-500 uppercase tracking-wide">Rows</p>
+        <p class="text-xs text-slate-500 uppercase tracking-wide">Total incidents</p>
         <p id="kpi-rows" class="text-2xl font-semibold text-slate-900 mt-1">—</p>
+        <p id="kpi-rows-sub" class="text-xs text-slate-400 mt-1">across all records</p>
       </div>
       <div class="bg-white border border-slate-200 rounded-lg p-4">
-        <p class="text-xs text-slate-500 uppercase tracking-wide">Columns</p>
-        <p id="kpi-cols" class="text-2xl font-semibold text-slate-900 mt-1">—</p>
+        <p class="text-xs text-slate-500 uppercase tracking-wide">Open</p>
+        <p id="kpi-open" class="text-2xl font-semibold text-amber-600 mt-1">—</p>
+        <p class="text-xs text-slate-400 mt-1">status not closed</p>
       </div>
       <div class="bg-white border border-slate-200 rounded-lg p-4">
-        <p class="text-xs text-slate-500 uppercase tracking-wide">KPI 3</p>
-        <p class="text-2xl font-semibold text-slate-400 mt-1">—</p>
+        <p class="text-xs text-slate-500 uppercase tracking-wide">Recordable</p>
+        <p id="kpi-recordable" class="text-2xl font-semibold text-rose-600 mt-1">—</p>
+        <p class="text-xs text-slate-400 mt-1">Recordable_Flag = Yes</p>
       </div>
       <div class="bg-white border border-slate-200 rounded-lg p-4">
-        <p class="text-xs text-slate-500 uppercase tracking-wide">KPI 4</p>
-        <p class="text-2xl font-semibold text-slate-400 mt-1">—</p>
+        <p class="text-xs text-slate-500 uppercase tracking-wide">This month</p>
+        <p id="kpi-this-month" class="text-2xl font-semibold text-sky-600 mt-1">—</p>
+        <p id="kpi-this-month-sub" class="text-xs text-slate-400 mt-1">—</p>
+      </div>
+      <div class="bg-white border border-slate-200 rounded-lg p-4">
+        <p class="text-xs text-slate-500 uppercase tracking-wide">Days w/o recordables</p>
+        <p class="mt-1 text-slate-400 text-sm">
+          <span id="kpi-clean-days" class="text-2xl font-semibold text-emerald-600">—</span>
+          <span class="text-slate-400">/ <span id="kpi-clean-window">30</span></span>
+        </p>
+        <p id="kpi-clean-sub" class="text-xs text-slate-400 mt-1">in the last 30 days</p>
       </div>
     </section>
 
-    <!-- Chart placeholder — wire up Chart.js here later -->
-    <section class="bg-white border border-slate-200 rounded-lg p-6">
-      <h2 class="text-sm font-semibold text-slate-700 mb-4">Chart</h2>
-      <div class="h-64 flex items-center justify-center text-slate-400 text-sm border border-dashed border-slate-200 rounded">
-        <canvas id="main-chart" class="hidden"></canvas>
-        <span id="chart-placeholder">Chart placeholder — add your Chart.js code in app.js</span>
+    <!-- Monthly chart (wide) + Status donut (side) -->
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div class="bg-white border border-slate-200 rounded-lg p-6 lg:col-span-2">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-sm font-semibold text-slate-700">Incidents by month</h2>
+          <span id="chart-subtitle" class="text-xs text-slate-500">—</span>
+        </div>
+        <div id="main-chart-wrap" class="h-64">
+          <canvas id="main-chart"></canvas>
+        </div>
+        <p id="chart-empty"
+           class="hidden text-center text-slate-400 text-sm py-16">
+          No DOI column found — can't chart monthly incidents.
+        </p>
+      </div>
+
+      <div class="bg-white border border-slate-200 rounded-lg p-6">
+        <h2 class="text-sm font-semibold text-slate-700 mb-4">Open vs closed</h2>
+        <div id="status-chart-wrap" class="h-64 relative">
+          <canvas id="status-chart"></canvas>
+        </div>
+        <p id="status-empty"
+           class="hidden text-center text-slate-400 text-sm py-16">
+          No Status column found.
+        </p>
+      </div>
+    </section>
+
+    <!-- Two-column: department breakdown + top supervisors by open incidents -->
+    <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div class="bg-white border border-slate-200 rounded-lg p-6">
+        <h2 class="text-sm font-semibold text-slate-700 mb-4">Incidents by department</h2>
+        <div id="dept-chart-wrap" class="h-64">
+          <canvas id="dept-chart"></canvas>
+        </div>
+        <p id="dept-empty"
+           class="hidden text-center text-slate-400 text-sm py-16">
+          No Department column found.
+        </p>
+      </div>
+
+      <div class="bg-white border border-slate-200 rounded-lg p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-sm font-semibold text-slate-700">Top supervisors — open incidents</h2>
+          <span class="text-xs text-slate-500">Top 8</span>
+        </div>
+        <ol id="supervisor-list" class="space-y-2 text-sm">
+          <li class="text-slate-400 text-center py-8">Loading…</li>
+        </ol>
       </div>
     </section>
 
