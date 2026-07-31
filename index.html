@@ -175,6 +175,32 @@
   .welcome-row .sub{font-size:12.5px;color:#a9c0da;margin-top:3px;font-weight:400;}
   #lastUpdated{transition:opacity .18s ease;}
   #lastUpdated.fade{opacity:0;}
+
+  /* Prominent "Data last refreshed" pill in the header. */
+  .pill.pill-updated{
+    display:inline-flex;align-items:center;gap:8px;
+    font-weight:600;
+    background:rgba(31,157,85,0.18);
+    border-color:rgba(31,157,85,0.55);
+    color:#d6f5e1;
+  }
+  .pill-updated .live-dot{
+    width:8px;height:8px;border-radius:50%;
+    background:#1f9d55;
+    box-shadow:0 0 0 0 rgba(31,157,85,0.6);
+    animation:livePulse 2s ease-out infinite;
+  }
+  .pill-updated.stale{
+    background:rgba(224,138,30,0.18);
+    border-color:rgba(224,138,30,0.55);
+    color:#fce6c8;
+  }
+  .pill-updated.stale .live-dot{background:#e08a1e;animation:none;}
+  @keyframes livePulse{
+    0%   { box-shadow:0 0 0 0 rgba(31,157,85,0.6); }
+    70%  { box-shadow:0 0 0 8px rgba(31,157,85,0);   }
+    100% { box-shadow:0 0 0 0 rgba(31,157,85,0);     }
+  }
   .pill-group{display:flex;gap:10px;flex-wrap:wrap;}
   .pill{
     border:1px solid rgba(255,255,255,0.25);
@@ -614,6 +640,12 @@
       <div class="sub">Master List of Injuries &middot; Focus Year 2026 &middot; <span id="lastUpdated">Updated Jul 27, 2026</span></div>
     </div>
     <div class="pill-group">
+      <div class="pill pill-updated" id="refreshedPill"
+           role="status" aria-live="polite" aria-atomic="true"
+           title="How long since the dashboard last pulled data">
+        <span class="live-dot" aria-hidden="true"></span>
+        <span id="refreshedPillText">Refreshed just now</span>
+      </div>
       <div class="pill" id="periodPill">&#128197; YTD 2026 (Jan 1 &ndash; Jul 27)</div>
       <div class="pill">&#9889; Medium Risk &middot; Sev 43</div>
       <button type="button" class="pill pill-refresh" id="refreshBtn" title="Refresh dashboard data">
@@ -714,7 +746,7 @@
         <h3>Non-Recordable Rate</h3>
         <span class="status-pill status-good">Good</span>
         <div class="gauge-meta" id="nrrFrom">&#9728;&#65039; From Jan 1, 2026 &middot; 12:00 AM</div>
-        <div class="gauge-meta" id="nrrTo">&#128337; To Jul 27, 2026 &middot; 24:00 PM</div>
+        <div class="gauge-meta" id="nrrTo">&#128337; To Jul 27, 2026 &middot; 11:59 PM</div>
       </div>
       <svg width="88" height="88" viewBox="0 0 88 88">
         <circle cx="44" cy="44" r="37" fill="none" stroke="#e9edf3" stroke-width="10"/>
@@ -869,10 +901,32 @@
   const EMBEDDED = JSON.parse(document.getElementById('incidentData').textContent);
   let INCIDENTS = sortIncidents(EMBEDDED);
 
-  // 2025 year-to-date comparison figures, from the workbook's YTD table.
-  const PRIOR_YTD = {total:141, rec:7, fa:104, rpo:30};
-  const SEVERITY_SCORE = 43;          // workbook composite, not derived here
-  const DAYS_WITHOUT_GOAL = 30;
+  // Tunable inputs. Defaults come from the workbook's own YTD comparison
+  // table; override any of them without editing this file by setting
+  //
+  //   <\/script>window.DASHBOARD_CONFIG = { priorYTD:{total:150}, severityScore:60 };<\/script>
+  //
+  // BEFORE the main script runs (in a real <script> tag — the "<\/script>"
+  // escapes above are only there so this comment doesn't break the HTML
+  // parser). Partial overrides merge with defaults.
+  const CONFIG_DEFAULTS = {
+    priorYTD:         {total:141, rec:7, fa:104, rpo:30},  // 2025 YTD reference
+    severityScore:    43,                                  // composite 0–100
+    daysWithoutGoal:  30,                                  // clean-day target
+  };
+  const CONFIG = (function(){
+    const user = (window.DASHBOARD_CONFIG || {});
+    return {
+      priorYTD:         Object.assign({}, CONFIG_DEFAULTS.priorYTD, user.priorYTD || {}),
+      severityScore:    Number.isFinite(user.severityScore)   ? user.severityScore   : CONFIG_DEFAULTS.severityScore,
+      daysWithoutGoal:  Number.isFinite(user.daysWithoutGoal) ? user.daysWithoutGoal : CONFIG_DEFAULTS.daysWithoutGoal,
+    };
+  })();
+
+  // Back-compat aliases so existing call sites keep working.
+  const PRIOR_YTD         = CONFIG.priorYTD;
+  const SEVERITY_SCORE    = CONFIG.severityScore;
+  const DAYS_WITHOUT_GOAL = CONFIG.daysWithoutGoal;
 
   const MONTH_NAMES = ['January','February','March','April','May','June',
                        'July','August','September','October','November','December'];
@@ -1039,7 +1093,7 @@
       document.getElementById('statRange').textContent =
         `From ${fmtLong(a.first)} to ${fmtLong(a.last)}`;
       document.getElementById('nrrFrom').innerHTML = `&#9728;&#65039; From ${fmtLong(a.first)} &middot; 12:00 AM`;
-      document.getElementById('nrrTo').innerHTML = `&#128337; To ${fmtLong(a.last)} &middot; 24:00 PM`;
+      document.getElementById('nrrTo').innerHTML = `&#128337; To ${fmtLong(a.last)} &middot; 11:59 PM`;
       document.getElementById('pageFooter').innerHTML =
         `Source: Master_List_Of_Injuries_2025_2026 &middot; ${a.total} YTD incident records (${a.year}) &middot; Generated ${fmtLong(a.last)}`;
     }
@@ -1339,7 +1393,8 @@
   function chipGroupHTML(group, order, counts, labelMap, active){
     return order.map(v=>{
       const label = (labelMap && labelMap[v]) || v;
-      return `<button type="button" class="chip ${active.has(v)?'active':''}" data-group="${group}" data-value="${escapeHtml(v)}">${escapeHtml(label)}<span class="chip-count">${counts.get(v)||0}</span></button>`;
+      const isActive = active.has(v);
+      return `<button type="button" class="chip ${isActive?'active':''}" data-group="${group}" data-value="${escapeHtml(v)}" aria-pressed="${isActive}">${escapeHtml(label)}<span class="chip-count">${counts.get(v)||0}</span></button>`;
     }).join('');
   }
 
@@ -1368,8 +1423,10 @@
     const chip = e.target.closest('.chip');
     if(!chip) return;
     const {group, value} = chip.dataset;
-    if(state[group].has(value)) state[group].delete(value); else state[group].add(value);
-    chip.classList.toggle('active');
+    const nowActive = !state[group].has(value);
+    if(nowActive) state[group].add(value); else state[group].delete(value);
+    chip.classList.toggle('active', nowActive);
+    chip.setAttribute('aria-pressed', String(nowActive));
     applyFilters();
   });
 
@@ -1387,7 +1444,10 @@
   document.getElementById('clearAllBtn').addEventListener('click', ()=>{
     state.q=''; searchInput.value=''; searchClearX.classList.remove('show');
     ['dept','esi','status','month'].forEach(g=>state[g].clear());
-    document.querySelectorAll('#filterChips .chip.active').forEach(c=>c.classList.remove('active'));
+    document.querySelectorAll('#filterChips .chip.active').forEach(c=>{
+      c.classList.remove('active');
+      c.setAttribute('aria-pressed','false');
+    });
     applyFilters();
   });
 
@@ -1587,9 +1647,29 @@
     renderNotifications();
   }
 
+  // Remember what had focus before the dialog opened so we can hand it back
+  // when the dialog closes — the a11y minimum for a non-modal popup dialog.
+  let notifOpener = null;
   function setPanelOpen(open){
+    const wasOpen = panel.classList.contains('open');
     panel.classList.toggle('open', open);
     bell.setAttribute('aria-expanded', String(open));
+
+    if(open && !wasOpen){
+      notifOpener = document.activeElement;
+      // Move focus into the dialog so screen readers land in it. Prefer
+      // the "Mark all read" action; fall back to the panel itself.
+      const target = markReadBtn || panel;
+      if(!panel.hasAttribute('tabindex')) panel.setAttribute('tabindex','-1');
+      window.requestAnimationFrame(()=>target.focus());
+    } else if(!open && wasOpen){
+      if(notifOpener && typeof notifOpener.focus === 'function'){
+        notifOpener.focus();
+      } else {
+        bell.focus();
+      }
+      notifOpener = null;
+    }
   }
   bell.addEventListener('click', e=>{
     e.stopPropagation();
@@ -1653,18 +1733,49 @@
     return changed;
   }
 
-  const refreshBtn    = document.getElementById('refreshBtn');
-  const refreshLabel  = refreshBtn.querySelector('.refresh-label');
-  const lastUpdatedEl = document.getElementById('lastUpdated');
+  const refreshBtn      = document.getElementById('refreshBtn');
+  const refreshLabel    = refreshBtn.querySelector('.refresh-label');
+  const lastUpdatedEl   = document.getElementById('lastUpdated');
+  const refreshedPill   = document.getElementById('refreshedPill');
+  const refreshedText   = document.getElementById('refreshedPillText');
+
+  // Timestamp of the most recent successful refresh. Drives the live pill.
+  let lastRefreshedAt = new Date();
+
+  function relativeAge(from){
+    const secs = Math.max(0, Math.round((Date.now() - from.getTime()) / 1000));
+    if(secs < 45)             return 'just now';
+    if(secs < 90)             return '1 min ago';
+    const mins = Math.round(secs / 60);
+    if(mins < 60)             return `${mins} min ago`;
+    const hrs = Math.round(mins / 60);
+    if(hrs < 24)              return `${hrs} hr${hrs===1?'':'s'} ago`;
+    const days = Math.round(hrs / 24);
+    return `${days} day${days===1?'':'s'} ago`;
+  }
+
+  function tickRefreshedPill(){
+    const age = Math.round((Date.now() - lastRefreshedAt.getTime()) / 1000);
+    refreshedText.textContent = `Refreshed ${relativeAge(lastRefreshedAt)}`;
+    // Amber "stale" state after 5 minutes without a refresh.
+    refreshedPill.classList.toggle('stale', age > 300);
+  }
 
   function stampUpdated(){
-    const time = new Date().toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
+    lastRefreshedAt = new Date();
+    const time = lastRefreshedAt.toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
     lastUpdatedEl.classList.add('fade');
     window.setTimeout(()=>{
       lastUpdatedEl.textContent = `Updated just now (${time})`;
       lastUpdatedEl.classList.remove('fade');
     }, 180);
+    tickRefreshedPill();
   }
+
+  // Update the "Refreshed X ago" text every 30 seconds so relative time
+  // doesn't rot on a page left open in the background.
+  window.setInterval(tickRefreshedPill, 30_000);
+  tickRefreshedPill();
 
   refreshBtn.addEventListener('click', async ()=>{
     if(refreshBtn.disabled) return;
