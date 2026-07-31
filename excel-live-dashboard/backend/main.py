@@ -1,11 +1,10 @@
 """
-Excel Live Dashboard — FastAPI backend.
+WVM Permit Dashboard — FastAPI backend.
 
-Serves the contents of an Excel file as JSON via GET /api/data.
-The frontend polls this endpoint every 15 seconds to stay in sync
-with the file on disk.
+Serves the WVM Permit Spreadsheet as JSON via GET /api/data.
+The frontend polls this endpoint every 15 seconds.
 
-Run locally:
+Run:
     uvicorn main:app --reload --port 8000
 """
 
@@ -23,46 +22,21 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 # ---------------------------------------------------------------------------
-# Configuration — edit these to point at your file.
+# Configuration
 # ---------------------------------------------------------------------------
-
-# Path to the Excel file. Two ways to set it:
-#   1. Preferred: set the EXCEL_PATH environment variable to an absolute path,
-#      e.g. on Windows:
-#          set EXCEL_PATH=C:\Users\You\OneDrive\Documents\Master_List_Of_Injuries.xlsx
-#      on macOS/Linux:
-#          export EXCEL_PATH="/Users/you/Documents/report.xlsx"
-#   2. Or hard-code the default below by editing the fallback path.
-# The fallback is the sample file bundled inside this repo.
 EXCEL_PATH: Path = Path(
     os.environ.get("EXCEL_PATH")
-    or Path(__file__).parent / "data" / "dashboard.xlsx"
+    or Path(__file__).parent / "data" / "WVM_Permit_Spreadsheet.xlsx"
 )
 
-# Which sheet to read. Use 0 for the first sheet, or a name like "Sales".
-# Overridable via the SHEET_NAME environment variable at run time. A purely
-# numeric value like "0" or "2" is treated as a sheet index; anything else
-# is passed through as a sheet name.
-def _resolve_sheet_name(raw: str | None) -> str | int:
-    if raw is None:
-        return "Master_List_Of_Injuries"
-    stripped = raw.strip()
-    if stripped.lstrip("-").isdigit():
-        return int(stripped)
-    return stripped
+SHEET_NAME: str | int = 0
 
-
-SHEET_NAME: str | int | None = _resolve_sheet_name(os.environ.get("SHEET_NAME"))
-
-# Which origins are allowed to call this API. "*" is fine for local dev.
-# For production, list your real frontend origin(s) instead.
 CORS_ORIGINS: list[str] = ["*"]
 
 # ---------------------------------------------------------------------------
 # App setup
 # ---------------------------------------------------------------------------
-
-app = FastAPI(title="Excel Live Dashboard API", version="1.0.0")
+app = FastAPI(title="WVM Permit Dashboard API", version="1.0.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -76,67 +50,53 @@ app.add_middleware(
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
-
 def _clean_value(value: Any) -> Any:
-    """
-    Make a single cell value JSON-safe.
-
-    pandas returns NaN, NaT, and numpy scalars which don't serialise cleanly.
-    We convert those into None or native Python types.
-    """
-    # NaN / NaT — both counted as "missing" by pandas.
     if value is None:
         return None
     if isinstance(value, float) and math.isnan(value):
         return None
     if pd.isna(value):
         return None
-
-    # Datetimes → ISO strings.
     if isinstance(value, (pd.Timestamp, datetime)):
         return value.isoformat()
-
-    # Numpy scalars → native Python.
     if hasattr(value, "item"):
         try:
             return value.item()
         except Exception:
             pass
-
     return value
 
 
+def _normalize_col_name(name: str) -> str:
+    """Collapse whitespace/newlines in column names to single spaces."""
+    return " ".join(str(name).split())
+
+
 def _read_excel() -> pd.DataFrame:
-    """Read the configured Excel file into a DataFrame."""
-    return pd.read_excel(EXCEL_PATH, sheet_name=SHEET_NAME, engine="openpyxl")
+    df = pd.read_excel(EXCEL_PATH, sheet_name=SHEET_NAME, engine="openpyxl")
+    df.columns = [_normalize_col_name(c) for c in df.columns]
+    return df
 
 
 def _file_mtime_iso(path: Path) -> str:
-    """Return the file's last-modified time as an ISO 8601 UTC string."""
     ts = path.stat().st_mtime
     return datetime.fromtimestamp(ts, tz=timezone.utc).isoformat()
 
 
 def _error(status: int, message: str, code: str) -> JSONResponse:
-    """Uniform error envelope so the frontend can rely on the shape."""
     return JSONResponse(
         status_code=status,
-        content={
-            "success": False,
-            "error": {"code": code, "message": message},
-        },
+        content={"success": False, "error": {"code": code, "message": message}},
     )
 
 
 # ---------------------------------------------------------------------------
 # Routes
 # ---------------------------------------------------------------------------
-
 @app.get("/")
 def root() -> dict[str, str]:
-    """Tiny health check so hitting the root gives something useful."""
     return {
-        "service": "excel-live-dashboard",
+        "service": "wvm-permit-dashboard",
         "status": "ok",
         "data_endpoint": "/api/data",
     }
@@ -144,19 +104,8 @@ def root() -> dict[str, str]:
 
 @app.get("/api/mtime")
 def get_mtime() -> JSONResponse:
-    """
-    Cheap poll endpoint — just the file's last-modified time.
-
-    The frontend hits this every couple of seconds and only refetches the
-    full /api/data payload when this timestamp actually changes. Costs a
-    single stat() call, so it's fine to poll frequently.
-    """
     if not EXCEL_PATH.exists():
-        return _error(
-            status=404,
-            message=f"Excel file not found at: {EXCEL_PATH}",
-            code="FILE_NOT_FOUND",
-        )
+        return _error(404, f"Excel file not found at: {EXCEL_PATH}", "FILE_NOT_FOUND")
     return JSONResponse(
         content={"success": True, "last_updated": _file_mtime_iso(EXCEL_PATH)},
         headers={"Cache-Control": "no-store, no-cache, must-revalidate, max-age=0"},
@@ -165,40 +114,14 @@ def get_mtime() -> JSONResponse:
 
 @app.get("/api/data")
 def get_data() -> JSONResponse:
-    """
-    Read the Excel file and return its contents as JSON.
-
-    Response shape (success):
-        {
-            "success": true,
-            "last_updated": "2026-01-15T10:30:00+00:00",
-            "row_count": 42,
-            "columns": ["col1", "col2", ...],
-            "data": [ { "col1": ..., "col2": ... }, ... ]
-        }
-    """
-    # Guard: file must exist.
     if not EXCEL_PATH.exists():
-        return _error(
-            status=404,
-            message=f"Excel file not found at: {EXCEL_PATH}",
-            code="FILE_NOT_FOUND",
-        )
+        return _error(404, f"Excel file not found at: {EXCEL_PATH}", "FILE_NOT_FOUND")
 
-    # Read the workbook. Any parse error becomes a clean 500.
     try:
         df = _read_excel()
-    except Exception as exc:  # openpyxl / pandas parse issues
-        return _error(
-            status=500,
-            message=f"Failed to read Excel file: {exc}",
-            code="READ_ERROR",
-        )
+    except Exception as exc:
+        return _error(500, f"Failed to read Excel file: {exc}", "READ_ERROR")
 
-    # Normalise column names to strings (Excel sometimes yields ints/dates).
-    df.columns = [str(c) for c in df.columns]
-
-    # Convert to a list of row dicts, cleaning values as we go.
     records: list[dict[str, Any]] = []
     for row in df.to_dict(orient="records"):
         records.append({k: _clean_value(v) for k, v in row.items()})
@@ -212,8 +135,6 @@ def get_data() -> JSONResponse:
             "columns": list(df.columns),
             "data": records,
         },
-        # Belt-and-braces: tell browsers/proxies never to cache this response
-        # so the frontend's 15s poll always gets fresh data.
         headers={
             "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
             "Pragma": "no-cache",
