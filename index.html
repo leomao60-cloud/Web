@@ -959,6 +959,91 @@
   .view-more{color:var(--ink-900);}
   .view-more::after{background:var(--ink-900);}
 
+  /* ---------- Page title + period selector (Skillset reference) ---------- */
+  .page-head{
+    display:flex;justify-content:space-between;align-items:flex-end;
+    flex-wrap:wrap;gap:16px 24px;margin-bottom:18px;
+  }
+  .page-head h1{font-size:24px;font-weight:800;margin:0;letter-spacing:-.3px;color:var(--ink);}
+  .page-head .sub{font-size:12.5px;color:var(--muted);margin-top:3px;}
+  .period-tabs{
+    display:inline-flex;background:var(--surface-alt);border-radius:999px;padding:3px;gap:2px;
+  }
+  .period-tabs button{
+    border:none;background:transparent;padding:8px 22px;border-radius:999px;
+    font-family:inherit;font-size:12.5px;font-weight:600;color:var(--muted);cursor:pointer;
+    transition:background .16s ease, color .16s ease, box-shadow .16s ease;
+  }
+  .period-tabs button:hover{color:var(--ink);}
+  .period-tabs button.active{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(15,18,22,0.12);}
+
+  /* KPI icons compact — smaller, less dominant than before to match reference */
+  .kpi-icon{width:34px;height:34px;border-radius:9px;font-size:16px;}
+  .kpi-body .kpi-value{font-size:26px;}
+  .kpi-body .kpi-delta{margin-top:6px;}
+
+  /* ---------- Current-month calendar tile ---------- */
+  .cal-card{
+    display:flex;flex-direction:column;gap:14px;
+    background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:18px 20px 16px;
+    transition:border-color .22s ease, box-shadow .22s ease;
+  }
+  .cal-card:hover{border-color:var(--line-strong);box-shadow:0 8px 22px rgba(15,18,22,0.06);}
+  .cal-head{
+    display:flex;justify-content:space-between;align-items:center;
+  }
+  .cal-title{font-size:14px;font-weight:700;color:var(--ink);}
+  .cal-sub{font-size:11.5px;color:var(--muted);}
+  .cal-grid{
+    display:grid;grid-template-columns:repeat(7,1fr);gap:4px;
+  }
+  .cal-dow{
+    text-align:center;font-size:10px;font-weight:700;color:var(--muted);
+    text-transform:uppercase;letter-spacing:.4px;padding:6px 0 2px;
+  }
+  .cal-day{
+    position:relative;aspect-ratio:1/1;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;
+    font-size:12px;font-weight:600;color:var(--ink);
+    border-radius:8px;background:transparent;
+    transition:background .16s ease, transform .12s ease;cursor:default;
+  }
+  .cal-day.empty{background:transparent;color:transparent;pointer-events:none;}
+  .cal-day.past{color:var(--muted);}
+  .cal-day.future{color:#c9ccd1;}
+  .cal-day .cal-dot{
+    position:absolute;bottom:5px;left:50%;transform:translateX(-50%);
+    width:4px;height:4px;border-radius:50%;background:var(--muted);opacity:.55;
+  }
+  .cal-day.hit{background:var(--surface-alt);color:var(--ink);}
+  .cal-day.hit .cal-dot{background:var(--ink);opacity:.85;}
+  .cal-day.hit.rec .cal-dot{background:var(--poor);opacity:1;}
+  .cal-day.hit:hover{background:var(--line);}
+  .cal-day.today{outline:2px solid var(--ink-900);outline-offset:-2px;}
+  .cal-day.selected{background:var(--ink-900);color:#fff;}
+  .cal-day.selected .cal-dot{background:#fff;}
+  .cal-legend{
+    display:flex;align-items:center;justify-content:space-between;
+    font-size:11px;color:var(--muted);padding-top:2px;
+    border-top:1px dashed var(--line);
+  }
+  .cal-legend b{color:var(--ink);}
+  .cal-legend .swatches{display:flex;gap:12px;}
+  .cal-legend .sw{display:inline-flex;align-items:center;gap:5px;}
+  .cal-legend .sw i{width:8px;height:8px;border-radius:50%;background:var(--ink);display:inline-block;opacity:.85;}
+  .cal-legend .sw i.rec{background:var(--poor);opacity:1;}
+
+  .gauge-row.with-cal{grid-template-columns:1fr 1fr 1fr 1.25fr;}
+  .gauge-row.with-cal .gauge-card h3{font-size:13.5px;}
+  .gauge-row.with-cal .gauge-card svg{width:76px;height:76px;flex-shrink:0;}
+  @media (max-width:1240px){
+    .gauge-row.with-cal{grid-template-columns:1fr 1fr;}
+  }
+  @media (max-width:760px){
+    .gauge-row.with-cal{grid-template-columns:1fr;}
+  }
+
   /* Sidebar responsive: collapse to icon rail on tablets, hide on phones
    * (a "menu" button appears in the header so nothing becomes unreachable) */
   .sidebar-toggle{display:none;}
@@ -1056,11 +1141,19 @@
 </header>
 
 <section class="welcome-band">
-  <div class="welcome-row">
+  <div class="page-head">
     <div>
-      <h1>Welcome, Safety Team</h1>
-      <div class="sub">Master List of Injuries &middot; Focus Year 2026 &middot; <span id="lastUpdated">Updated Jul 27, 2026</span></div>
+      <h1>Dashboard</h1>
+      <div class="sub">Master List of Injuries &middot; <span id="lastUpdated">Updated Jul 27, 2026</span></div>
     </div>
+    <div class="period-tabs" id="periodTabs" role="tablist" aria-label="Reporting period">
+      <button type="button" role="tab" data-mode="day">Day</button>
+      <button type="button" role="tab" data-mode="week">Week</button>
+      <button type="button" role="tab" class="active" data-mode="month" aria-selected="true">Month</button>
+      <button type="button" role="tab" data-mode="year">Year</button>
+    </div>
+  </div>
+  <div class="welcome-row" style="justify-content:flex-end;">
     <div class="pill-group">
       <div class="pill pill-updated" id="refreshedPill"
            role="status" aria-live="polite" aria-atomic="true"
@@ -1161,8 +1254,8 @@
     </div>
   </div>
 
-  <!-- Gauges -->
-  <div class="gauge-row">
+  <!-- Gauges + this-month calendar -->
+  <div class="gauge-row with-cal">
     <div class="gauge-card">
       <div class="gauge-left">
         <h3>Non-Recordable Rate</h3>
@@ -1209,6 +1302,23 @@
           stroke-dasharray="232.5" stroke-dashoffset="132.5"/>
         <text x="44" y="49" text-anchor="middle" font-size="17" font-weight="800" fill="#1a2433">43</text>
       </svg>
+    </div>
+
+    <div class="cal-card" id="calCard">
+      <div class="cal-head">
+        <div>
+          <div class="cal-title" id="calTitle">July 2026</div>
+          <div class="cal-sub" id="calSub">Daily incident count &middot; latest highlighted</div>
+        </div>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+      <div class="cal-legend">
+        <span><b id="calTotal">0</b> in month</span>
+        <span class="swatches">
+          <span class="sw"><i></i>Incident</span>
+          <span class="sw"><i class="rec"></i>Recordable</span>
+        </span>
+      </div>
     </div>
   </div>
 
@@ -2191,6 +2301,86 @@
     applyFilters();
     buildSupervisors();
     renderSupervisors(supSearchInput.value);
+    renderCalendar();
+  }
+
+  // ==================================================================
+  // Current-month calendar tile (Skillset-style, adapted for daily
+  // incident counts). Uses AGG so it refreshes with every dataset swap.
+  // ==================================================================
+  function renderCalendar(){
+    const a = AGG;
+    const grid = document.getElementById('calGrid');
+    if(!grid || !a.last) return;
+
+    const year = a.year, month = a.latestMonthIdx;
+    const first = new Date(year, month, 1);
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    // Monday-first: shift Sunday(0) to 6, everything else -1
+    const firstDow = (first.getDay() + 6) % 7;
+    const latestDay = a.last.getMonth() === month && a.last.getFullYear() === year
+      ? a.last.getDate() : 0;
+
+    // build day -> {v, r} map from a.days (already computed for latest month)
+    const dayMap = new Map();
+    a.days.forEach(d => dayMap.set(d.d, d));
+
+    document.getElementById('calTitle').textContent = `${MONTH_NAMES[month]} ${year}`;
+
+    let html = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']
+      .map(d => `<div class="cal-dow">${d}</div>`).join('');
+
+    for(let i = 0; i < firstDow; i++) html += '<div class="cal-day empty"></div>';
+
+    let monthTotal = 0;
+    for(let d = 1; d <= daysInMonth; d++){
+      const info = dayMap.get(d);
+      const v = info ? info.v : 0;
+      const r = info ? info.r : 0;
+      monthTotal += v;
+      const classes = ['cal-day'];
+      if(d > latestDay && latestDay > 0) classes.push('future');
+      else if(d < latestDay) classes.push('past');
+      if(v > 0) classes.push('hit');
+      if(r > 0) classes.push('rec');
+      if(d === latestDay) classes.push('selected');
+      const title = v > 0
+        ? `${MONTH_ABBR[month]} ${d} · ${v} incident${v>1?'s':''}${r?` (${r} recordable)`:''}`
+        : `${MONTH_ABBR[month]} ${d} · no incidents`;
+      html += `<div class="${classes.join(' ')}" title="${title}" data-day="${d}">${d}${v>0?'<span class="cal-dot"></span>':''}</div>`;
+    }
+
+    grid.innerHTML = html;
+    document.getElementById('calTotal').textContent = monthTotal;
+    document.getElementById('calSub').textContent =
+      `Daily incident count · latest highlighted (${MONTH_ABBR[month]} ${latestDay})`;
+  }
+
+  // ==================================================================
+  // Period tabs (Day / Week / Month / Year) — drive the trend chart's
+  // granularity. "Year" collapses to the month view since we only have
+  // one focus year loaded at a time.
+  // ==================================================================
+  const periodTabs = document.getElementById('periodTabs');
+  if(periodTabs){
+    periodTabs.addEventListener('click', e=>{
+      const btn = e.target.closest('button[data-mode]');
+      if(!btn) return;
+      periodTabs.querySelectorAll('button').forEach(b=>{
+        b.classList.remove('active');
+        b.removeAttribute('aria-selected');
+      });
+      btn.classList.add('active');
+      btn.setAttribute('aria-selected','true');
+      // Map period tabs to the trend chart's own tabs (year -> month)
+      const mode = btn.dataset.mode === 'year' ? 'month' : btn.dataset.mode;
+      const trendBtn = document.querySelector(`#trendTabs .seg-btn[data-mode="${mode}"]`);
+      if(trendBtn){
+        document.querySelectorAll('#trendTabs .seg-btn').forEach(b=>b.classList.remove('active'));
+        trendBtn.classList.add('active');
+        renderTrend(mode);
+      }
+    });
   }
 
   // Pulls data/incidents.json when the page is served over http(s).
