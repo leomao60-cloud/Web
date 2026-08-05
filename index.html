@@ -8,11 +8,21 @@
   :root{
     /* Monochrome UI palette (Skillset-inspired). Navy/teal names are kept
        as aliases so existing rules keep working with the new tones. */
-    --ink-900:#0f1216;      /* near-black — highlighted tiles, primary buttons */
-    --ink-800:#1a1d21;      /* dark surface, active nav */
+    --ink-900:#0f1216;      /* near-black — reserved for body text */
+    --ink-800:#1a1d21;
     --ink-700:#2b2f35;
-    --accent:#111418;       /* single dark accent (replaces old teal) */
+    --accent:#111418;
     --accent-soft:#e5e7ea;
+    /* Brand accent — corporate navy blue (blend from the second reference).
+       Used for highlighted tiles, active nav, primary buttons, and chart
+       series that previously showed pure black. */
+    --brand:#1d3f75;
+    --brand-strong:#142c56;
+    --brand-mid:#3b62a8;
+    --brand-soft:#eef2f9;
+    /* Red is reserved for the single most-active CTA + destructive states. */
+    --brand-red:#e5253a;
+    --brand-red-strong:#c31a2c;
     --bg:#f4f5f7;           /* page background */
     --sidebar-bg:#ffffff;
     --card:#ffffff;
@@ -423,7 +433,7 @@
   }
   .trend-col.visible{opacity:1;transform:translateY(0);}
   .trend-bar{
-    width:100%;max-width:26px;background:linear-gradient(180deg,#3b3f45,var(--ink-900));
+    width:100%;max-width:26px;background:linear-gradient(180deg,var(--brand-mid),var(--brand));
     border-radius:5px 5px 2px 2px;transform-origin:bottom;
     transition:transform .2s cubic-bezier(.22,1,.36,1), filter .2s ease;
   }
@@ -740,7 +750,7 @@
   }
   .sidebar-brand .mark{
     width:30px;height:30px;border-radius:8px;
-    background:var(--ink-900);color:#fff;
+    background:var(--brand);color:#fff;
     display:inline-flex;align-items:center;justify-content:center;
     font-size:12px;font-weight:800;letter-spacing:.5px;
   }
@@ -753,7 +763,13 @@
     transition:background .18s ease, color .18s ease, transform .12s ease;
   }
   .sidebar-nav a:hover{background:var(--surface-alt);color:var(--ink);}
-  .sidebar-nav a.active{background:var(--ink-900);color:#fff;}
+  .sidebar-nav a.active{background:var(--brand);color:#fff;}
+  .sidebar-nav a .nav-badge{
+    margin-left:auto;font-size:10.5px;font-weight:800;
+    background:var(--brand-red);color:#fff;
+    border-radius:9px;padding:1px 7px;line-height:14px;
+  }
+  .sidebar-nav a.active .nav-badge{background:#fff;color:var(--brand);}
   .sidebar-nav a .nav-ico{
     width:20px;height:20px;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;
     font-size:14px;opacity:.85;
@@ -765,7 +781,7 @@
   }
   .sidebar-spacer{flex:1;}
   .sidebar-card{
-    background:var(--ink-900);color:#fff;border-radius:12px;
+    background:var(--brand);color:#fff;border-radius:12px;
     padding:14px 14px 12px;margin:12px 0;
   }
   .sidebar-card .sc-eyebrow{
@@ -776,11 +792,11 @@
   .sidebar-card .sc-body{font-size:11.5px;color:#c6cad0;line-height:1.5;margin-bottom:10px;}
   .sidebar-card .sc-btn{
     display:block;width:100%;text-align:center;padding:8px 10px;border-radius:8px;
-    background:#fff;color:var(--ink-900);font-weight:700;font-size:12px;
+    background:#fff;color:var(--brand);font-weight:700;font-size:12px;
     border:none;cursor:pointer;font-family:inherit;
     transition:background .16s ease, transform .12s ease;
   }
-  .sidebar-card .sc-btn:hover{background:#e5e7ea;}
+  .sidebar-card .sc-btn:hover{background:#eef2f9;}
   .sidebar-card .sc-btn:active{transform:scale(.97);}
 
   /* ---------- Top header ---------- */
@@ -815,11 +831,17 @@
   }
   header.topnav .icon-btn:hover{background:var(--surface-alt);border-color:var(--line-strong);}
   header.topnav .avatar{
-    background:var(--ink-900);color:#fff;width:36px;height:36px;
+    background:var(--brand);color:#fff;width:36px;height:36px;
     border-radius:50%;
   }
-  header.topnav .avatar:hover{box-shadow:0 0 0 3px rgba(17,20,24,.10);}
+  header.topnav .avatar:hover{box-shadow:0 0 0 3px rgba(29,63,117,.14);}
   .notif-badge{border-color:var(--card);}
+  .header-clock{
+    display:inline-flex;align-items:center;font-variant-numeric:tabular-nums;
+    font-size:13.5px;font-weight:700;letter-spacing:.6px;color:var(--ink);
+    padding:0 10px;
+  }
+  @media (max-width:900px){ .header-clock{display:none;} }
 
   /* ---------- Welcome / page-header band ---------- */
   .welcome-band{
@@ -834,8 +856,9 @@
     font-weight:600;padding:8px 14px;border-radius:10px;
   }
   .pill:hover{background:var(--surface-alt);border-color:var(--line-strong);transform:translateY(-1px);}
-  button.pill-refresh{background:var(--ink-900);color:#fff;border-color:var(--ink-900);}
-  button.pill-refresh:hover{background:#000;border-color:#000;}
+  /* Primary CTA: matches the reference's red "Show" / "Sign in" accent. */
+  button.pill-refresh{background:var(--brand-red);color:#fff;border-color:var(--brand-red);}
+  button.pill-refresh:hover{background:var(--brand-red-strong);border-color:var(--brand-red-strong);}
   .pill.pill-updated{
     background:var(--good-bg);color:var(--good);border-color:transparent;
   }
@@ -859,17 +882,17 @@
   .kpi-delta.flat{color:var(--good);}
   .kpi-delta.share{color:var(--muted);}
 
-  /* Highlighted primary KPI (Total Incidents YTD) */
+  /* Highlighted primary KPI (Total Incidents YTD) — brand blue */
   .kpi-card.kpi-highlight{
-    background:var(--ink-900);color:#fff;border-color:var(--ink-900);
+    background:var(--brand);color:#fff;border-color:var(--brand);
   }
-  .kpi-card.kpi-highlight:hover{background:#000;border-color:#000;}
-  .kpi-card.kpi-highlight .kpi-icon{background:rgba(255,255,255,0.12);color:#fff;}
-  .kpi-card.kpi-highlight:hover .kpi-icon{background:rgba(255,255,255,0.22);}
-  .kpi-card.kpi-highlight .kpi-body .kpi-label{color:#a8adb5;}
+  .kpi-card.kpi-highlight:hover{background:var(--brand-strong);border-color:var(--brand-strong);}
+  .kpi-card.kpi-highlight .kpi-icon{background:rgba(255,255,255,0.14);color:#fff;}
+  .kpi-card.kpi-highlight:hover .kpi-icon{background:rgba(255,255,255,0.26);}
+  .kpi-card.kpi-highlight .kpi-body .kpi-label{color:#b8c4dc;}
   .kpi-card.kpi-highlight .kpi-body .kpi-value{color:#fff;}
-  .kpi-card.kpi-highlight .kpi-body .kpi-delta{color:#e5e7ea;}
-  .kpi-card.kpi-highlight .kpi-delta.up{color:#ffbdb3;}
+  .kpi-card.kpi-highlight .kpi-body .kpi-delta{color:#dbe4f2;}
+  .kpi-card.kpi-highlight .kpi-delta.up{color:#ffb6a3;}
   .kpi-card.kpi-highlight .kpi-delta.flat{color:#8fe0b3;}
 
   /* ---------- Cards, gauges, misc surfaces ---------- */
@@ -890,21 +913,21 @@
   /* Chart tints — swap teal/blue palette to neutral grays */
   .stat-block{background:var(--surface-alt);border-radius:12px;}
   .spark-badge{background:var(--good-bg);color:var(--good);}
-  .action-box{background:var(--surface-alt);border-left-color:var(--ink-900);color:var(--ink);}
-  .findings-list li::before{background:var(--ink-900);}
-  .findings-list li:hover{color:var(--ink-900);}
+  .action-box{background:var(--brand-soft);border-left-color:var(--brand);color:var(--ink);}
+  .findings-list li::before{background:var(--brand);}
+  .findings-list li:hover{color:var(--brand);}
 
   /* Segmented control (Month/Week/Day, filter chips) */
   .seg-control{background:var(--surface-alt);}
   .seg-btn.active{color:var(--ink-900);box-shadow:0 1px 3px rgba(15,18,22,0.12);}
   .chip{background:var(--card);border-color:var(--line);}
   .chip:hover{background:var(--surface-alt);border-color:var(--line-strong);}
-  .chip.active{background:var(--ink-900);border-color:var(--ink-900);color:#fff;box-shadow:0 3px 8px rgba(15,18,22,0.22);}
-  .chip.active:hover{background:#000;}
+  .chip.active{background:var(--brand);border-color:var(--brand);color:#fff;box-shadow:0 3px 8px rgba(29,63,117,0.28);}
+  .chip.active:hover{background:var(--brand-strong);border-color:var(--brand-strong);}
 
   /* Search fields (explorer + supervisor) */
   .search-row{background:var(--surface-alt);border-color:var(--line);}
-  .search-row:focus-within{border-color:var(--ink-700);box-shadow:0 0 0 3px rgba(17,20,24,.08);background:var(--card);}
+  .search-row:focus-within{border-color:var(--brand);box-shadow:0 0 0 3px rgba(29,63,117,0.14);background:var(--card);}
 
   /* Filter group panel */
   .filter-groups{background:var(--surface-alt);border-color:var(--line);}
@@ -912,8 +935,8 @@
   /* Sup list — refresh row separators */
   .sup-row-item:hover{background:var(--surface-alt);}
   .rank{background:var(--surface-alt);color:var(--ink);}
-  .sup-row-item:hover .rank{background:var(--ink-900);color:#fff;}
-  .sup-row-item:hover .sup-name{color:var(--ink-900);}
+  .sup-row-item:hover .rank{background:var(--brand);color:#fff;}
+  .sup-row-item:hover .sup-name{color:var(--brand);}
 
   /* Explorer + notifications hover tones */
   table.recent tr:hover td,.result-row:hover{background:var(--surface-alt);}
@@ -945,19 +968,19 @@
   /* Modal — align to new palette */
   .modal-close{background:var(--surface-alt);color:var(--muted);}
   .modal-close:hover{background:var(--line);color:var(--ink);}
-  .btn-primary{background:var(--ink-900);}
-  .btn-primary:hover:not(:disabled){background:#000;}
+  .btn-primary{background:var(--brand);}
+  .btn-primary:hover:not(:disabled){background:var(--brand-strong);}
   .source-strip{background:var(--surface-alt);}
   .source-badge{background:var(--line);color:var(--ink);}
   .source-badge.custom{background:var(--good-bg);color:var(--good);}
   .dropzone{background:var(--card);border-color:var(--line-strong);}
-  .dropzone:hover,.dropzone:focus-visible{border-color:var(--ink-700);background:var(--surface-alt);}
-  .dropzone.dragging{border-color:var(--ink-900);background:var(--surface-alt);}
-  .mapper-preview{background:var(--surface-alt);border-left-color:var(--ink-900);}
+  .dropzone:hover,.dropzone:focus-visible{border-color:var(--brand);background:var(--brand-soft);}
+  .dropzone.dragging{border-color:var(--brand);background:var(--brand-soft);}
+  .mapper-preview{background:var(--brand-soft);border-left-color:var(--brand);}
 
-  /* View-more link — dark accent instead of blue */
-  .view-more{color:var(--ink-900);}
-  .view-more::after{background:var(--ink-900);}
+  /* Section links — brand blue accent */
+  .view-more{color:var(--brand);}
+  .view-more::after{background:var(--brand);}
 
   /* ---------- Page title + period selector (Skillset reference) ---------- */
   .page-head{
@@ -1020,8 +1043,8 @@
   .cal-day.hit .cal-dot{background:var(--ink);opacity:.85;}
   .cal-day.hit.rec .cal-dot{background:var(--poor);opacity:1;}
   .cal-day.hit:hover{background:var(--line);}
-  .cal-day.today{outline:2px solid var(--ink-900);outline-offset:-2px;}
-  .cal-day.selected{background:var(--ink-900);color:#fff;}
+  .cal-day.today{outline:2px solid var(--brand);outline-offset:-2px;}
+  .cal-day.selected{background:var(--brand);color:#fff;}
   .cal-day.selected .cal-dot{background:#fff;}
   .cal-legend{
     display:flex;align-items:center;justify-content:space-between;
@@ -1096,7 +1119,7 @@
     <a href="#panels"><span class="nav-ico">&#128203;</span><span>Injuries</span></a>
     <a href="#panels"><span class="nav-ico">&#127970;</span><span>Departments</span></a>
     <a href="#insights"><span class="nav-ico">&#128200;</span><span>Trends</span></a>
-    <a href="#recent"><span class="nav-ico">&#128269;</span><span>Explorer</span></a>
+    <a href="#recent" id="navExplorer"><span class="nav-ico">&#128269;</span><span>Explorer</span><span class="nav-badge" id="navExplorerBadge" style="display:none;">0</span></a>
     <a href="#insights"><span class="nav-ico">&#128101;</span><span>Supervisors</span></a>
   </nav>
   <div class="sidebar-spacer"></div>
@@ -1121,6 +1144,7 @@
     <kbd>&#8629;</kbd>
   </label>
   <div class="header-right">
+    <span class="header-clock" id="headerClock" aria-hidden="true">00 : 00</span>
     <div class="notif-wrap">
       <button type="button" class="icon-btn" id="notifBell" title="Notifications" aria-haspopup="true" aria-expanded="false">
         &#128276;
@@ -1516,7 +1540,9 @@
   const MONTH_ABBR  = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   // Monochrome ramp — near-black to very light gray, one accent hue skipped
   // so the whole page reads as one system.
-  const PALETTE = ['#111418','#3b3f45','#6b7280','#9ca3af','#c9ccd1','#e8eaed'];
+  // Brand-forward ramp: navy blue at the top, blue-tinted grays descending.
+  // Reads as one system even when many series share the palette.
+  const PALETTE = ['#1d3f75','#3b62a8','#7987a3','#a4b0c6','#ccd4e0','#eef1f6'];
 
   function sortIncidents(rows){
     return [...rows].sort((a,b)=> a.d < b.d ? 1 : a.d > b.d ? -1 : 0);
@@ -1841,7 +1867,7 @@
     }).join(' ');
     const poly = document.createElementNS('http://www.w3.org/2000/svg','polyline');
     poly.setAttribute('points',pts);
-    poly.setAttribute('fill','none'); poly.setAttribute('stroke','#111418');
+    poly.setAttribute('fill','none'); poly.setAttribute('stroke','#1d3f75');
     poly.setAttribute('stroke-width','2');
     poly.setAttribute('stroke-linecap','round'); poly.setAttribute('stroke-linejoin','round');
     svg.appendChild(poly);
@@ -2203,6 +2229,13 @@
     notifFoot.textContent = n
       ? `${n} new incident${n>1?'s':''} since you last checked.`
       : `Watching ${INCIDENTS.length} incidents · you're all caught up.`;
+    // Mirror the count as a sidebar badge on the Explorer nav link, like the
+    // "99" on MENU POINT 5 in the reference.
+    const navB = document.getElementById('navExplorerBadge');
+    if(navB){
+      navB.textContent = n > 99 ? '99+' : n;
+      navB.style.display = n > 0 ? 'inline-block' : 'none';
+    }
   }
 
   function checkForNewIncidents(){
@@ -3046,6 +3079,18 @@
     sidebarEl.classList.remove('open');
     openSettings();
   });
+
+  // Header clock — 24-hour, colon-separated to match the reference's "09 : 55"
+  const headerClock = document.getElementById('headerClock');
+  function tickClock(){
+    if(!headerClock) return;
+    const now = new Date();
+    const hh = String(now.getHours()).padStart(2,'0');
+    const mm = String(now.getMinutes()).padStart(2,'0');
+    headerClock.textContent = `${hh} : ${mm}`;
+  }
+  tickClock();
+  window.setInterval(tickClock, 30000);
 
   // Global search bar in the top header — reuses the Incident Explorer path
   const topSearch = document.getElementById('topSearch');
