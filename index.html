@@ -839,9 +839,54 @@
   .header-clock{
     display:inline-flex;align-items:center;font-variant-numeric:tabular-nums;
     font-size:13.5px;font-weight:700;letter-spacing:.6px;color:var(--ink);
-    padding:0 10px;
+    padding:5px 10px;border-radius:8px;cursor:pointer;user-select:none;
+    background:transparent;border:1px solid transparent;font-family:inherit;
+    transition:background .15s ease, border-color .15s ease, transform .12s ease;
   }
+  .header-clock:hover{background:var(--card);border-color:var(--line);}
+  .header-clock:active{transform:scale(.96);}
   @media (max-width:900px){ .header-clock{display:none;} }
+
+  /* ---------- Avatar user menu ---------- */
+  .user-wrap{position:relative;}
+  .user-panel{
+    position:absolute;top:44px;right:0;width:290px;z-index:90;
+    background:var(--card);border:1px solid var(--line);border-radius:12px;
+    box-shadow:0 14px 38px rgba(10,20,40,0.16);overflow:hidden;
+    opacity:0;transform:translateY(-8px) scale(.97);pointer-events:none;
+    transition:opacity .18s ease, transform .18s cubic-bezier(.22,1,.36,1);
+  }
+  .user-panel.open{opacity:1;transform:translateY(0) scale(1);pointer-events:auto;}
+  .user-head{
+    display:flex;align-items:center;gap:12px;
+    padding:14px 16px;border-bottom:1px solid var(--line);
+    background:var(--brand-soft);
+  }
+  .user-avatar-lg{
+    width:40px;height:40px;border-radius:50%;background:var(--brand);color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    font-weight:700;font-size:14px;flex-shrink:0;
+  }
+  .user-name{font-size:13.5px;font-weight:700;color:var(--ink);line-height:1.2;}
+  .user-role{font-size:11px;color:var(--muted);margin-top:2px;}
+  .user-meta{padding:10px 16px;font-size:12px;color:var(--muted);}
+  .user-meta > div{display:flex;justify-content:space-between;padding:4px 0;}
+  .user-meta b{color:var(--ink);font-variant-numeric:tabular-nums;}
+  .user-actions{border-top:1px solid var(--line);padding:6px;}
+  .user-action{
+    display:flex;align-items:center;gap:10px;width:100%;padding:9px 10px;
+    border-radius:7px;border:none;background:transparent;
+    font-family:inherit;font-size:12.5px;color:var(--ink);
+    cursor:pointer;text-align:left;
+    transition:background .14s ease, color .14s ease;
+  }
+  .user-action:hover{background:var(--surface-alt);}
+  .user-action .ua-ico{width:18px;text-align:center;opacity:.85;}
+  .user-action.user-action-danger{color:var(--brand-red);}
+  .user-action.user-action-danger:hover{background:var(--poor-bg);}
+  @media (max-width:480px){
+    .user-panel{width:calc(100vw - 32px);right:-8px;}
+  }
 
   /* ---------- Welcome / page-header band ---------- */
   .welcome-band{
@@ -1160,7 +1205,34 @@
       </div>
     </div>
     <button type="button" class="icon-btn" id="settingsBtn" title="Data settings">&#9881;</button>
-    <div class="avatar">ST</div>
+    <div class="user-wrap">
+      <button type="button" class="avatar" id="avatarBtn" title="Account" aria-haspopup="true" aria-expanded="false">ST</button>
+      <div class="user-panel" id="userPanel" role="menu" aria-label="Account menu">
+        <div class="user-head">
+          <div class="user-avatar-lg">ST</div>
+          <div>
+            <div class="user-name">Safety Team</div>
+            <div class="user-role">Administrator &middot; <span id="userDataMode">Bundled data</span></div>
+          </div>
+        </div>
+        <div class="user-meta">
+          <div><span>Incidents loaded</span><b id="userLoadCount">0</b></div>
+          <div><span>Latest incident</span><b id="userLoadLatest">—</b></div>
+          <div><span>Focus year</span><b id="userLoadYear">—</b></div>
+        </div>
+        <div class="user-actions">
+          <button type="button" class="user-action" id="userLoadData">
+            <span class="ua-ico">&#128194;</span> Load a workbook…
+          </button>
+          <button type="button" class="user-action" id="userResetData">
+            <span class="ua-ico">&#8635;</span> Reset to bundled data
+          </button>
+          <button type="button" class="user-action user-action-danger" id="userSignOut">
+            <span class="ua-ico">&#8629;</span> Sign out (clear preferences)
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </header>
 
@@ -1173,8 +1245,8 @@
     <div class="period-tabs" id="periodTabs" role="tablist" aria-label="Reporting period">
       <button type="button" role="tab" data-mode="day">Day</button>
       <button type="button" role="tab" data-mode="week">Week</button>
-      <button type="button" role="tab" class="active" data-mode="month" aria-selected="true">Month</button>
-      <button type="button" role="tab" data-mode="year">Year</button>
+      <button type="button" role="tab" data-mode="month">Month</button>
+      <button type="button" role="tab" class="active" data-mode="year" aria-selected="true">Year</button>
     </div>
   </div>
   <div class="welcome-row" style="justify-content:flex-end;">
@@ -1507,6 +1579,25 @@
   const EMBEDDED = JSON.parse(document.getElementById('incidentData').textContent);
   let INCIDENTS = sortIncidents(EMBEDDED);
   let usingCustomData = false;   // set when the user loads their own workbook
+  let periodFilter = 'year';     // 'year' | 'month' | 'week' | 'day'
+
+  // Restrict the raw incidents to the currently-selected period. Everything
+  // downstream (KPIs, charts, calendar, findings, explorer defaults) then
+  // derives from the returned subset.
+  function filterByPeriod(rows, period){
+    if(period === 'year' || !rows.length) return rows;
+    const latestMs = Math.max(...rows.map(r => parseDate(r.d).getTime()));
+    const latest = new Date(latestMs);
+    let cutoff;
+    if(period === 'day'){
+      cutoff = new Date(latest);
+    } else if(period === 'week'){
+      cutoff = new Date(latest); cutoff.setDate(cutoff.getDate() - 6);
+    } else {                                       // month = current calendar month
+      cutoff = new Date(latest.getFullYear(), latest.getMonth(), 1);
+    }
+    return rows.filter(r => parseDate(r.d) >= cutoff);
+  }
 
   // Tunable inputs. Defaults come from the workbook's own YTD comparison
   // table; override any of them without editing this file by setting
@@ -1690,23 +1781,32 @@
     };
 
     document.getElementById('kpiTotal').textContent = a.total;
-    document.getElementById('kpiTotalDelta').innerHTML = delta(a.total, PRIOR_YTD.total);
     document.getElementById('kpiRec').textContent = a.rec;
-    document.getElementById('kpiRecDelta').innerHTML = delta(a.rec, PRIOR_YTD.rec);
     document.getElementById('kpiFa').textContent = a.fa;
-    document.getElementById('kpiFaDelta').textContent = `${pct(a.fa)}% of YTD incidents`;
     document.getElementById('kpiRpo').textContent = a.rpo;
-    document.getElementById('kpiRpoDelta').textContent = `${pct(a.rpo)}% of YTD incidents`;
+    // Prior-year deltas only make sense over full YTD; for narrower periods
+    // report what share of the YTD total this slice represents instead.
+    const isYear = periodFilter === 'year';
+    const ytdTotal = INCIDENTS.length;
+    const ytdShare = v => ytdTotal ? Math.round((v/ytdTotal)*100) : 0;
+    document.getElementById('kpiTotalDelta').innerHTML = isYear
+      ? delta(a.total, PRIOR_YTD.total)
+      : `&#8226; ${ytdShare(a.total)}% of YTD total`;
+    document.getElementById('kpiRecDelta').innerHTML = isYear
+      ? delta(a.rec, PRIOR_YTD.rec)
+      : `&#8226; ${a.rec} of ${INCIDENTS.filter(r=>r.esi==='RECORDABLE').length} YTD recordable`;
+    document.getElementById('kpiFaDelta').textContent = `${pct(a.fa)}% of this period`;
+    document.getElementById('kpiRpoDelta').textContent = `${pct(a.rpo)}% of this period`;
 
     if(a.first && a.last){
-      document.getElementById('periodPill').innerHTML =
-        `&#128197; YTD ${a.year} (${fmtShort(a.first)} &ndash; ${fmtShort(a.last)})`;
+      // periodPill is owned by applyPeriodLabels() so it can reflect the
+      // active filter (This Week, This Month, YTD, …) rather than always YTD.
       document.getElementById('statRange').textContent =
         `From ${fmtLong(a.first)} to ${fmtLong(a.last)}`;
       document.getElementById('nrrFrom').innerHTML = `&#9728;&#65039; From ${fmtLong(a.first)} &middot; 12:00 AM`;
       document.getElementById('nrrTo').innerHTML = `&#128337; To ${fmtLong(a.last)} &middot; 11:59 PM`;
       document.getElementById('pageFooter').innerHTML =
-        `Source: Master_List_Of_Injuries_2025_2026 &middot; ${a.total} YTD incident records (${a.year}) &middot; Generated ${fmtLong(a.last)}`;
+        `Source: Master_List_Of_Injuries_2025_2026 &middot; ${INCIDENTS.length} YTD incident records (${a.year}) &middot; Generated ${fmtLong(a.last)}`;
     }
     document.getElementById('statTotal').textContent = a.total;
     document.getElementById('resultsTotal').textContent = a.total;
@@ -2322,7 +2422,8 @@
   // Full render + live refresh
   // ==================================================================
   function renderAll(){
-    AGG = computeAggregates(INCIDENTS);
+    const scoped = filterByPeriod(INCIDENTS, periodFilter);
+    AGG = computeAggregates(scoped);
     renderHeadline();
     renderGauges();
     renderDonut();
@@ -2335,6 +2436,34 @@
     buildSupervisors();
     renderSupervisors(supSearchInput.value);
     renderCalendar();
+    applyPeriodLabels();
+  }
+
+  // Rewrite the primary-KPI label and the "YTD 2026" pill so the user can
+  // see at a glance which period the page is scoped to. Derives the
+  // date-range boundaries from the period itself, not from AGG.first (which
+  // is pinned to Jan 1 for YTD).
+  function applyPeriodLabels(){
+    const label = document.querySelector('.kpi-card.kpi-highlight .kpi-label');
+    const pill  = document.getElementById('periodPill');
+    const a     = AGG;
+    if(!a.last){ return; }
+    let start;
+    if(periodFilter === 'year')       start = new Date(a.year, 0, 1);
+    else if(periodFilter === 'month') start = new Date(a.last.getFullYear(), a.last.getMonth(), 1);
+    else if(periodFilter === 'week'){ start = new Date(a.last); start.setDate(start.getDate() - 6); }
+    else                              start = new Date(a.last);   // day
+    const range = periodFilter === 'day'
+      ? fmtShort(a.last)
+      : `${fmtShort(start)} – ${fmtShort(a.last)}`;
+    const labels = {
+      year:  ['Total Incidents YTD',        `📅 YTD ${a.year} (${range})`],
+      month: ['Total Incidents This Month', `📅 This Month (${range})`],
+      week:  ['Total Incidents This Week',  `📅 Last 7 Days (${range})`],
+      day:   ['Total Incidents Latest Day', `📅 Latest Day (${range})`]
+    }[periodFilter];
+    if(label) label.textContent = labels[0];
+    if(pill)  pill.innerHTML    = labels[1];
   }
 
   // ==================================================================
@@ -2390,29 +2519,32 @@
   }
 
   // ==================================================================
-  // Period tabs (Day / Week / Month / Year) — drive the trend chart's
-  // granularity. "Year" collapses to the month view since we only have
-  // one focus year loaded at a time.
+  // Period tabs (Day / Week / Month / Year) — filter the whole dashboard
+  // to that time window. Every panel below re-renders from the filtered
+  // subset via renderAll(), and the trend chart's own granularity tab
+  // moves to whatever level of detail fits.
   // ==================================================================
   const periodTabs = document.getElementById('periodTabs');
+  const PERIOD_TREND_MODE = {year:'month', month:'day', week:'day', day:'day'};
   if(periodTabs){
     periodTabs.addEventListener('click', e=>{
       const btn = e.target.closest('button[data-mode]');
-      if(!btn) return;
+      if(!btn || btn.classList.contains('active')) return;
       periodTabs.querySelectorAll('button').forEach(b=>{
         b.classList.remove('active');
         b.removeAttribute('aria-selected');
       });
       btn.classList.add('active');
       btn.setAttribute('aria-selected','true');
-      // Map period tabs to the trend chart's own tabs (year -> month)
-      const mode = btn.dataset.mode === 'year' ? 'month' : btn.dataset.mode;
-      const trendBtn = document.querySelector(`#trendTabs .seg-btn[data-mode="${mode}"]`);
-      if(trendBtn){
-        document.querySelectorAll('#trendTabs .seg-btn').forEach(b=>b.classList.remove('active'));
-        trendBtn.classList.add('active');
-        renderTrend(mode);
-      }
+      periodFilter = btn.dataset.mode;
+
+      // Pick a sensible bar granularity for the trend chart given the range
+      const trendMode = PERIOD_TREND_MODE[periodFilter] || 'month';
+      document.querySelectorAll('#trendTabs .seg-btn').forEach(b=>{
+        b.classList.toggle('active', b.dataset.mode === trendMode);
+      });
+
+      renderAll();
     });
   }
 
@@ -3080,17 +3212,85 @@
     openSettings();
   });
 
-  // Header clock — 24-hour, colon-separated to match the reference's "09 : 55"
+  // Header clock — click to toggle between 24h and 12h, preference persists.
+  const CLOCK_KEY = 'incidentReport.clock24h';
   const headerClock = document.getElementById('headerClock');
+  let clock24h = window.localStorage.getItem(CLOCK_KEY) !== '0';   // default 24h
   function tickClock(){
     if(!headerClock) return;
     const now = new Date();
-    const hh = String(now.getHours()).padStart(2,'0');
+    let hh = now.getHours();
     const mm = String(now.getMinutes()).padStart(2,'0');
-    headerClock.textContent = `${hh} : ${mm}`;
+    let suffix = '';
+    if(!clock24h){
+      suffix = hh >= 12 ? ' PM' : ' AM';
+      hh = hh % 12 || 12;
+    }
+    headerClock.textContent = `${String(hh).padStart(2,'0')} : ${mm}${suffix}`;
+    headerClock.title = clock24h
+      ? `${now.toDateString()} — click for 12-hour`
+      : `${now.toDateString()} — click for 24-hour`;
+  }
+  if(headerClock){
+    headerClock.addEventListener('click', ()=>{
+      clock24h = !clock24h;
+      window.localStorage.setItem(CLOCK_KEY, clock24h ? '1' : '0');
+      tickClock();
+    });
   }
   tickClock();
   window.setInterval(tickClock, 30000);
+
+  // ==================================================================
+  // Avatar user menu — accountable actions instead of a dead click
+  // ==================================================================
+  const avatarBtn = document.getElementById('avatarBtn');
+  const userPanel = document.getElementById('userPanel');
+  function setUserOpen(open){
+    userPanel.classList.toggle('open', open);
+    avatarBtn.setAttribute('aria-expanded', String(open));
+    if(open) refreshUserMeta();
+  }
+  function refreshUserMeta(){
+    document.getElementById('userLoadCount').textContent = INCIDENTS.length;
+    document.getElementById('userLoadLatest').textContent = AGG.last ? fmtLong(AGG.last) : '—';
+    document.getElementById('userLoadYear').textContent = AGG.year || '—';
+    document.getElementById('userDataMode').textContent = usingCustomData ? 'Custom workbook' : 'Bundled data';
+  }
+  avatarBtn.addEventListener('click', e=>{
+    e.stopPropagation();
+    setUserOpen(!userPanel.classList.contains('open'));
+  });
+  document.addEventListener('click', e=>{
+    if(!e.target.closest('.user-wrap')) setUserOpen(false);
+  });
+  document.addEventListener('keydown', e=>{
+    if(e.key === 'Escape') setUserOpen(false);
+  });
+  document.getElementById('userLoadData').addEventListener('click', ()=>{
+    setUserOpen(false);
+    openSettings();
+  });
+  document.getElementById('userResetData').addEventListener('click', ()=>{
+    setUserOpen(false);
+    try{ window.localStorage.removeItem(CUSTOM_KEY); }catch(err){}
+    INCIDENTS = sortIncidents(EMBEDDED);
+    usingCustomData = false;
+    renderAll();
+    checkForNewIncidents();
+    describeSource();
+    lastUpdatedEl.textContent = 'Bundled dataset';
+  });
+  document.getElementById('userSignOut').addEventListener('click', ()=>{
+    setUserOpen(false);
+    if(!confirm('Clear all local preferences (custom workbook, notification history, clock format)?')) return;
+    try{
+      window.localStorage.removeItem(CUSTOM_KEY);
+      window.localStorage.removeItem(SEEN_KEY);
+      window.localStorage.removeItem(CLOCK_KEY);
+    }catch(err){}
+    window.location.reload();
+  });
 
   // Global search bar in the top header — reuses the Incident Explorer path
   const topSearch = document.getElementById('topSearch');
