@@ -582,6 +582,39 @@
   .results-head-row span{font-size:10.5px;text-transform:uppercase;letter-spacing:.3px;color:var(--muted);font-weight:700;}
   .results-body{transition:opacity .16s ease, transform .16s ease;min-height:60px;}
   .results-body.fading{opacity:0;transform:translateY(4px);}
+
+  /* Pagination footer for the Incident Explorer. Hidden entirely when the
+     filtered result set fits on a single page. */
+  .pagination{
+    display:none;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    padding:12px 4px 4px;
+    font-size:12.5px;
+    color:var(--muted);
+    border-top:1px solid var(--line);
+    margin-top:8px;
+    flex-wrap:wrap;
+  }
+  .pagination.show{display:flex;}
+  .pagination .range{color:var(--ink);font-weight:500;}
+  .pagination .page-controls{display:inline-flex;align-items:center;gap:4px;}
+  .pagination button{
+    font-family:inherit;font-size:12.5px;
+    background:#fff;border:1px solid var(--line);color:var(--ink);
+    border-radius:6px;padding:5px 10px;min-width:32px;
+    cursor:pointer;transition:background .15s ease, border-color .15s ease;
+  }
+  .pagination button:hover:not([disabled]):not([aria-current]){
+    background:#f0f4f9;border-color:#c8d2e0;
+  }
+  .pagination button[aria-current="page"]{
+    background:var(--navy-800);border-color:var(--navy-800);color:#fff;
+    cursor:default;
+  }
+  .pagination button[disabled]{opacity:.45;cursor:not-allowed;}
+  .pagination .gap{padding:0 4px;color:var(--muted);user-select:none;}
   .result-row{
     padding:11px 10px;border-bottom:1px solid var(--line);border-radius:8px;
     opacity:0;transform:translateY(6px);
@@ -1251,8 +1284,11 @@
   </div>
   <div class="welcome-row" style="justify-content:flex-end;">
     <div class="pill-group">
+      <!-- Purely visual — no aria-live, since the text ticks every 30s and
+           we don't want screen readers announcing "Refreshed 3 min ago" on
+           every update. Screen reader users get the refresh signal from the
+           #lastUpdated line in the welcome band instead. -->
       <div class="pill pill-updated" id="refreshedPill"
-           role="status" aria-live="polite" aria-atomic="true"
            title="How long since the dashboard last pulled data">
         <span class="live-dot" aria-hidden="true"></span>
         <span id="refreshedPillText">Refreshed just now</span>
@@ -1508,6 +1544,11 @@
       </div>
       <div class="results-body" id="resultsBody"></div>
     </div>
+
+    <nav class="pagination" id="pagination" aria-label="Incident results pages">
+      <div class="range" id="paginationRange">&nbsp;</div>
+      <div class="page-controls" id="paginationControls"></div>
+    </nav>
   </div>
 
   <!-- Data settings -->
@@ -2263,9 +2304,77 @@
     }, 150);
   }
 
+  // ---------- Pagination for the Incident Explorer ----------
+  //
+  // At ~600 rows today the DOM is already 3,500+ nodes; the workbook can
+  // easily grow past that. Paginate to keep initial render cheap and let
+  // users find rows without scrolling half a page.
+
+  const PAGE_SIZE = 25;
+  let filteredRows = [];           // rows the current filter+search keeps
+  let currentPage  = 1;            // 1-indexed
+
+  // Compact pager: always show first + last, plus a window around current.
+  // Returns an array like [1, '…', 4, 5, 6, '…', 12] with '…' as gaps.
+  function paginationWindow(current, total){
+    if(total <= 7) return Array.from({length: total}, (_, i) => i + 1);
+    const set = new Set([1, total, current - 1, current, current + 1]);
+    const pages = [...set].filter(n => n >= 1 && n <= total).sort((a,b)=>a-b);
+    const out = [];
+    for(let i = 0; i < pages.length; i++){
+      out.push(pages[i]);
+      if(i < pages.length - 1 && pages[i+1] - pages[i] > 1) out.push('…');
+    }
+    return out;
+  }
+
+  function renderPagination(){
+    const pager    = document.getElementById('pagination');
+    const rangeEl  = document.getElementById('paginationRange');
+    const controls = document.getElementById('paginationControls');
+    const total    = filteredRows.length;
+    const pages    = Math.max(1, Math.ceil(total / PAGE_SIZE));
+
+    // Clamp — a filter change might have made currentPage overshoot.
+    if(currentPage > pages) currentPage = pages;
+    if(currentPage < 1)     currentPage = 1;
+
+    // Hide the whole footer if a single page holds everything.
+    if(total <= PAGE_SIZE){
+      pager.classList.remove('show');
+      controls.innerHTML = '';
+      rangeEl.textContent = '';
+      return;
+    }
+    pager.classList.add('show');
+
+    const start = (currentPage - 1) * PAGE_SIZE + 1;
+    const end   = Math.min(currentPage * PAGE_SIZE, total);
+    rangeEl.textContent = `Showing ${start.toLocaleString()}–${end.toLocaleString()} of ${total.toLocaleString()}`;
+
+    const parts = [];
+    parts.push(`<button type="button" data-page="prev" ${currentPage===1?'disabled':''} aria-label="Previous page">‹ Prev</button>`);
+    for(const p of paginationWindow(currentPage, pages)){
+      if(p === '…'){
+        parts.push(`<span class="gap" aria-hidden="true">…</span>`);
+      } else {
+        const isCurrent = p === currentPage;
+        parts.push(`<button type="button" data-page="${p}"${isCurrent?' aria-current="page"':''} aria-label="Page ${p}">${p}</button>`);
+      }
+    }
+    parts.push(`<button type="button" data-page="next" ${currentPage===pages?'disabled':''} aria-label="Next page">Next ›</button>`);
+    controls.innerHTML = parts.join('');
+  }
+
+  function renderCurrentPage(){
+    const start = (currentPage - 1) * PAGE_SIZE;
+    renderResults(filteredRows.slice(start, start + PAGE_SIZE));
+    renderPagination();
+  }
+
   function applyFilters(){
     const q = state.q.trim().toLowerCase();
-    const filtered = INCIDENTS.filter(r=>{
+    filteredRows = INCIDENTS.filter(r=>{
       if(state.dept.size && !state.dept.has(r.dept)) return false;
       if(state.esi.size && !state.esi.has(r.esi)) return false;
       if(state.status.size && !state.status.has(r.s)) return false;
@@ -2273,10 +2382,31 @@
       if(q && !`${r.e} ${r.dept} ${r.t} ${r.sup} ${r.esi} ${r.s} ${r.m}`.toLowerCase().includes(q)) return false;
       return true;
     });
-    renderResults(filtered);
-    document.getElementById('resultsCount').textContent = filtered.length;
+    // Any filter or search change resets to page 1 — otherwise the user
+    // might land on an empty page 8 after narrowing results down to 3.
+    currentPage = 1;
+    renderCurrentPage();
+    document.getElementById('resultsCount').textContent = filteredRows.length;
     updateClearBtn();
   }
+
+  // Delegated click handler for the pagination controls.
+  document.getElementById('paginationControls').addEventListener('click', (e)=>{
+    const btn = e.target.closest('button[data-page]');
+    if(!btn || btn.hasAttribute('disabled')) return;
+    const total = Math.max(1, Math.ceil(filteredRows.length / PAGE_SIZE));
+    const raw = btn.dataset.page;
+    let next = currentPage;
+    if(raw === 'prev')      next = currentPage - 1;
+    else if(raw === 'next') next = currentPage + 1;
+    else                    next = parseInt(raw, 10);
+    if(!Number.isFinite(next) || next < 1 || next > total || next === currentPage) return;
+    currentPage = next;
+    renderCurrentPage();
+    // Bring the results table into view so page 2+ actually shows.
+    document.getElementById('resultsBody')
+      .scrollIntoView({behavior:'smooth', block:'start'});
+  });
 
   function jumpToIncidentSearch(name){
     ['dept','esi','status','month'].forEach(g=>state[g].clear());
@@ -2447,10 +2577,12 @@
       if(!panel.hasAttribute('tabindex')) panel.setAttribute('tabindex','-1');
       window.requestAnimationFrame(()=>target.focus());
     } else if(!open && wasOpen){
-      if(notifOpener && typeof notifOpener.focus === 'function'){
-        notifOpener.focus();
-      } else {
-        bell.focus();
+      // Only pull focus back if it's still inside the dialog — otherwise the
+      // user has moved on (e.g. clicked in a search field before hitting
+      // Escape) and stealing focus would be worse than doing nothing.
+      const focusIsInPanel = panel.contains(document.activeElement);
+      if(focusIsInPanel){
+        (notifOpener && typeof notifOpener.focus === 'function' ? notifOpener : bell).focus();
       }
       notifOpener = null;
     }
@@ -2698,9 +2830,13 @@
     refreshBtn.classList.add('spinning');
     refreshLabel.textContent = 'Refreshing…';
 
+    // Two things can happen: the fetch succeeds (we saw the server), or it
+    // fails (offline / file:// / no data file). Track it so we don't lie
+    // in the UI by stamping "Refreshed just now" on a failed request.
+    let fetchOk = true;
     let changed = false;
     try{ changed = await fetchLatestIncidents(); }
-    catch(err){ /* offline or no data file: fall back to what's loaded */ }
+    catch(err){ fetchOk = false; }
 
     // keep the spinner visible long enough to read as a real action
     await new Promise(done=>window.setTimeout(done, 500));
@@ -2712,13 +2848,20 @@
       card.classList.add('refresh-pulse');
       window.setTimeout(()=>card.classList.remove('refresh-pulse'), 700);
     });
-    stampUpdated();
+
+    if(fetchOk) stampUpdated();
 
     refreshBtn.classList.remove('spinning');
     refreshBtn.disabled = false;
-    refreshLabel.textContent = found ? `${found} new` : 'Live data';
-    if(found){
+
+    if(!fetchOk){
+      refreshLabel.textContent = 'Refresh failed';
       window.setTimeout(()=>{ refreshLabel.textContent = 'Live data'; }, 2600);
+    } else {
+      refreshLabel.textContent = found ? `${found} new` : 'Live data';
+      if(found){
+        window.setTimeout(()=>{ refreshLabel.textContent = 'Live data'; }, 2600);
+      }
     }
   });
 
@@ -3430,9 +3573,16 @@
   restoreCustomDataset();
   renderAll();
   checkForNewIncidents();
-  // pick up a newer data file on first paint too, when one is reachable
+  // Stamp the welcome-band "Updated…" line with the page's actual load
+  // time so it doesn't sit at the static HTML fallback ("Updated Jul 27,
+  // 2026") until the user's first manual refresh.
+  stampUpdated();
+  // Pick up a newer data file on first paint too, when one is reachable.
+  // Re-stamp only if the background fetch actually pulled a change.
   fetchLatestIncidents()
-    .then(changed=>{ if(changed){ renderAll(); checkForNewIncidents(); } })
+    .then(changed=>{
+      if(changed){ renderAll(); checkForNewIncidents(); stampUpdated(); }
+    })
     .catch(()=>{});
 </script>
 
