@@ -640,8 +640,11 @@
       <div class="sub">Master List of Injuries &middot; Focus Year 2026 &middot; <span id="lastUpdated">Updated Jul 27, 2026</span></div>
     </div>
     <div class="pill-group">
+      <!-- Purely visual — no aria-live, since the text ticks every 30s and
+           we don't want screen readers announcing "Refreshed 3 min ago" on
+           every update. Screen reader users get the refresh signal from the
+           #lastUpdated line in the welcome band instead. -->
       <div class="pill pill-updated" id="refreshedPill"
-           role="status" aria-live="polite" aria-atomic="true"
            title="How long since the dashboard last pulled data">
         <span class="live-dot" aria-hidden="true"></span>
         <span id="refreshedPillText">Refreshed just now</span>
@@ -1663,10 +1666,12 @@
       if(!panel.hasAttribute('tabindex')) panel.setAttribute('tabindex','-1');
       window.requestAnimationFrame(()=>target.focus());
     } else if(!open && wasOpen){
-      if(notifOpener && typeof notifOpener.focus === 'function'){
-        notifOpener.focus();
-      } else {
-        bell.focus();
+      // Only pull focus back if it's still inside the dialog — otherwise the
+      // user has moved on (e.g. clicked in a search field before hitting
+      // Escape) and stealing focus would be worse than doing nothing.
+      const focusIsInPanel = panel.contains(document.activeElement);
+      if(focusIsInPanel){
+        (notifOpener && typeof notifOpener.focus === 'function' ? notifOpener : bell).focus();
       }
       notifOpener = null;
     }
