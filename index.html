@@ -1788,9 +1788,13 @@
     refreshBtn.classList.add('spinning');
     refreshLabel.textContent = 'Refreshing…';
 
+    // Two things can happen: the fetch succeeds (we saw the server), or it
+    // fails (offline / file:// / no data file). Track it so we don't lie
+    // in the UI by stamping "Refreshed just now" on a failed request.
+    let fetchOk = true;
     let changed = false;
     try{ changed = await fetchLatestIncidents(); }
-    catch(err){ /* offline or no data file: fall back to what's loaded */ }
+    catch(err){ fetchOk = false; }
 
     // keep the spinner visible long enough to read as a real action
     await new Promise(done=>window.setTimeout(done, 500));
@@ -1802,22 +1806,36 @@
       card.classList.add('refresh-pulse');
       window.setTimeout(()=>card.classList.remove('refresh-pulse'), 700);
     });
-    stampUpdated();
+
+    if(fetchOk) stampUpdated();
 
     refreshBtn.classList.remove('spinning');
     refreshBtn.disabled = false;
-    refreshLabel.textContent = found ? `${found} new` : 'Live data';
-    if(found){
+
+    if(!fetchOk){
+      refreshLabel.textContent = 'Refresh failed';
       window.setTimeout(()=>{ refreshLabel.textContent = 'Live data'; }, 2600);
+    } else {
+      refreshLabel.textContent = found ? `${found} new` : 'Live data';
+      if(found){
+        window.setTimeout(()=>{ refreshLabel.textContent = 'Live data'; }, 2600);
+      }
     }
   });
 
   // ---- boot ----
   renderAll();
   checkForNewIncidents();
-  // pick up a newer data file on first paint too, when one is reachable
+  // Stamp the welcome-band "Updated…" line with the page's actual load
+  // time so it doesn't sit at the static HTML fallback ("Updated Jul 27,
+  // 2026") until the user's first manual refresh.
+  stampUpdated();
+  // Pick up a newer data file on first paint too, when one is reachable.
+  // Re-stamp only if the background fetch actually pulled a change.
   fetchLatestIncidents()
-    .then(changed=>{ if(changed){ renderAll(); checkForNewIncidents(); } })
+    .then(changed=>{
+      if(changed){ renderAll(); checkForNewIncidents(); stampUpdated(); }
+    })
     .catch(()=>{});
 </script>
 
