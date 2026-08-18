@@ -1784,13 +1784,15 @@
   function renderHeadline(){
     const a = AGG;
     const pct = v => a.total ? Math.round((v/a.total)*100) : 0;
+    // Deltas are number-only strings — use textContent everywhere and unicode
+    // glyphs directly so all four cards go through the same safe write path.
     const delta = (cur, prior) => {
-      if(!prior) return `&#9679; no ${a.year-1} baseline`;
+      if(!prior) return `● no ${a.year-1} baseline`;
       const diff = cur - prior;
       const rel = Math.round((diff/prior)*100);
-      if(diff > 0) return `&#9650; +${rel}% vs ${a.year-1} (${prior})`;
-      if(diff < 0) return `&#9660; ${rel}% vs ${a.year-1} (${prior})`;
-      return `&#9679; +0 vs ${a.year-1} (${prior})`;
+      if(diff > 0) return `▲ +${rel}% vs ${a.year-1} (${prior})`;
+      if(diff < 0) return `▼ ${rel}% vs ${a.year-1} (${prior})`;
+      return `● +0 vs ${a.year-1} (${prior})`;
     };
 
     document.getElementById('kpiTotal').textContent = a.total;
@@ -1802,12 +1804,13 @@
     const isYear = periodFilter === 'year';
     const ytdTotal = INCIDENTS.length;
     const ytdShare = v => ytdTotal ? Math.round((v/ytdTotal)*100) : 0;
-    document.getElementById('kpiTotalDelta').innerHTML = isYear
+    const ytdRec = INCIDENTS.filter(r => r.esi === 'RECORDABLE').length;
+    document.getElementById('kpiTotalDelta').textContent = isYear
       ? delta(a.total, PRIOR_YTD.total)
-      : `&#8226; ${ytdShare(a.total)}% of YTD total`;
-    document.getElementById('kpiRecDelta').innerHTML = isYear
+      : `• ${ytdShare(a.total)}% of YTD total`;
+    document.getElementById('kpiRecDelta').textContent = isYear
       ? delta(a.rec, PRIOR_YTD.rec)
-      : `&#8226; ${a.rec} of ${INCIDENTS.filter(r=>r.esi==='RECORDABLE').length} YTD recordable`;
+      : `• ${a.rec} of ${ytdRec} YTD recordable`;
     document.getElementById('kpiFaDelta').textContent = `${pct(a.fa)}% of this period`;
     document.getElementById('kpiRpoDelta').textContent = `${pct(a.rpo)}% of this period`;
 
@@ -3267,19 +3270,30 @@
   // ---- Sidebar + top-search wiring ----
   const sidebarEl = document.getElementById('sidebar');
   const sidebarToggle = document.getElementById('sidebarToggle');
-  if(sidebarToggle){
-    sidebarToggle.addEventListener('click', e=>{
-      e.stopPropagation();
-      sidebarEl.classList.toggle('open');
-    });
+  function closeSidebar(){
+    if(sidebarEl) sidebarEl.classList.remove('open');
+  }
+  if(sidebarEl){
+    // Outside click and Escape close the drawer regardless of whether the
+    // toggle button is visible — matches the a11y expectations for the
+    // notification and avatar panels.
     document.addEventListener('click', e=>{
       if(sidebarEl.classList.contains('open') &&
          !e.target.closest('.sidebar') && !e.target.closest('.sidebar-toggle')){
-        sidebarEl.classList.remove('open');
+        closeSidebar();
       }
     });
+    document.addEventListener('keydown', e=>{
+      if(e.key === 'Escape' && sidebarEl.classList.contains('open')) closeSidebar();
+    });
     sidebarEl.addEventListener('click', e=>{
-      if(e.target.closest('a')) sidebarEl.classList.remove('open');
+      if(e.target.closest('a')) closeSidebar();
+    });
+  }
+  if(sidebarToggle){
+    sidebarToggle.addEventListener('click', e=>{
+      e.stopPropagation();
+      if(sidebarEl) sidebarEl.classList.toggle('open');
     });
   }
 
