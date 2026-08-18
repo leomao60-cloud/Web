@@ -2036,6 +2036,12 @@
   }
 
   function renderTrend(mode){
+    // Own the active-class sync too, so the visible tab always matches the
+    // rendered chart even if a caller forgets to update the tabs (or a
+    // previous render threw before doing so).
+    document.querySelectorAll('#trendTabs .seg-btn').forEach(b=>{
+      b.classList.toggle('active', b.dataset.mode === mode);
+    });
     const cfg = trendConfig(mode);
     trendWrap.classList.add('fading');
     window.setTimeout(()=>{
@@ -2064,12 +2070,18 @@
   document.getElementById('trendTabs').addEventListener('click', e=>{
     const btn = e.target.closest('.seg-btn');
     if(!btn) return;
-    document.querySelectorAll('#trendTabs .seg-btn').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
+    trendManualOverride = btn.dataset.mode;      // user override; cleared on period-tab click
     renderTrend(btn.dataset.mode);
   });
+  // Single source of truth for trend-chart granularity: the period filter
+  // implies a natural default (Year → month bars, Month/Week/Day → day bars),
+  // but leave a manual trend-tab click as an override until the user picks
+  // a period tab again.
+  const PERIOD_TREND_MODE = {year:'month', month:'day', week:'day', day:'day'};
+  let trendManualOverride = null;
   function activeTrendMode(){
-    return document.querySelector('#trendTabs .seg-btn.active').dataset.mode;
+    if(trendManualOverride) return trendManualOverride;
+    return PERIOD_TREND_MODE[periodFilter] || 'month';
   }
 
   // ==================================================================
@@ -2200,10 +2212,10 @@
       if(active) b.setAttribute('aria-selected','true');
       else b.removeAttribute('aria-selected');
     });
-    // trend chart granularity aligned with year → month bars
-    document.querySelectorAll('#trendTabs .seg-btn').forEach(b => {
-      b.classList.toggle('active', b.dataset.mode === 'month');
-    });
+    // trend granularity derives from periodFilter via activeTrendMode(),
+    // so clearing the manual override is enough; renderTrend syncs the
+    // visible tab on the next paint.
+    trendManualOverride = null;
     // supervisor list search
     if(supSearchInput){
       supSearchInput.value = '';
@@ -2597,7 +2609,6 @@
   // moves to whatever level of detail fits.
   // ==================================================================
   const periodTabs = document.getElementById('periodTabs');
-  const PERIOD_TREND_MODE = {year:'month', month:'day', week:'day', day:'day'};
   if(periodTabs){
     periodTabs.addEventListener('click', e=>{
       const btn = e.target.closest('button[data-mode]');
@@ -2609,13 +2620,10 @@
       btn.classList.add('active');
       btn.setAttribute('aria-selected','true');
       periodFilter = btn.dataset.mode;
-
-      // Pick a sensible bar granularity for the trend chart given the range
-      const trendMode = PERIOD_TREND_MODE[periodFilter] || 'month';
-      document.querySelectorAll('#trendTabs .seg-btn').forEach(b=>{
-        b.classList.toggle('active', b.dataset.mode === trendMode);
-      });
-
+      trendManualOverride = null;   // let the new period pick its natural trend granularity
+      // Trend granularity is now sourced from periodFilter inside
+      // activeTrendMode(), so the visible chart cannot desync from the
+      // period tab even if the render pipeline throws mid-flight.
       renderAll();
     });
   }
@@ -3316,36 +3324,49 @@
   window.setInterval(tickClock, 30000);
 
   // ==================================================================
-  // Avatar user menu — accountable actions instead of a dead click
+  // Avatar user menu — accountable actions instead of a dead click.
+  // Every element is guarded so a future markup change that drops one
+  // control can't NPE the whole boot script.
   // ==================================================================
   const avatarBtn = document.getElementById('avatarBtn');
   const userPanel = document.getElementById('userPanel');
   function setUserOpen(open){
+    if(!userPanel || !avatarBtn) return;
     userPanel.classList.toggle('open', open);
     avatarBtn.setAttribute('aria-expanded', String(open));
     if(open) refreshUserMeta();
   }
   function refreshUserMeta(){
-    document.getElementById('userLoadCount').textContent = INCIDENTS.length;
-    document.getElementById('userLoadLatest').textContent = AGG.last ? fmtLong(AGG.last) : '—';
-    document.getElementById('userLoadYear').textContent = AGG.year || '—';
-    document.getElementById('userDataMode').textContent = usingCustomData ? 'Custom workbook' : 'Bundled data';
+    const set = (id, value) => {
+      const el = document.getElementById(id);
+      if(el) el.textContent = value;
+    };
+    set('userLoadCount',  INCIDENTS.length);
+    set('userLoadLatest', AGG.last ? fmtLong(AGG.last) : '—');
+    set('userLoadYear',   AGG.year || '—');
+    set('userDataMode',   usingCustomData ? 'Custom workbook' : 'Bundled data');
   }
-  avatarBtn.addEventListener('click', e=>{
-    e.stopPropagation();
-    setUserOpen(!userPanel.classList.contains('open'));
-  });
+  if(avatarBtn){
+    avatarBtn.addEventListener('click', e=>{
+      e.stopPropagation();
+      setUserOpen(!userPanel.classList.contains('open'));
+    });
+  }
   document.addEventListener('click', e=>{
     if(!e.target.closest('.user-wrap')) setUserOpen(false);
   });
   document.addEventListener('keydown', e=>{
     if(e.key === 'Escape') setUserOpen(false);
   });
-  document.getElementById('userLoadData').addEventListener('click', ()=>{
+  const onClickIf = (id, handler) => {
+    const el = document.getElementById(id);
+    if(el) el.addEventListener('click', handler);
+  };
+  onClickIf('userLoadData', ()=>{
     setUserOpen(false);
     openSettings();
   });
-  document.getElementById('userResetData').addEventListener('click', ()=>{
+  onClickIf('userResetData', ()=>{
     setUserOpen(false);
     try{ window.localStorage.removeItem(CUSTOM_KEY); }catch(err){}
     INCIDENTS = sortIncidents(EMBEDDED);
@@ -3356,7 +3377,7 @@
     describeSource();
     lastUpdatedEl.textContent = 'Bundled dataset';
   });
-  document.getElementById('userSignOut').addEventListener('click', ()=>{
+  onClickIf('userSignOut', ()=>{
     setUserOpen(false);
     if(!confirm('Clear all local preferences (custom workbook, notification history, clock format)?')) return;
     try{
