@@ -1635,6 +1635,19 @@
   // Reads as one system even when many series share the palette.
   const PALETTE = ['#1d3f75','#3b62a8','#7987a3','#a4b0c6','#ccd4e0','#eef1f6'];
 
+  // Distance in days between today's latest incident and the most recent
+  // RECORDABLE case. Runs against the full dataset so a period filter can
+  // never falsely reset the streak.
+  function daysSinceLastRecordable(rows){
+    if(!rows.length) return null;
+    const dates = rows.map(r=>parseDate(r.d));
+    const latest = new Date(Math.max(...dates.map(d=>d.getTime())));
+    const recDates = rows.filter(r=>r.esi === 'RECORDABLE').map(r=>parseDate(r.d));
+    if(!recDates.length) return null;
+    const lastRec = new Date(Math.max(...recDates.map(d=>d.getTime())));
+    return Math.round((latest - lastRec) / 86400000);
+  }
+
   function sortIncidents(rows){
     return [...rows].sort((a,b)=> a.d < b.d ? 1 : a.d > b.d ? -1 : 0);
   }
@@ -1809,7 +1822,11 @@
         `Source: Master_List_Of_Injuries_2025_2026 &middot; ${INCIDENTS.length} YTD incident records (${a.year}) &middot; Generated ${fmtLong(a.last)}`;
     }
     document.getElementById('statTotal').textContent = a.total;
-    document.getElementById('resultsTotal').textContent = a.total;
+    // Explorer counter denominator: use the full incident set, since the
+    // Incident Explorer filters INCIDENTS directly (not the period-scoped
+    // subset). Keeping it on a.total made the badge read "N of M" with
+    // mismatched semantics whenever a period filter was active.
+    document.getElementById('resultsTotal').textContent = INCIDENTS.length;
 
     const relTotal = PRIOR_YTD.total ? Math.round(((a.total-PRIOR_YTD.total)/PRIOR_YTD.total)*100) : 0;
     document.getElementById('sparkBadge').innerHTML = `${relTotal>=0?'&#9650;':'&#9660;'} ${Math.abs(relTotal)}%`;
@@ -1832,15 +1849,19 @@
     document.getElementById('nrrText').textContent = `${(nonRec*100).toFixed(1)}%`;
     setArc(document.getElementById('nrrArc'), nonRec);
 
-    if(a.daysSinceRec === null){
+    // Read from the full-dataset streak so a period filter can't collapse
+    // it — reflects the true "days since last recordable" the safety team
+    // cares about, not just the visible window.
+    const daysSinceRec = a.daysSinceRecordableFull;
+    if(daysSinceRec === null){
       document.getElementById('dwrText').textContent = '—';
       document.getElementById('dwrMeta').innerHTML = '&#128337; No recordable cases on file';
       setArc(document.getElementById('dwrArc'), 1);
     } else {
-      const frac = Math.min(a.daysSinceRec / DAYS_WITHOUT_GOAL, 1);
+      const frac = Math.min(daysSinceRec / DAYS_WITHOUT_GOAL, 1);
       document.getElementById('dwrText').textContent = `${Math.round(frac*100)}%`;
       document.getElementById('dwrMeta').innerHTML =
-        `&#128337; Currently at ${a.daysSinceRec} / ${DAYS_WITHOUT_GOAL} days`;
+        `&#128337; Currently at ${daysSinceRec} / ${DAYS_WITHOUT_GOAL} days`;
       const pill = document.getElementById('dwrPill');
       pill.textContent = frac >= 1 ? 'Goal met' : 'On Pace';
       pill.className = 'status-pill ' + (frac >= 1 ? 'status-good' : 'status-fair');
@@ -2141,26 +2162,54 @@
     applyFilters();
   });
 
-  searchInput.addEventListener('input', ()=>{
-    state.q = searchInput.value;
-    searchClearX.classList.toggle('show', state.q.length>0);
-    applyFilters();
-  });
+  // setExplorerQuery is defined later in the boot block; hoisting works
+  // because both event handlers only fire in response to user input.
+  searchInput.addEventListener('input', ()=> setExplorerQuery(searchInput.value));
   searchClearX.addEventListener('click', ()=>{
-    searchInput.value=''; state.q='';
-    searchClearX.classList.remove('show');
+    setExplorerQuery('');
     searchInput.focus();
-    applyFilters();
   });
-  document.getElementById('clearAllBtn').addEventListener('click', ()=>{
-    state.q=''; searchInput.value=''; searchClearX.classList.remove('show');
-    ['dept','esi','status','month'].forEach(g=>state[g].clear());
-    document.querySelectorAll('#filterChips .chip.active').forEach(c=>{
+  // Shared reset used by the "Clear all" button and every dataset-swap path
+  // (reset-to-bundled, sign-out, custom-workbook apply). Also mirrors the
+  // clear into the top-header search so the two search fields stay in sync.
+  function clearExplorerFilters(opts){
+    state.q = '';
+    if(searchInput) searchInput.value = '';
+    searchClearX.classList.remove('show');
+    ['dept','esi','status','month'].forEach(g => state[g].clear());
+    document.querySelectorAll('#filterChips .chip.active').forEach(c => {
       c.classList.remove('active');
       c.setAttribute('aria-pressed','false');
     });
-    applyFilters();
-  });
+    const top = document.getElementById('topSearch');
+    if(top) top.value = '';
+    if(opts && opts.render !== false) applyFilters();
+  }
+  document.getElementById('clearAllBtn').addEventListener('click', ()=>clearExplorerFilters());
+
+  // Reset every view back to a neutral default. Used whenever the underlying
+  // dataset changes (custom workbook loaded, reset to bundled, sign-out) so
+  // the new data is not rendered through an unrelated filter.
+  function resetDashboardToDefaults(){
+    clearExplorerFilters({render:false});
+    // period tabs: back to Year, matching the initial page state
+    periodFilter = 'year';
+    document.querySelectorAll('#periodTabs button').forEach(b => {
+      const active = b.dataset.mode === 'year';
+      b.classList.toggle('active', active);
+      if(active) b.setAttribute('aria-selected','true');
+      else b.removeAttribute('aria-selected');
+    });
+    // trend chart granularity aligned with year → month bars
+    document.querySelectorAll('#trendTabs .seg-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.mode === 'month');
+    });
+    // supervisor list search
+    if(supSearchInput){
+      supSearchInput.value = '';
+      supSearchClearX.classList.remove('show');
+    }
+  }
 
   function updateClearBtn(){
     const filterCount = state.dept.size + state.esi.size + state.status.size + state.month.size;
@@ -2216,11 +2265,13 @@
 
   function jumpToIncidentSearch(name){
     ['dept','esi','status','month'].forEach(g=>state[g].clear());
-    document.querySelectorAll('#filterChips .chip.active').forEach(c=>c.classList.remove('active'));
-    state.q = name;
-    searchInput.value = name;
-    searchClearX.classList.add('show');
-    applyFilters();
+    document.querySelectorAll('#filterChips .chip.active').forEach(c=>{
+      c.classList.remove('active');
+      c.setAttribute('aria-pressed','false');
+    });
+    // Route through the shared setter so #topSearch (the header search) stays
+    // in sync with the Explorer's own search box.
+    setExplorerQuery(name);
     document.getElementById('recent').scrollIntoView({behavior:'smooth', block:'start'});
     const row = document.querySelector('#recent .search-row');
     row.classList.remove('flash'); void row.offsetWidth; row.classList.add('flash');
@@ -2424,6 +2475,11 @@
   function renderAll(){
     const scoped = filterByPeriod(INCIDENTS, periodFilter);
     AGG = computeAggregates(scoped);
+    // The safety streak and current-month calendar total should reflect the
+    // full incident record, not the period-filtered subset — otherwise a
+    // "Week" view can collapse a real running streak to '—' or hide most of
+    // the month's incidents from the calendar tile.
+    AGG.daysSinceRecordableFull = daysSinceLastRecordable(INCIDENTS);
     renderHeadline();
     renderGauges();
     renderDonut();
@@ -2471,23 +2527,40 @@
   // incident counts). Uses AGG so it refreshes with every dataset swap.
   // ==================================================================
   function renderCalendar(){
-    const a = AGG;
     const grid = document.getElementById('calGrid');
-    if(!grid || !a.last) return;
+    const titleEl = document.getElementById('calTitle');
+    const totalEl = document.getElementById('calTotal');
+    const subEl   = document.getElementById('calSub');
+    if(!grid || !titleEl || !totalEl || !subEl) return;
 
-    const year = a.year, month = a.latestMonthIdx;
+    // Anchor on the latest incident date in the *full* dataset so switching
+    // the period filter to Week/Day doesn't collapse the calendar title or
+    // undercount days that fell outside the visible window.
+    if(!INCIDENTS.length) return;
+    const latestMs = Math.max(...INCIDENTS.map(r => parseDate(r.d).getTime()));
+    const latest = new Date(latestMs);
+    const year  = latest.getFullYear();
+    const month = latest.getMonth();
+    const latestDay = latest.getDate();
+
     const first = new Date(year, month, 1);
     const daysInMonth = new Date(year, month + 1, 0).getDate();
-    // Monday-first: shift Sunday(0) to 6, everything else -1
-    const firstDow = (first.getDay() + 6) % 7;
-    const latestDay = a.last.getMonth() === month && a.last.getFullYear() === year
-      ? a.last.getDate() : 0;
+    const firstDow = (first.getDay() + 6) % 7;  // Monday-first
 
-    // build day -> {v, r} map from a.days (already computed for latest month)
+    // Build the day map from the full dataset filtered to the target month,
+    // not from AGG.days (which is scoped to the current period filter).
     const dayMap = new Map();
-    a.days.forEach(d => dayMap.set(d.d, d));
+    INCIDENTS.forEach(r => {
+      const dt = parseDate(r.d);
+      if(dt.getFullYear() !== year || dt.getMonth() !== month) return;
+      const d = dt.getDate();
+      const entry = dayMap.get(d) || {v:0, r:0};
+      entry.v++;
+      if(r.esi === 'RECORDABLE') entry.r++;
+      dayMap.set(d, entry);
+    });
 
-    document.getElementById('calTitle').textContent = `${MONTH_NAMES[month]} ${year}`;
+    titleEl.textContent = `${MONTH_NAMES[month]} ${year}`;
 
     let html = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']
       .map(d => `<div class="cal-dow">${d}</div>`).join('');
@@ -2513,9 +2586,8 @@
     }
 
     grid.innerHTML = html;
-    document.getElementById('calTotal').textContent = monthTotal;
-    document.getElementById('calSub').textContent =
-      `Daily incident count · latest highlighted (${MONTH_ABBR[month]} ${latestDay})`;
+    totalEl.textContent = monthTotal;
+    subEl.textContent   = `Daily incident count · latest highlighted (${MONTH_ABBR[month]} ${latestDay})`;
   }
 
   // ==================================================================
@@ -3152,6 +3224,7 @@
     }
     INCIDENTS = sortIncidents(payload.records);
     usingCustomData = true;
+    resetDashboardToDefaults();
     renderAll();
     checkForNewIncidents();
     describeSource();
@@ -3163,6 +3236,7 @@
     try{ window.localStorage.removeItem(CUSTOM_KEY); }catch(err){}
     INCIDENTS = sortIncidents(EMBEDDED);
     usingCustomData = false;
+    resetDashboardToDefaults();
     renderAll();
     checkForNewIncidents();
     describeSource();
@@ -3276,6 +3350,7 @@
     try{ window.localStorage.removeItem(CUSTOM_KEY); }catch(err){}
     INCIDENTS = sortIncidents(EMBEDDED);
     usingCustomData = false;
+    resetDashboardToDefaults();
     renderAll();
     checkForNewIncidents();
     describeSource();
@@ -3292,28 +3367,28 @@
     window.location.reload();
   });
 
-  // Global search bar in the top header — reuses the Incident Explorer path
+  // Global search bar in the top header — reuses the Incident Explorer path.
+  // Both fields drive one shared "set the query" call so a keystroke only
+  // triggers one applyFilters, and programmatic queries (e.g. supervisor
+  // click-to-jump) also flow through it and keep the two inputs in sync.
   const topSearch = document.getElementById('topSearch');
+  function setExplorerQuery(value){
+    state.q = value;
+    if(searchInput && searchInput.value !== value) searchInput.value = value;
+    if(topSearch   && topSearch.value   !== value) topSearch.value   = value;
+    searchClearX.classList.toggle('show', value.length > 0);
+    applyFilters();
+  }
   if(topSearch){
-    topSearch.addEventListener('input', ()=>{
-      state.q = topSearch.value;
-      searchInput.value = topSearch.value;
-      searchClearX.classList.toggle('show', state.q.length>0);
-      applyFilters();
-    });
+    topSearch.addEventListener('input', ()=> setExplorerQuery(topSearch.value));
     topSearch.addEventListener('keydown', e=>{
       if(e.key === 'Enter'){
         e.preventDefault();
         document.getElementById('recent').scrollIntoView({behavior:'smooth', block:'start'});
       } else if(e.key === 'Escape'){
-        topSearch.value = ''; state.q = '';
-        searchInput.value = '';
-        searchClearX.classList.remove('show');
-        applyFilters();
+        setExplorerQuery('');
       }
     });
-    // keep the two search fields in sync
-    searchInput.addEventListener('input', ()=>{ topSearch.value = searchInput.value; });
   }
 
   // ---- boot ----
